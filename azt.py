@@ -31,7 +31,7 @@ import time
 import unicodedata
 from pathlib import Path
 
-__version__ = "0.1.0"
+__version__ = "0.1.1"
 
 SEV_ORDER = {"HIGH": 0, "MEDIUM": 1, "INFO": 2}
 
@@ -387,7 +387,13 @@ def cmd_scan(args):
     if args.gate and not failed:
         marker = root / ".claude" / ".azt-intake-pass"
         marker.parent.mkdir(exist_ok=True)
-        marker.touch()
+        marker.write_text(json.dumps({"azt": __version__, "verdict": "pass",
+                                      "ts": int(time.time())}) + "\n")
+        gi = root / ".gitignore"
+        line = ".claude/.azt-intake-pass"
+        if not (gi.exists() and line in gi.read_text()):
+            with open(gi, "a") as fh:
+                fh.write(line + "\n")
         print("\n(gate opened: %s)" % marker)
     return 1 if failed else 0
 
@@ -407,7 +413,7 @@ def cmd_install_hook(args):
     if any(GATE_HOOK_CMD in h.get("command", "") for e in pre for h in e.get("hooks", [])):
         print("azt: intake gate already wired in %s" % settings)
         return 0
-    pre.append({"matcher": "Bash",
+    pre.append({"matcher": "Bash|Write|Edit|NotebookEdit",
                 "hooks": [{"type": "command", "command": GATE_HOOK_CMD}]})
     settings.write_text(json.dumps(cfg, indent=2) + "\n")
     print("azt: intake gate wired in %s" % settings)
@@ -426,13 +432,18 @@ def default_ttl():
 def cmd_gate_check(_args):
     root = Path(os.environ.get("CLAUDE_PROJECT_DIR", "."))
     marker = root / ".claude" / ".azt-intake-pass"
+    stale = ""
     if marker.exists():
+        valid = False
+        try:
+            valid = json.loads(marker.read_text()).get("verdict") == "pass"
+        except Exception:
+            pass
         age_min = (time.time() - marker.stat().st_mtime) / 60
-        if age_min <= default_ttl():
+        if valid and age_min <= default_ttl():
             return 0
-        stale = " (last pass %dmin ago; TTL %dmin)" % (age_min, default_ttl())
-    else:
-        stale = ""
+        stale = (" (marker invalid — must be written by `azt scan --gate`)" if not valid
+                 else " (last pass %dmin ago; TTL %dmin)" % (age_min, default_ttl()))
     sys.stderr.write(
         "BLOCKED by agent-zero-trust intake gate: this workspace has no fresh intake scan%s.\n"
         "Run: azt scan --gate .   — review any findings with the user before proceeding.\n"

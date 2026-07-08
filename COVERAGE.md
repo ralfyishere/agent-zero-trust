@@ -36,6 +36,12 @@ Also structurally out of reach: content fetched at runtime, binary/image
 payloads, files > 1 MB, encodings we don't decode, and novel shapes that
 haven't become rules yet.
 
+## Fixed bypasses (found by our own testing)
+
+| Bypass | Found | Fixed |
+|---|---|---|
+| Gate marker forgeable via an agent's Write tool (hook only matched Bash; a plain `touch`-equivalent file opened the gate) | v0.1.0 live-session test, day one | v0.1.1: hook matches all mutating tools (Bash/Write/Edit/NotebookEdit) AND the marker must carry `azt scan --gate`'s content signature |
+
 **Bypass reports are the most valuable contribution this project can
 receive** — see SECURITY.md. Each confirmed bypass becomes either a rule (and
 a caught-fixture) or a documented miss here. Either outcome improves the

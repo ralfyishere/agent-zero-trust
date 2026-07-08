@@ -16,6 +16,14 @@ Non-sensitive reports: open an issue. Sensitive ones (a shape you believe is
 being exploited in the wild): GitHub private vulnerability reporting on this
 repo.
 
+## Disclosure log
+
+- **v0.1.1** — gate bypass fixed: the intake hook originally matched only
+  Bash, so an agent's file-write tools could forge the pass marker. Found in
+  our own first live-session test; fixed same day (broadened matcher +
+  signed marker). Logged here because a gate that quietly patches its
+  bypasses is not a gate you should trust.
+
 ## What a clean scan means
 
 "No known-shape red flags found." Never "safe." Pattern matching cannot catch

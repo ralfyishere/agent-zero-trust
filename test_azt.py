@@ -65,6 +65,35 @@ with tempfile.TemporaryDirectory() as td:
     inv, f2 = azt.scan_repo(td)
     check(sev_count(f2, "HIGH") == 0, ".azt-ignore suppresses by rule+path")
 
+# unit checks: gate marker signature (a hand-created marker must NOT pass)
+import subprocess, time as _time
+with tempfile.TemporaryDirectory() as td:
+    td = Path(td)
+    (td / "README.md").write_text("# clean\n")
+    env = dict(os.environ, CLAUDE_PROJECT_DIR=str(td))
+    r = subprocess.run([sys.executable, str(ROOT / "azt.py"), "gate-check"],
+                       env=env, capture_output=True, text=True)
+    check(r.returncode == 2, "gate-check blocks with no marker")
+    (td / ".claude").mkdir()
+    (td / ".claude" / ".azt-intake-pass").write_text("")   # forged via Write-tool shape
+    r = subprocess.run([sys.executable, str(ROOT / "azt.py"), "gate-check"],
+                       env=env, capture_output=True, text=True)
+    check(r.returncode == 2 and "invalid" in r.stderr,
+          "gate-check rejects forged/empty marker (Write-tool bypass)")
+    r = subprocess.run([sys.executable, str(ROOT / "azt.py"), "scan", "--gate", str(td)],
+                       capture_output=True, text=True)
+    check(r.returncode == 0, "scan --gate passes on clean dir")
+    r = subprocess.run([sys.executable, str(ROOT / "azt.py"), "gate-check"],
+                       env=env, capture_output=True, text=True)
+    check(r.returncode == 0, "gate-check accepts azt-written marker")
+    gi = (td / ".gitignore").read_text()
+    check(".azt-intake-pass" in gi, "scan --gate gitignores the marker")
+
+# version consistency: single source of truth check
+import re as _re
+pyver = _re.search(r'version = "([^"]+)"', (ROOT / "pyproject.toml").read_text()).group(1)
+check(pyver == azt.__version__, "pyproject version == azt.__version__ (%s)" % pyver)
+
 print()
 if FAILS:
     print("RESULT: %d FAILURE(S)" % FAILS)
