@@ -1,0 +1,26 @@
+name: "agent-zero-trust scan"
+description: "Zero-trust repo intake for AI coding agents: fail on known-shape injection/execution risks in the instruction environment before an agent (or a reviewer) trusts the tree."
+branding:
+  icon: "shield"
+  color: "red"
+inputs:
+  path:
+    description: "Directory to scan"
+    required: false
+    default: "."
+  fail-on:
+    description: "Severity that fails the job: high, medium, or any"
+    required: false
+    default: "high"
+  version:
+    description: "agent-zero-trust version from PyPI (empty = latest)"
+    required: false
+    default: ""
+runs:
+  using: "composite"
+  steps:
+    - shell: bash
+      run: |
+        SPEC="agent-zero-trust"
+        if [ -n "${{ inputs.version }}" ]; then SPEC="agent-zero-trust==${{ inputs.version }}"; fi
+        pipx run --spec "$SPEC" azt scan "${{ inputs.path }}" --fail-on "${{ inputs.fail-on }}"

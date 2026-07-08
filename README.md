@@ -76,6 +76,20 @@ on HIGH findings; `--json` for machines.
    calls in postinstall/hooks, `npx -y` auto-installs in MCP configs,
    symlinks escaping the repo.
 
+## Use in CI (GitHub Action)
+
+```yaml
+- uses: ralfyishere/agent-zero-trust@v0.1.2
+  with:
+    path: .          # directory to scan
+    fail-on: high    # high | medium | any
+```
+
+PRs that introduce injection shapes, hook traps, or hostile automation fail
+the check before any agent — or reviewer — trusts the tree. The action is a
+thin wrapper over the PyPI package (pin `version:` for reproducibility); our
+own CI dogfoods it against both the benign and malicious fixtures.
+
 ## Gate mode: make intake impossible to forget
 
 ```bash
