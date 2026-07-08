@@ -8,6 +8,11 @@ on:
     types: [published]
   workflow_dispatch:
 
+# Least privilege for every job; the publish job re-grants id-token: write
+# for OIDC trusted publishing (job-level permissions replace this block).
+permissions:
+  contents: read
+
 jobs:
   build:
     runs-on: ubuntu-latest
