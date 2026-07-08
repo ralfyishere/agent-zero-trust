@@ -1,0 +1,5 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Security disclosure (sensitive)
+    url: https://github.com/ralfyishere/agent-zero-trust/security/advisories/new
+    about: For a bypass you believe is being exploited in the wild — private reporting.

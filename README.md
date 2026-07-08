@@ -88,7 +88,7 @@ on HIGH findings; `--json` for machines.
 ## Use in CI (GitHub Action)
 
 ```yaml
-- uses: ralfyishere/agent-zero-trust@v0.1.3
+- uses: ralfyishere/agent-zero-trust@v0.1.4
   with:
     path: .          # directory to scan
     fail-on: high    # high | medium | any
@@ -106,20 +106,32 @@ azt install-hook .        # wires a PreToolUse hook into .claude/settings.json
 azt scan --gate .         # a passing scan opens the gate (default TTL 24h)
 ```
 
-With the gate wired, a Claude Code session in that workspace cannot run shell
-commands until an intake scan has passed — the same deterministic-hook
-pattern as [rules-with-receipts](https://github.com/ralfyishere/rules-with-receipts)'
-publish gate, pointed at the intake boundary instead.
+With the gate wired, a Claude Code session in that workspace is blocked from
+mutating tools (Bash, Write, Edit, NotebookEdit) until an intake scan has
+passed — the same deterministic-hook pattern as
+[rules-with-receipts](https://github.com/ralfyishere/rules-with-receipts)'
+publish gate, pointed at the intake boundary instead. It is a speed bump, not
+a sandbox: it enforces "scan happened", not "agent is contained." The v0.1.0
+gate matched only Bash and could be forged by a file-write tool — found in our
+first live test, fixed in v0.1.1, and logged in SECURITY.md rather than quietly
+patched.
 
 ## Honesty: what a clean scan does NOT mean
 
-Pattern matching cannot catch cleverly worded natural-language manipulation —
-so we ship working attacks that pass our own scan, in
-[`corpus/misses/`](corpus/misses/), asserted **undetected** in CI so the
-ledger can't silently drift. Full caught/missed table:
-[COVERAGE.md](COVERAGE.md). As far as we know this is the only injection
-scanner that publishes its own false-negative ledger; bypass reports are the
-most-wanted contribution ([SECURITY.md](SECURITY.md)).
+Three things we say out loud, because a security tool that hides its edges is
+the dangerous kind:
+
+1. **A clean scan is "no known-shape red flags", never "safe".** Pattern
+   matching cannot catch cleverly worded natural-language manipulation.
+2. **We publish our own false-negatives.** Working attacks that pass our scan
+   live in [`corpus/misses/`](corpus/misses/), asserted **undetected** in CI so
+   the ledger can't silently drift. Full caught/missed table:
+   [COVERAGE.md](COVERAGE.md). As far as we know this is the only injection
+   scanner that publishes its own miss rate; bypass reports are the most-wanted
+   contribution ([SECURITY.md](SECURITY.md)).
+3. **We disclosed our own day-one bypass.** The first gate could be forged;
+   we found it, fixed it same-day, and wrote it down — a gate that quietly
+   patches its bypasses is not a gate you should trust.
 
 ## What this is not
 
