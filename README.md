@@ -26,13 +26,22 @@ git clone https://some-repo-you-do-not-trust
 azt scan some-repo-you-do-not-trust
 ```
 
+Or see it catch something right now, no install (stdlib only):
+
+```bash
+git clone https://github.com/ralfyishere/agent-zero-trust
+cd agent-zero-trust
+python3 azt.py scan corpus/malicious-markdown   # exits 1, red findings
+python3 azt.py scan corpus/benign-repo          # exits 0, clean
+```
+
 ## What it looks like
 
 Real output against [`corpus/malicious-markdown/`](corpus/malicious-markdown/)
 (a fixture using the documented HTML-comment injection technique):
 
 ```
-agent-zero-trust v0.1.0 — repo intake scan of corpus/malicious-markdown
+agent-zero-trust — repo intake scan of corpus/malicious-markdown
 
 INSTRUCTION ENVIRONMENT: 0 file(s) can influence an agent here
 
@@ -79,7 +88,7 @@ on HIGH findings; `--json` for machines.
 ## Use in CI (GitHub Action)
 
 ```yaml
-- uses: ralfyishere/agent-zero-trust@v0.1.2
+- uses: ralfyishere/agent-zero-trust@v0.1.3
   with:
     path: .          # directory to scan
     fail-on: high    # high | medium | any

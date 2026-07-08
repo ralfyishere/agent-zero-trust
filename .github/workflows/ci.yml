@@ -46,3 +46,12 @@ jobs:
           path: corpus/malicious-markdown
       - name: assert the failure happened
         run: test "${{ steps.mal.outcome }}" = "failure"
+
+  action-published-tag:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: the action works for strangers via the published tag
+        uses: ralfyishere/agent-zero-trust@v0.1.2
+        with:
+          path: corpus/benign-repo

@@ -31,7 +31,7 @@ import time
 import unicodedata
 from pathlib import Path
 
-__version__ = "0.1.2"
+__version__ = "0.1.3"
 
 SEV_ORDER = {"HIGH": 0, "MEDIUM": 1, "INFO": 2}
 
@@ -338,7 +338,7 @@ def scan_repo(root):
 
 
 def print_report(root, inventory, findings):
-    print("agent-zero-trust v%s — repo intake scan of %s\n" % (__version__, root))
+    print("agent-zero-trust — repo intake scan of %s\n" % root)
     print("INSTRUCTION ENVIRONMENT: %d file(s) can influence an agent here" % len(inventory))
     by_class = {}
     for h in inventory:
