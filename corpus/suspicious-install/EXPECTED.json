@@ -1,0 +1,16 @@
+{
+  "must_flag": [
+    {
+      "rule": "net.pipe_shell",
+      "path": "install.sh"
+    },
+    {
+      "rule": "exfil.pipe_out",
+      "path": "install.sh"
+    },
+    {
+      "rule": "pkg.lifecycle",
+      "path": "package.json"
+    }
+  ]
+}

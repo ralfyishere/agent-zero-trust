@@ -1,0 +1,28 @@
+{
+  "must_flag": [
+    {
+      "rule": "stealth.html_comment_imperative",
+      "path": "TROUBLESHOOTING.md"
+    },
+    {
+      "rule": "inject.instruction_override",
+      "path": "TROUBLESHOOTING.md"
+    },
+    {
+      "rule": "net.pipe_shell",
+      "path": "TROUBLESHOOTING.md"
+    },
+    {
+      "rule": "inject.agent_directed",
+      "path": "README.md"
+    },
+    {
+      "rule": "exec.always_run",
+      "path": "README.md"
+    },
+    {
+      "rule": "inject.concealment",
+      "path": "TROUBLESHOOTING.md"
+    }
+  ]
+}

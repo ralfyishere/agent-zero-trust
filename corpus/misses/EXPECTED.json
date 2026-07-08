@@ -1,0 +1,4 @@
+{
+  "must_not_flag_high": true,
+  "note": "These are KNOWN MISSES. Pure natural-language manipulation with no trigger shapes. If a rule ever catches one, move it out of misses/ and update COVERAGE.md."
+}

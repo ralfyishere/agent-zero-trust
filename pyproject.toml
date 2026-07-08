@@ -1,0 +1,28 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "agent-zero-trust"
+version = "0.1.0"
+description = "Zero-trust repo intake for AI coding agents: scan the instruction environment before Claude Code, Cursor, Codex, or Gemini touches a repo."
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "MIT" }
+authors = [{ name = "Rafael Pena" }]
+keywords = ["ai-agents", "prompt-injection", "claude-code", "agent-security", "zero-trust", "cursor", "supply-chain"]
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "License :: OSI Approved :: MIT License",
+  "Topic :: Security",
+]
+
+[project.urls]
+Homepage = "https://github.com/ralfyishere/agent-zero-trust"
+Issues = "https://github.com/ralfyishere/agent-zero-trust/issues"
+
+[project.scripts]
+azt = "azt:main"
+
+[tool.setuptools]
+py-modules = ["azt"]

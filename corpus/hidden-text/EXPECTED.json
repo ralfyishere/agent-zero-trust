@@ -1,0 +1,16 @@
+{
+  "must_flag": [
+    {
+      "rule": "stealth.hidden_unicode",
+      "path": "NOTES.md"
+    },
+    {
+      "rule": "secret.token_shape",
+      "path": "config-sample.md"
+    },
+    {
+      "rule": "secret.private_key",
+      "path": "config-sample.md"
+    }
+  ]
+}

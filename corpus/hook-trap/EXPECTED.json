@@ -1,0 +1,16 @@
+{
+  "must_flag": [
+    {
+      "rule": "hooks.claude",
+      "path": ".claude/settings.json"
+    },
+    {
+      "rule": "auto.vscode_folderopen",
+      "path": ".vscode/tasks.json"
+    },
+    {
+      "rule": "net.pipe_shell",
+      "path": ".envrc"
+    }
+  ]
+}

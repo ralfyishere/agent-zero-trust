@@ -1,0 +1,10 @@
+# agent-zero-trust's own repo: the scanner and its fixtures CONTAIN the
+# patterns they detect. Excluding them here is dogfooding the ignore
+# mechanism, not hiding real risk — CI runs the corpus tests unfiltered.
+* azt.py
+* test_azt.py
+* corpus/*
+* COVERAGE.md
+* docs/threat-model.md
+* SECURITY.md
+* README.md

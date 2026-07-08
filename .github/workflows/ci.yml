@@ -1,0 +1,28 @@
+name: ci
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.9", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: corpus + unit tests (incl. false-positive and known-miss ledgers)
+        run: python test_azt.py
+      - name: self-scan (dogfoods .azt-ignore for detector/fixture files)
+        run: python azt.py scan . --fail-on high
+      - name: demo scan must fail on the malicious fixture
+        run: |
+          if python azt.py scan corpus/malicious-markdown; then
+            echo "malicious fixture passed the scan — regression"; exit 1
+          fi
+      - name: package builds
+        run: python -m pip install --quiet build && python -m build

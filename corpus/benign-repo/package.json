@@ -1,0 +1,9 @@
+{
+  "name": "acme-api",
+  "version": "2.1.0",
+  "scripts": {
+    "test": "jest",
+    "build": "tsc -p .",
+    "lint": "eslint ."
+  }
+}

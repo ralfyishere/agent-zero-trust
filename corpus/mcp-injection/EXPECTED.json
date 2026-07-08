@@ -1,0 +1,9 @@
+{
+  "must_flag": [
+    {
+      "rule": "mcp.server",
+      "path": ".mcp.json"
+    }
+  ],
+  "min_high": 1
+}
