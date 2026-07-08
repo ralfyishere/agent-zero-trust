@@ -34,8 +34,12 @@ with your credentials.
   in human docs, hidden unicode, HTML-comment imperatives, auto-exec configs
   (MCP servers, folderOpen tasks, .envrc, lifecycle scripts, hooks,
   pull_request_target checkouts), token shapes, private keys, symlink escapes.
-- **Gate, optionally**: `azt install-hook` blocks an agent's shell access in a
-  workspace until `azt scan --gate` has passed, so intake cannot be forgotten.
+- **Gate, optionally**: `azt install-hook` blocks an agent's mutating tools
+  (Bash/Write/Edit/NotebookEdit) in a workspace until `azt scan --gate` has
+  passed, so intake cannot be forgotten. This is a speed bump, not a sandbox:
+  it enforces "a scan happened," not "the agent is contained." It reduces the
+  chance of skipping intake; it does not confine an agent that is already
+  running, and its own v0.1.0 bypass is in the disclosure log (SECURITY.md).
 
 ## Design commitments
 

@@ -13,14 +13,18 @@ inputs:
     required: false
     default: "high"
   version:
-    description: "agent-zero-trust version from PyPI (empty = latest)"
+    # Defaults to the package version that ships with THIS action tag, so
+    # `uses: ...@vX.Y.Z` pins the scanner to X.Y.Z by default. Set explicitly
+    # to override, or "latest" to always use the newest PyPI release.
+    description: "agent-zero-trust version from PyPI (default: matches this action tag)"
     required: false
-    default: ""
+    default: "0.1.5"
 runs:
   using: "composite"
   steps:
     - shell: bash
       run: |
-        SPEC="agent-zero-trust"
-        if [ -n "${{ inputs.version }}" ]; then SPEC="agent-zero-trust==${{ inputs.version }}"; fi
+        V="${{ inputs.version }}"
+        if [ -z "$V" ] || [ "$V" = "latest" ]; then SPEC="agent-zero-trust";
+        else SPEC="agent-zero-trust==$V"; fi
         pipx run --spec "$SPEC" azt scan "${{ inputs.path }}" --fail-on "${{ inputs.fail-on }}"

@@ -4,29 +4,12 @@
 [![PyPI](https://img.shields.io/pypi/v/agent-zero-trust)](https://pypi.org/project/agent-zero-trust/)
 [![license](https://img.shields.io/github/license/ralfyishere/agent-zero-trust)](LICENSE)
 
-**Zero-trust repo intake for AI coding agents.**
+**Zero-trust repo intake for AI coding agents.** A repo is no longer just code
+— for an agent that reads and follows files, it is an *instruction
+environment*. `azt` scans it before Claude Code, Cursor, Codex, or Gemini
+operates inside it.
 
-AI coding agents read files, follow instructions, run commands, and trigger
-workflows. That means a repo is no longer just code — **it is an instruction
-environment**. A README, an HTML comment, an MCP config, a postinstall
-script, or a Claude Code hook can steer an agent the moment it enters.
-Documented attacks already do exactly this.
-
-`azt` scans a repository **before** Claude Code, Cursor, Codex, Gemini, or
-any other agent operates inside it. Deterministic, offline, single-file,
-stdlib-only — the core never calls a model, because a scanner that asks an
-LLM whether content is safe to show an LLM is itself injectable by that
-content ([threat model](docs/threat-model.md)).
-
-## Quick start
-
-```bash
-pipx install agent-zero-trust     # or: pip install agent-zero-trust
-git clone https://some-repo-you-do-not-trust
-azt scan some-repo-you-do-not-trust
-```
-
-Or see it catch something right now, no install (stdlib only):
+## See it catch something in 30 seconds (no install, stdlib only)
 
 ```bash
 git clone https://github.com/ralfyishere/agent-zero-trust
@@ -34,6 +17,24 @@ cd agent-zero-trust
 python3 azt.py scan corpus/malicious-markdown   # exits 1, red findings
 python3 azt.py scan corpus/benign-repo          # exits 0, clean
 ```
+
+Then point it at any repo:
+
+```bash
+pipx install agent-zero-trust
+azt scan /path/to/some/repo
+```
+
+## Why
+
+A README, an HTML comment, an MCP config, a postinstall script, or a Claude
+Code hook can steer an agent the moment it enters a repo. These attacks are
+documented in the wild (see [prior art](#prior-art)); the HTML-comment
+technique is invisible when rendered but plain text to the model.
+
+`azt` is deterministic, offline, single-file, stdlib-only. The core never
+calls a model — a scanner that asks an LLM whether content is safe to show an
+LLM is itself injectable by that content ([threat model](docs/threat-model.md)).
 
 ## What it looks like
 
@@ -88,16 +89,26 @@ on HIGH findings; `--json` for machines.
 ## Use in CI (GitHub Action)
 
 ```yaml
-- uses: ralfyishere/agent-zero-trust@v0.1.4
-  with:
-    path: .          # directory to scan
-    fail-on: high    # high | medium | any
+name: agent-zero-trust
+on: [pull_request, push]
+jobs:
+  intake-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ralfyishere/agent-zero-trust@v0.1.5
+        with:
+          path: .
+          fail-on: high      # high | medium | any
+          version: 0.1.5     # pins the scanner; omit for latest
 ```
 
 PRs that introduce injection shapes, hook traps, or hostile automation fail
 the check before any agent — or reviewer — trusts the tree. The action is a
-thin wrapper over the PyPI package (pin `version:` for reproducibility); our
-own CI dogfoods it against both the benign and malicious fixtures.
+thin wrapper over the PyPI package. Pinning the action tag alone
+(`@v0.1.5`) pins the action's *default* scanner version, which matches the
+tag; set `version:` explicitly if you want to be certain. Our own CI dogfoods
+the action against both the benign and malicious fixtures.
 
 ## Gate mode: make intake impossible to forget
 
@@ -125,8 +136,8 @@ the dangerous kind:
    matching cannot catch cleverly worded natural-language manipulation.
 2. **We publish our own false-negatives.** Working attacks that pass our scan
    live in [`corpus/misses/`](corpus/misses/), asserted **undetected** in CI so
-   the ledger can't silently drift. Full caught/missed table:
-   [COVERAGE.md](COVERAGE.md). As far as we know this is the only injection
+   the ledger can't silently drift. Full caught/missed list:
+   [COVERAGE.md](COVERAGE.md). As far as we know this is the only repo-intake
    scanner that publishes its own miss rate; bypass reports are the most-wanted
    contribution ([SECURITY.md](SECURITY.md)).
 3. **We disclosed our own day-one bypass.** The first gate could be forged;
@@ -138,19 +149,30 @@ the dangerous kind:
 - **Not a guarantee.** A clean scan = "no known-shape red flags", never "safe".
 - **Not a secrets scanner.** We flag token shapes we pass; run gitleaks or
   trufflehog for depth.
-- **Not agent-side tool scanning.** Your own MCP servers/skills/configs are
-  [Snyk agent-scan / mcp-scan](https://github.com/invariantlabs-ai/mcp-scan)'s
-  lane; azt scans the *repo* you're about to enter. Run both — they compose.
+- **Not agent-side tool scanning.** [Snyk Agent Scan / mcp-scan](https://github.com/invariantlabs-ai/mcp-scan)
+  inventories and analyzes your *installed* agent components — MCP servers,
+  skills, agent configs on your machine. `azt` is pre-agent *repo* intake: "I
+  just cloned this tree; what in it could steer or trap an agent before I let
+  one operate here?" They overlap on project-scoped configs but sit at
+  different trust boundaries. Run both.
 - **Not runtime monitoring or sandboxing.** Static intake only.
+
+## Prior art
+
+The "malicious-but-clean repo" attack surface these tools address is
+documented publicly:
+
+- [Mozilla: indirect prompt injection in AI coding agents](https://www.helpnetsecurity.com/2026/06/29/mozilla-warns-of-indirect-prompt-injection-risk-in-ai-coding-agents/)
+- [Microsoft: securing CI/CD in an agentic world (Claude Code Action case)](https://www.microsoft.com/en-us/security/blog/2026/06/05/securing-ci-cd-in-agentic-world-claude-code-github-action-case/)
+- [Cloud Security Alliance: Claude Code GitHub Action prompt-injection note](https://labs.cloudsecurityalliance.org/research/csa-research-note-claude-code-github-action-prompt-injection/)
+- [Snyk / Invariant: mcp-scan and agentic-AI security research](https://github.com/invariantlabs-ai/mcp-scan)
 
 ## The Receipts Stack
 
-| Stage | Repo |
-|---|---|
-| **Intake** — scan the repo before the agent enters | **agent-zero-trust** (this repo) |
-| **Discipline** — install the tested operating layer | [rules-with-receipts](https://github.com/ralfyishere/rules-with-receipts) |
-| **Testing** — prove whether rules do anything | [rulebench](https://github.com/ralfyishere/rulebench) |
-| **Taxonomy** — name the failures, grade the evidence | [agent-failure-modes](https://github.com/ralfyishere/agent-failure-modes) |
+- **Intake** — scan the repo before the agent enters: **agent-zero-trust** (this repo)
+- **Discipline** — install the tested operating layer: [rules-with-receipts](https://github.com/ralfyishere/rules-with-receipts)
+- **Testing** — prove whether rules do anything: [rulebench](https://github.com/ralfyishere/rulebench)
+- **Taxonomy** — name the failures, grade the evidence: [agent-failure-modes](https://github.com/ralfyishere/agent-failure-modes)
 
 ## License
 

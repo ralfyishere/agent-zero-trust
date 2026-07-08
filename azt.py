@@ -31,7 +31,7 @@ import time
 import unicodedata
 from pathlib import Path
 
-__version__ = "0.1.4"
+__version__ = "0.1.5"
 
 SEV_ORDER = {"HIGH": 0, "MEDIUM": 1, "INFO": 2}
 
