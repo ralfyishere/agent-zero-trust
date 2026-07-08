@@ -94,7 +94,7 @@ import re as _re
 pyver = _re.search(r'version = "([^"]+)"', (ROOT / "pyproject.toml").read_text()).group(1)
 check(pyver == azt.__version__, "pyproject version == azt.__version__ (%s)" % pyver)
 actyml = (ROOT / "action.yml").read_text()
-actver = _re.search(r'default: "([0-9.]+)"', actyml).group(1)
+actver = _re.search(r'default: "(\d+\.\d+\.\d+)"', actyml).group(1)
 check(actver == azt.__version__, "action.yml default version == azt.__version__ (%s)" % actver)
 
 print()
