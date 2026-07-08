@@ -31,6 +31,10 @@ jobs:
         run: python -m pip install --quiet build && python -m build
 
   action-dogfood:
+    # Tests the composite action's WIRING (inputs -> pipx -> scan -> exit code)
+    # against the latest PUBLISHED package. The scanner logic itself is tested
+    # on the local tree by the `test` jobs above. version: latest is required
+    # because CI runs on push, before this tree's version is published.
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -38,12 +42,14 @@ jobs:
         uses: ./
         with:
           path: corpus/benign-repo
+          version: latest
       - name: action fails on the malicious fixture
         id: mal
         uses: ./
         continue-on-error: true
         with:
           path: corpus/malicious-markdown
+          version: latest
       - name: assert the failure happened
         run: test "${{ steps.mal.outcome }}" = "failure"
 
