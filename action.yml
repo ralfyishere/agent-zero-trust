@@ -18,7 +18,7 @@ inputs:
     # to override, or "latest" to always use the newest PyPI release.
     description: "agent-zero-trust version from PyPI (default: matches this action tag)"
     required: false
-    default: "0.1.5"
+    default: "0.1.6"
 runs:
   using: "composite"
   steps:

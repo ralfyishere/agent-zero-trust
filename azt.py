@@ -31,7 +31,7 @@ import time
 import unicodedata
 from pathlib import Path
 
-__version__ = "0.1.5"
+__version__ = "0.1.6"
 
 SEV_ORDER = {"HIGH": 0, "MEDIUM": 1, "INFO": 2}
 
@@ -47,7 +47,7 @@ TEXT_RULES = [
      r"(?:curl|wget|iwr|invoke-webrequest)\b[^\n|]*\|\s*(?:sudo\s+)?(?:bash|sh|zsh|python3?|node|pwsh)"),
     ("net.fetch_unknown", "MEDIUM",
      "Network fetch to a non-allowlisted host in an instruction/setup context",
-     r"\b(?:curl|wget)\s+[^\n]*https?://(?!(?:github\.com|raw\.githubusercontent\.com|docs\.|localhost|127\.0\.0\.1))"),
+     r"\b(?:curl|wget)\s+[^\n]*https?://(?!(?:[a-z0-9-]+\.)*(?:github\.com|githubusercontent\.com|localhost|127\.0\.0\.1)(?:[:/?#]|$))"),
     ("net.reverse_shell", "HIGH",
      "Reverse-shell shape (nc -e, /dev/tcp, socket-to-shell)",
      r"\bnc\b[^\n]{0,40}\s-e\s|/dev/tcp/|\bsocat\b[^\n]{0,40}exec|\bsh\s+-i\s+[^\n]{0,20}(?:&|\|)"),
@@ -95,10 +95,18 @@ TEXT_RULES = [
 ]
 COMPILED = [(rid, sev, desc, re.compile(pat, re.I)) for rid, sev, desc, pat in TEXT_RULES]
 
-# Rules whose signal depends on a shell pipe; markdown table rows use `|` as a
-# separator, so skip those rules on table-looking lines (false-positive class
-# inherited from rulebench vet's regression suite).
-PIPE_DEPENDENT = {"net.pipe_shell", "exfil.pipe_out", "net.dns_exec"}
+# Rules whose signal is JUST a bare shell pipe `|`; markdown table rows use `|`
+# as a cell separator, so these are skipped on table-looking lines to avoid a
+# false-positive class. Only net.dns_exec qualifies: its regex ends in a bare
+# `|` that a table separator satisfies. net.pipe_shell and exfil.pipe_out were
+# REMOVED (2026-07-10) because their regexes require a specific dangerous command
+# on BOTH sides of the pipe (curl…|…bash, cat…|…curl), which does not occur in
+# benign tables — so suppressing them only created a bypass: wrapping a payload
+# in a table cell (`| curl x | bash |`) downgraded a HIGH finding to a passing
+# MEDIUM. Residual (ledgered): a table-wrapped `dig … txt … | sh` still evades
+# net.dns_exec; net.dns_exec is obscure and its bare trailing pipe cannot be run
+# on tables without a large FP class. See test_azt.py ("unit checks: evasion bypasses").
+PIPE_DEPENDENT = {"net.dns_exec"}
 MD_TABLE = re.compile(r"^\s*\|.*\|\s*$|^\s*\|?[\s:-]+\|[\s:|-]*$")
 
 # ---------------------------------------------------------------------------
