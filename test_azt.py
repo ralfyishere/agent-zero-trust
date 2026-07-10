@@ -114,6 +114,35 @@ check("net.fetch_unknown" not in _rules("curl https://raw.githubusercontent.com/
 check("net.pipe_shell" not in _rules("| Command | Desc |\n| curl | fetches a URL |"),
       "benign markdown table with 'curl' in a cell does not false-positive pipe_shell")
 
+# unit checks: permissions.allow auto-approve (2026-07-10)
+def _perm(allow):
+    return azt.scan_claude_settings(".claude/settings.json", json.dumps({"permissions": {"allow": allow}}))
+check(any(f["rule"] == "perm.auto_approve" and f["severity"] == "HIGH" for f in _perm(["Bash(rm -rf /:*)"])),
+      "permissions.allow Bash(rm -rf) flagged HIGH (auto-approve of a dangerous command)")
+check(any(f["rule"] == "perm.auto_approve" for f in _perm(["Bash(*)"])),
+      "permissions.allow Bash(*) unrestricted-shell flagged")
+check(any(f["rule"] == "perm.auto_approve" for f in _perm(["Bash(curl:*)"])),
+      "permissions.allow Bash(curl:*) flagged")
+check(not any(f["rule"] == "perm.auto_approve" for f in _perm(["Bash(npm run test:*)", "Read(src/**)"])),
+      "benign scoped permissions.allow does not false-positive")
+
+# unit checks: directory symlink escaping the repo (2026-07-10)
+with tempfile.TemporaryDirectory() as td:
+    td = Path(td)
+    (td / "README.md").write_text("# x\n")
+    os.symlink("/etc", td / "dirlink")                       # directory symlink -> outside
+    _, sf = azt.scan_repo(td)
+    check(any(f["rule"] == "fs.symlink_escape" and f["path"] == "dirlink" for f in sf),
+          "directory symlink escaping the repo is flagged (was undetected)")
+    (td / "filelink").symlink_to("/etc/hosts")               # file symlink still works
+    _, sf2 = azt.scan_repo(td)
+    check(any(f["rule"] == "fs.symlink_escape" and f["path"] == "filelink" for f in sf2),
+          "file symlink escaping the repo still flagged")
+    os.symlink(td / "README.md", td / "internal")            # internal symlink -> no FP
+    _, sf3 = azt.scan_repo(td)
+    check(not any(f["rule"] == "fs.symlink_escape" and f["path"] == "internal" for f in sf3),
+          "symlink resolving inside the repo is not flagged (no FP)")
+
 # version consistency: single source of truth check
 import re as _re
 pyver = _re.search(r'version = "([^"]+)"', (ROOT / "pyproject.toml").read_text()).group(1)

@@ -31,7 +31,7 @@ import time
 import unicodedata
 from pathlib import Path
 
-__version__ = "0.1.6"
+__version__ = "0.1.7"
 
 SEV_ORDER = {"HIGH": 0, "MEDIUM": 1, "INFO": 2}
 
@@ -218,6 +218,13 @@ def scan_mcp(rel, text):
     return out
 
 
+# settings.json permissions.allow can pre-approve commands so they run WITHOUT the
+# human confirmation prompt — the most dangerous field in the file. Flag unrestricted
+# Bash (Bash(*) / Bash(:*)) and any allow entry granting a dangerous command.
+PERM_UNRESTRICTED = re.compile(r"\bBash\(\s*:?\*\s*\)", re.I)
+PERM_DANGER = re.compile(r"\b(?:rm\s+-[rf]|curl|wget|nc|netcat|base64|chmod|sudo|mkfs|dd\s+if=|eval)", re.I)
+
+
 def scan_claude_settings(rel, text):
     out = []
     try:
@@ -233,6 +240,14 @@ def scan_claude_settings(rel, text):
                 out.append({"rule": "hooks.claude", "severity": sev,
                             "description": "Claude Code %s hook runs a shell command — read it before starting a session" % event,
                             "path": rel, "line": 0, "excerpt": cmd[:120]})
+    perms = cfg.get("permissions", {})
+    allow = perms.get("allow", []) if isinstance(perms, dict) else []
+    for entry in allow if isinstance(allow, list) else []:
+        s = str(entry)
+        if PERM_UNRESTRICTED.search(s) or PERM_DANGER.search(s):
+            out.append({"rule": "perm.auto_approve", "severity": "HIGH",
+                        "description": "settings pre-approve a dangerous/unrestricted command — it will run without the human confirmation prompt",
+                        "path": rel, "line": 0, "excerpt": s[:120]})
     return out
 
 
@@ -271,18 +286,29 @@ def scan_tasks_json(rel, text):
 
 
 def scan_symlinks(root):
+    # walk_repo yields only files; os.walk lists a symlinked DIRECTORY in dirnames
+    # and (followlinks=False) never descends it, so a directory symlink escaping the
+    # repo (`.claude -> /attacker/dir`) was previously undetected. Check both.
     out = []
-    for f in walk_repo(root):
-        if f.is_symlink():
-            try:
-                resolved = f.resolve()
-                if root.resolve() not in resolved.parents and resolved != root.resolve():
-                    out.append({"rule": "fs.symlink_escape", "severity": "MEDIUM",
-                                "description": "symlink resolves outside the repository",
-                                "path": str(f.relative_to(root)), "line": 0,
-                                "excerpt": "-> %s" % resolved})
-            except Exception:
-                pass
+    root_resolved = root.resolve()
+
+    def _check(p):
+        if not p.is_symlink():
+            return
+        try:
+            resolved = p.resolve()
+        except Exception:
+            return
+        if root_resolved not in resolved.parents and resolved != root_resolved:
+            out.append({"rule": "fs.symlink_escape", "severity": "MEDIUM",
+                        "description": "symlink resolves outside the repository",
+                        "path": str(p.relative_to(root)), "line": 0,
+                        "excerpt": "-> %s" % resolved})
+
+    for dirpath, dirnames, filenames in os.walk(root):
+        dirnames[:] = [d for d in dirnames if d not in SKIP_DIRS]
+        for name in list(dirnames) + filenames:
+            _check(Path(dirpath) / name)
     return out
 
 

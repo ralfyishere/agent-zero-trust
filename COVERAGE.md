@@ -27,6 +27,8 @@ tests fail loudly if the ledger drifts from reality.
 
 - `mcp.server` — MCP server fetching remote content at session start · *mcp-injection*
 - `hooks.claude` — Claude Code hook running shell with a network call · *hook-trap*
+- `perm.auto_approve` — settings.json `permissions.allow` pre-approving a dangerous or unrestricted command (runs without the confirmation prompt) · *unit-tested*
+- `fs.symlink_escape` — a file OR directory symlink resolving outside the repository · *unit-tested*
 - `auto.vscode_folderopen` — VS Code task auto-running on folder open · *hook-trap*
 - `pkg.lifecycle` — package.json postinstall with a network call · *suspicious-install*
 - `ci.prt_checkout` — `pull_request_target` + PR-head checkout · *unit-tested*
