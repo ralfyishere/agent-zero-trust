@@ -5,6 +5,7 @@ import io
 import json
 import os
 from pathlib import Path
+import subprocess
 import tempfile
 import unittest
 from unittest.mock import Mock, patch
@@ -119,6 +120,27 @@ class SafetyCITests(unittest.TestCase):
             self.assertIn(required, text)
         for forbidden in ("pull_request_target:", "workflow_dispatch:", "uses: actions/upload-artifact", "secrets.", "sudo "):
             self.assertNotIn(forbidden, text)
+
+    def test_runner_paths_are_initialized_on_runner_not_in_job_env(self):
+        text = (ci.ROOT / ".github/workflows/safety-fs001.yml").read_text()
+        # GitHub rejects runner context at jobs.<id>.env before allocating a VM.
+        job_env = text.split("    env:\n", 1)[1].split("    steps:\n", 1)[0]
+        self.assertNotIn("runner.", job_env)
+        marker = "      - name: Initialize runner-local paths\n        run: |\n"
+        self.assertIn(marker, text)
+        block = text.split(marker, 1)[1].split("      - ", 1)[0]
+        script = "\n".join(line[10:] for line in block.splitlines())
+        env_file = self.root / "github-env"
+        runner_temp = self.root / "runner temp with spaces"
+        result = subprocess.run(["bash", "--noprofile", "--norc", "-euo", "pipefail", "-c", script],
+                                env={"PATH": os.defpath, "RUNNER_TEMP": str(runner_temp),
+                                     "GITHUB_ENV": str(env_file)}, capture_output=True, timeout=5)
+        self.assertEqual(0, result.returncode, result.stderr)
+        self.assertEqual([
+            "AZT_CI_ROOT=" + str(runner_temp / "azt-fs001"),
+            "AZT_DIST=" + str(runner_temp / "azt-fs001-dist"),
+            "AZT_BUILD_PYTHON=" + str(runner_temp / "azt-fs001-build/bin/python"),
+        ], env_file.read_text().splitlines())
 
 
 if __name__ == "__main__":
