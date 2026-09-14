@@ -1,0 +1,6 @@
+--- a/arithmetic.py
++++ b/arithmetic.py
+@@ -1,2 +1,2 @@
+ def add(a, b):
+-    return a - b
++    return a + b

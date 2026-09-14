@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "AZT local authenticated snapshot receipt v1",
+  "type": "object", "additionalProperties": false, "required": ["payload", "authentication"],
+  "properties": {
+    "payload": {"type": "object", "additionalProperties": false,
+      "required": ["schema_version", "receipt_id", "event", "issued_at", "expires_at", "workspace_id", "input_digest", "scope_digest", "engine_digest", "engine_version", "policy", "threshold", "observation", "outcome"],
+      "properties": {
+        "schema_version": {"const": 1}, "receipt_id": {"type": "string", "pattern": "^[a-f0-9]{32}$"},
+        "event": {"const": "snapshot_admitted"}, "issued_at": {"type": "integer"}, "expires_at": {"type": "integer"},
+        "workspace_id": {"$ref": "#/$defs/digest"}, "input_digest": {"$ref": "#/$defs/digest"},
+        "scope_digest": {"$ref": "#/$defs/digest"}, "engine_digest": {"$ref": "#/$defs/digest"},
+        "engine_version": {"type": "string"}, "policy": {"type": "object", "required": ["source", "digest"]},
+        "threshold": {"enum": ["high", "medium", "any"]}, "observation": {"const": "static input inspection only"},
+        "outcome": {"const": "pass"}
+      }
+    },
+    "authentication": {"type": "object", "additionalProperties": false, "required": ["algorithm", "tag"],
+      "properties": {"algorithm": {"const": "HMAC-SHA256"}, "tag": {"$ref": "#/$defs/digest"}}}
+  },
+  "$defs": {"digest": {"type": "string", "pattern": "^[a-f0-9]{64}$"}}
+}

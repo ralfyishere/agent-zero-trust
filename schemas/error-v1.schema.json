@@ -1,0 +1,7 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "AZT CLI error v1",
+  "type": "object", "required": ["schema_version", "version", "decision", "error"],
+  "properties": {"schema_version": {"const": 1}, "version": {"type": "string"},
+    "decision": {"enum": ["error", "deny"]}, "error": {"type": "string"}}
+}

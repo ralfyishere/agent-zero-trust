@@ -1,0 +1,11 @@
+cff-version: 1.2.0
+message: "If you use this software in research, please cite the repository and identify the exact commit or released version you used."
+type: software
+title: "agent-zero-trust"
+abstract: "Deterministic, offline repository intake for AI coding agents, with explicit policy, inspection scope, and snapshot admission evidence."
+authors:
+  - family-names: "Peña"
+    given-names: "Rafael"
+repository-code: "https://github.com/ralfyishere/agent-zero-trust"
+url: "https://github.com/ralfyishere/agent-zero-trust"
+license: MIT

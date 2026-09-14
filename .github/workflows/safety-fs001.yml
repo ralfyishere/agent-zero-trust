@@ -1,0 +1,67 @@
+name: AZT-FS-001 approved integration
+
+# push works before this file exists on main; workflow_dispatch does not.
+# https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows#push
+# The marker limits accidental runs; it is NOT an authentication mechanism.
+# An operator must approve each marked push. Reruns need new approval too.
+on:
+  push:
+    branches: [fix/trusted-intake-evidence]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: azt-fs001-reviewed-integration
+  cancel-in-progress: false
+
+jobs:
+  fs001:
+    if: >-
+      github.repository == 'ralfyishere/agent-zero-trust' &&
+      github.event.repository.private == false &&
+      github.event.deleted == false &&
+      github.run_attempt == 1 &&
+      contains(github.event.head_commit.message, '[azt-fs001-once]')
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    env:
+      PYTHONDONTWRITEBYTECODE: "1"
+      AZT_CI_ROOT: ${{ runner.temp }}/azt-fs001
+      AZT_DIST: ${{ runner.temp }}/azt-fs001-dist
+      AZT_BUILD_PYTHON: ${{ runner.temp }}/azt-fs001-build/bin/python
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+          fetch-depth: 1
+      - name: Explicit setup download — pinned Python build tools from PyPI
+        timeout-minutes: 2
+        run: |
+          mkdir -m 700 "$AZT_CI_ROOT"
+          python3 -m venv "$RUNNER_TEMP/azt-fs001-build"
+          "$AZT_BUILD_PYTHON" -m pip --isolated --disable-pip-version-check --no-cache-dir --timeout 20 --retries 1 install --only-binary=:all: --no-deps setuptools==83.0.0 wheel==0.47.0 packaging==26.0
+          "$AZT_BUILD_PYTHON" -m pip --isolated --disable-pip-version-check list --format=json
+      - name: Build the checked-out candidate offline
+        timeout-minutes: 2
+        run: |
+          "$AZT_BUILD_PYTHON" -c 'import os, setuptools.build_meta as b; b.build_wheel(os.environ["AZT_DIST"])'
+      - name: Explicit setup download — official Python image from Docker Hub
+        timeout-minutes: 3
+        run: |
+          mkdir -m 700 "$AZT_CI_ROOT/pull-client"
+          timeout 120s docker --config "$AZT_CI_ROOT/pull-client" --host unix:///var/run/docker.sock pull --platform linux/amd64 docker.io/library/python:3.12-slim
+      - name: Verify real prerequisites and run installed-wheel baseline / exposed / repaired
+        timeout-minutes: 4
+        run: |
+          python3 scripts/safety_ci.py run --wheel "$AZT_DIST/agent_zero_trust-0.1.9-py3-none-any.whl" --output "$AZT_CI_ROOT"
+      - name: Always clean test-owned containers and export bounded evidence to log
+        if: always()
+        timeout-minutes: 1
+        run: |
+          python3 scripts/safety_ci.py finish --output "$AZT_CI_ROOT"
+      # No artifacts, caches, packages or images uploaded. JSON in logs is the
+      # export: AZT_FS001_EVIDENCE_BEGIN / one JSON document / ..._END.
+      # Standard public hosted runners are free; logs do not use artifact quota:
+      # https://docs.github.com/en/billing/concepts/product-billing/github-actions

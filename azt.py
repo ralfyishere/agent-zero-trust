@@ -14,7 +14,7 @@ Design commitments (see docs/threat-model.md):
   cleverly worded natural-language social engineering. A clean scan means
   "no known-shape red flags", never "safe". Known misses are published in
   corpus/misses/ and COVERAGE.md.
-- Single file, stdlib only, Python 3.9+. Read what you run.
+- Stdlib only, Python 3.9+. Read what you run.
 
 Engine provenance: extracted and extended from `rulebench vet`
 (https://github.com/ralfyishere/rulebench), same maintainer, same rules
@@ -31,7 +31,10 @@ import time
 import unicodedata
 from pathlib import Path
 
-__version__ = "0.1.7"
+import azt_intake
+import azt_gate
+
+__version__ = "0.1.9"
 
 SEV_ORDER = {"HIGH": 0, "MEDIUM": 1, "INFO": 2}
 
@@ -115,16 +118,18 @@ MD_TABLE = re.compile(r"^\s*\|.*\|\s*$|^\s*\|?[\s:-]+\|[\s:|-]*$")
 # ---------------------------------------------------------------------------
 AGENT_SURFACE = [
     ("instructions", "INFO",
-     ["CLAUDE.md", "AGENTS.md", "GEMINI.md", ".cursorrules", ".clinerules",
+     ["CLAUDE.md", "AGENTS.md", "AGENTS.override.md", "GEMINI.md", ".cursorrules", ".clinerules",
       ".windsurfrules", ".cursor/rules/*", ".github/copilot-instructions.md",
       "**/CLAUDE.md", "**/AGENTS.md", "*.mdc"],
      "read as standing instructions by coding agents"),
     ("skills_commands", "INFO",
-     [".claude/skills/**/SKILL.md", ".claude/commands/*", ".claude/agents/*"],
+     [".claude/skills/*", ".claude/commands/*", ".claude/agents/*"],
      "loadable procedures/commands an agent may execute"),
     ("agent_settings", "MEDIUM",
      [".claude/settings.json", ".claude/settings.local.json"],
      "can define hooks that execute shell commands on agent events"),
+    ("agent_config", "INFO", [".codex/config.toml"],
+     "agent configuration; text patterns only, no TOML structural analysis"),
     ("mcp_config", "MEDIUM",
      [".mcp.json", "mcp.json", ".cursor/mcp.json", ".vscode/mcp.json",
       ".gemini/settings.json"],
@@ -151,11 +156,6 @@ TEXT_EXT = {".md", ".mdc", ".txt", ".sh", ".bash", ".zsh", ".py", ".js", ".ts",
 MAX_BYTES = 1_000_000
 
 
-def walk_repo(root):
-    for dirpath, dirnames, filenames in os.walk(root):
-        dirnames[:] = [d for d in dirnames if d not in SKIP_DIRS]
-        for name in filenames:
-            yield Path(dirpath) / name
 
 
 def classify_surface(root, files):
@@ -165,7 +165,8 @@ def classify_surface(root, files):
     for cls, sev, globs, why in AGENT_SURFACE:
         for rel, f in rels.items():
             for g in globs:
-                if fnmatch.fnmatch(rel, g) or fnmatch.fnmatch(Path(rel).name, g):
+                if any(fnmatch.fnmatchcase("/".join(rel.split("/")[i:]), g)
+                       for i in range(len(rel.split("/")))):
                     hits.append({"class": cls, "severity": sev, "path": rel, "why": why})
                     break
     seen, out = set(), []
@@ -205,14 +206,18 @@ def scan_mcp(rel, text):
         cfg = json.loads(text)
     except Exception:
         return out
-    servers = cfg.get("mcpServers") or cfg.get("servers") or {}
-    for name, s in (servers.items() if isinstance(servers, dict) else []):
+    servers = list((cfg.get("mcpServers") or {}).items()) + list((cfg.get("servers") or {}).items())
+    for name, s in servers:
         cmd = " ".join([str(s.get("command", ""))] + [str(a) for a in s.get("args", [])])
         sev, why = "MEDIUM", "MCP server '%s' executes at session start: %s" % (name, cmd.strip())
         if re.search(r"curl|wget|bash\s+-c|https?://", cmd, re.I):
             sev, why = "HIGH", "MCP server '%s' fetches/executes remote content: %s" % (name, cmd.strip())
         elif re.search(r"npx\s+(-y|--yes)", cmd):
             why += " (npx -y auto-installs the package unprompted)"
+        if s.get("url"):
+            sev = "MEDIUM"
+            if cmd.strip():
+                sev = "HIGH" if re.search(r"curl|wget|bash\s+-c|https?://", cmd, re.I) else "MEDIUM"
         out.append({"rule": "mcp.server", "severity": sev, "description": why,
                     "path": rel, "line": 0, "excerpt": cmd.strip()[:120]})
     return out
@@ -285,35 +290,10 @@ def scan_tasks_json(rel, text):
     return out
 
 
-def scan_symlinks(root):
-    # walk_repo yields only files; os.walk lists a symlinked DIRECTORY in dirnames
-    # and (followlinks=False) never descends it, so a directory symlink escaping the
-    # repo (`.claude -> /attacker/dir`) was previously undetected. Check both.
-    out = []
-    root_resolved = root.resolve()
-
-    def _check(p):
-        if not p.is_symlink():
-            return
-        try:
-            resolved = p.resolve()
-        except Exception:
-            return
-        if root_resolved not in resolved.parents and resolved != root_resolved:
-            out.append({"rule": "fs.symlink_escape", "severity": "MEDIUM",
-                        "description": "symlink resolves outside the repository",
-                        "path": str(p.relative_to(root)), "line": 0,
-                        "excerpt": "-> %s" % resolved})
-
-    for dirpath, dirnames, filenames in os.walk(root):
-        dirnames[:] = [d for d in dirnames if d not in SKIP_DIRS]
-        for name in list(dirnames) + filenames:
-            _check(Path(dirpath) / name)
-    return out
 
 
 STRUCTURAL = [
-    (re.compile(r"(^|/)(\.mcp\.json|mcp\.json)$"), scan_mcp),
+    (re.compile(r"(^|/)(\.mcp\.json|mcp\.json|\.gemini/settings\.json)$"), scan_mcp),
     (re.compile(r"(^|/)\.claude/settings(\.local)?\.json$"), scan_claude_settings),
     (re.compile(r"(^|/)package\.json$"), scan_package_json),
     (re.compile(r"(^|/)\.github/workflows/[^/]+\.ya?ml$"), scan_workflow),
@@ -321,64 +301,34 @@ STRUCTURAL = [
 ]
 
 
-# --- ignore mechanism ---------------------------------------------------------
-
-def load_ignores(root):
-    """.azt-ignore lines: 'RULE_ID path-glob' (glob optional, '*' default)."""
-    ig = []
-    p = root / ".azt-ignore"
-    if p.exists():
-        for line in p.read_text().splitlines():
-            line = line.strip()
-            if not line or line.startswith("#"):
-                continue
-            parts = line.split(None, 1)
-            ig.append((parts[0], parts[1] if len(parts) > 1 else "*"))
-    return ig
-
-
-def is_ignored(finding, ignores):
-    for rule, glob in ignores:
-        if (rule == "*" or finding["rule"] == rule or finding["rule"].startswith(rule + ".")) \
-                and fnmatch.fnmatch(finding["path"], glob):
-            return True
-    return False
-
-
 # --- scan orchestration ---------------------------------------------------------
 
+def scan_report(root, policy=None, fail_on="high"):
+    report = azt_intake.inspect(root, sys.modules[__name__], policy)
+    threshold = {"high": 0, "medium": 1, "any": 2}[fail_on]
+    failed = any(SEV_ORDER[f["severity"]] <= threshold for f in report["findings"])
+    report["threshold"] = fail_on
+    report["decision"] = "incomplete" if not report["scope"]["complete"] else ("deny" if failed else "pass")
+    return report
+
+
 def scan_repo(root):
-    root = Path(root)
-    files = [f for f in walk_repo(root) if not f.is_symlink()]
-    inventory = classify_surface(root, files)
-    findings = []
-    for f in files:
-        rel = str(f.relative_to(root)).replace(os.sep, "/")
-        try:
-            if f.stat().st_size > MAX_BYTES or f.suffix.lower() not in TEXT_EXT:
-                continue
-            text = f.read_text(errors="replace")
-        except Exception:
-            continue
-        for pat, scanner in STRUCTURAL:
-            if pat.search(rel):
-                findings += scanner(rel, text)
-        findings += scan_text_file(rel, text)
-    findings += scan_symlinks(root)
-    ignores = load_ignores(root)
-    findings = [f for f in findings if not is_ignored(f, ignores)]
-    findings.sort(key=lambda f: (SEV_ORDER.get(f["severity"], 9), f["path"], f["line"]))
-    return inventory, findings
+    """Compatibility tuple API; findings are always unsuppressed by the target.
+
+    New consumers should use scan_report to inspect completeness and policy.
+    """
+    report = scan_report(root)
+    return report["inventory"], report["findings"]
 
 
 def print_report(root, inventory, findings):
-    print("agent-zero-trust — repo intake scan of %s\n" % root)
+    print("agent-zero-trust — repo intake scan of %s\n" % azt_intake.safe_label(root))
     print("INSTRUCTION ENVIRONMENT: %d file(s) can influence an agent here" % len(inventory))
     by_class = {}
     for h in inventory:
         by_class.setdefault(h["class"], []).append(h["path"])
     for cls, paths in sorted(by_class.items()):
-        print("  %-16s %s" % (cls, ", ".join(sorted(paths)[:6]) + (" (+%d more)" % (len(paths) - 6) if len(paths) > 6 else "")))
+        print("  %-16s %s" % (cls, ", ".join(azt_intake.safe_label(p) for p in sorted(paths)[:6]) + (" (+%d more)" % (len(paths) - 6) if len(paths) > 6 else "")))
     print()
     high = [f for f in findings if f["severity"] == "HIGH"]
     med = [f for f in findings if f["severity"] == "MEDIUM"]
@@ -388,8 +338,8 @@ def print_report(root, inventory, findings):
         print("FINDINGS: %d HIGH, %d MEDIUM" % (len(high), len(med)))
         for f in findings:
             loc = ":%d" % f["line"] if f["line"] else ""
-            print("  [%-6s] %s  %s%s" % (f["severity"], f["rule"], f["path"], loc))
-            print("           %s" % f["description"])
+            print("  [%-6s] %s  %s%s" % (f["severity"], f["rule"], azt_intake.safe_label(f["path"]), loc))
+            print("           %s" % azt_intake.safe_label(f["description"]))
             if f["excerpt"]:
                 print("           > %s" % f["excerpt"])
     print()
@@ -404,110 +354,211 @@ def print_report(root, inventory, findings):
               "\nthe instruction-environment files above before trusting them.")
 
 
+def emit_error(args, message, decision="error"):
+    message = azt_intake.safe_label(message)
+    if getattr(args, "json", False):
+        print(json.dumps({"schema_version": 1, "version": __version__,
+                          "decision": decision, "error": message}, sort_keys=True))
+    print("azt: " + message, file=sys.stderr)
+    return 2
+
+
 def cmd_scan(args):
-    root = Path(args.target)
-    if not root.is_dir():
-        print("azt: %s is not a directory" % root, file=sys.stderr)
-        return 2
-    inventory, findings = scan_repo(root)
-    if args.json:
-        print(json.dumps({"version": __version__, "inventory": inventory,
-                          "findings": findings}, indent=2))
-    else:
-        print_report(root, inventory, findings)
-    thresh = {"high": 0, "medium": 1, "any": 2}[args.fail_on]
-    worst = min((SEV_ORDER[f["severity"]] for f in findings), default=99)
-    failed = worst <= thresh
-    if args.gate and not failed:
-        marker = root / ".claude" / ".azt-intake-pass"
-        marker.parent.mkdir(exist_ok=True)
-        marker.write_text(json.dumps({"azt": __version__, "verdict": "pass",
-                                      "ts": int(time.time())}) + "\n")
-        gi = root / ".gitignore"
-        line = ".claude/.azt-intake-pass"
-        if not (gi.exists() and line in gi.read_text()):
-            with open(gi, "a") as fh:
-                fh.write(line + "\n")
-        print("\n(gate opened: %s)" % marker)
-    return 1 if failed else 0
+    try:
+        report = scan_report(args.target, args.policy, args.fail_on)
+        if args.gate and report["decision"] == "pass":
+            # A second bounded read catches normal concurrent edits. This is not
+            # an atomic filesystem snapshot or hostile-writer runtime boundary.
+            second = scan_report(args.target, args.policy, args.fail_on)
+            if second != report:
+                raise azt_intake.IntakeError("workspace or policy changed during admission; retry on a quiescent tree")
+            report["admission"] = azt_gate.issue(args.target, args.state_dir, report,
+                                                args.fail_on, args.ttl_minutes)
+        if args.json:
+            print(json.dumps(report, indent=2, sort_keys=True, ensure_ascii=True))
+        else:
+            print_report(args.target, report["inventory"], report["findings"])
+            scope = report["scope"]
+            print("INSPECTION: %s; %d inspected, %d skipped, %d errors" %
+                  ("complete within declared scope" if scope["complete"] else "INCOMPLETE",
+                   len(scope["inspected"]), len(scope["skipped"]), len(scope["errors"])))
+            for item in scope["errors"] + scope["skipped"]:
+                print("  %s: %s" % (azt_intake.safe_label(item["path"]), azt_intake.safe_label(item["reason"])))
+            print("EXCEPTIONS: %d target requests (not applied); %d trusted suppressed findings" %
+                  (sum(r["requested_lines"] for r in report["target_requests"]), len(report["suppressed_findings"])))
+            for request in report["target_requests"]:
+                print("  target request source %s: %d lines, not applied (sha256 %s)" %
+                      (azt_intake.safe_label(request["path"]), request["requested_lines"], request["sha256"]))
+            for finding in report["suppressed_findings"]:
+                print("  %s %s: %s; policy %s (%s)" %
+                      (finding["rule"], azt_intake.safe_label(finding["path"]),
+                       azt_intake.safe_label(finding["exception"]["reason"]),
+                       azt_intake.safe_label(report["policy"]["source"]), report["policy"]["digest"]))
+            print("DECISION: %s" % report["decision"])
+            if "admission" in report:
+                print("Snapshot admitted; receipt stored outside workspace. No runtime containment.")
+        return {"pass": 0, "deny": 1, "incomplete": 2}[report["decision"]]
+    except (OSError, ValueError, RuntimeError) as exc:
+        return emit_error(args, str(exc) if isinstance(exc, azt_intake.IntakeError) else
+                          "input or evidence-store operation failed; no admission issued")
 
 
 GATE_HOOK_CMD = "azt gate-check"
 
 
+class GateDeadline(Exception):
+    """Must propagate through per-file error handling to stop the whole check."""
+
+
 def cmd_install_hook(args):
-    """Wire a PreToolUse hook: no tool runs until an intake scan has passed."""
-    root = Path(args.target)
-    settings = root / ".claude" / "settings.json"
-    settings.parent.mkdir(exist_ok=True)
-    cfg = {}
-    if settings.exists():
-        cfg = json.loads(settings.read_text())
-    pre = cfg.setdefault("hooks", {}).setdefault("PreToolUse", [])
-    if any(GATE_HOOK_CMD in h.get("command", "") for e in pre for h in e.get("hooks", [])):
-        print("azt: intake gate already wired in %s" % settings)
-        return 0
-    pre.append({"matcher": "Bash|Write|Edit|NotebookEdit",
-                "hooks": [{"type": "command", "command": GATE_HOOK_CMD}]})
-    settings.write_text(json.dumps(cfg, indent=2) + "\n")
-    print("azt: intake gate wired in %s" % settings)
-    print("Sessions in this repo now require a fresh `azt scan --gate .` pass "
-          "before Bash commands run (TTL %d min; AZT_INTAKE_TTL_MIN overrides)." % default_ttl())
-    return 0
-
-
-def default_ttl():
+    """Install an honest workflow hook using descriptor-relative safe writes."""
+    import shlex
+    root = Path(os.path.abspath(args.target))
+    fd = None
     try:
-        return int(os.environ.get("AZT_INTAKE_TTL_MIN", "1440"))
-    except ValueError:
-        return 1440
-
-
-def cmd_gate_check(_args):
-    root = Path(os.environ.get("CLAUDE_PROJECT_DIR", "."))
-    marker = root / ".claude" / ".azt-intake-pass"
-    stale = ""
-    if marker.exists():
-        valid = False
+        # Validate operator storage before touching the target.
+        store = azt_gate.open_store(args.state_dir, root, create=True)
+        os.close(store)
+        # Validate policy now so installation cannot embed a target-owned policy.
+        scan_report(root, args.policy, args.fail_on)
+        fd = azt_intake.open_absolute(root, directory=True)
         try:
-            valid = json.loads(marker.read_text()).get("verdict") == "pass"
-        except Exception:
+            os.mkdir(".claude", 0o755, dir_fd=fd)
+        except FileExistsError:
             pass
-        age_min = (time.time() - marker.stat().st_mtime) / 60
-        if valid and age_min <= default_ttl():
-            return 0
-        stale = (" (marker invalid — must be written by `azt scan --gate`)" if not valid
-                 else " (last pass %dmin ago; TTL %dmin)" % (age_min, default_ttl()))
-    sys.stderr.write(
-        "BLOCKED by agent-zero-trust intake gate: this workspace has no fresh intake scan%s.\n"
-        "Run: azt scan --gate .   — review any findings with the user before proceeding.\n"
-        "The user can force-open with: touch .claude/.azt-intake-pass\n" % stale)
-    return 2
+        child = os.open(".claude", os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW, dir_fd=fd)
+        os.close(fd)
+        fd = child
+        cfg = {}
+        try:
+            source = os.open("settings.json", os.O_RDONLY | os.O_NONBLOCK | os.O_NOFOLLOW, dir_fd=fd)
+        except FileNotFoundError:
+            pass
+        else:
+            try:
+                raw, _ = azt_intake.read_fd(source, MAX_BYTES)
+                cfg = azt_intake.json_object(raw.decode("utf-8"))
+                azt_intake.validate_config("scan_claude_settings", cfg)
+            finally:
+                os.close(source)
+        command = [str(Path(sys.executable).resolve()), str(Path(__file__).resolve()), "gate-check",
+                   "--state-dir", str(Path(os.path.abspath(args.state_dir))), "--fail-on", args.fail_on]
+        if args.policy:
+            command.extend(["--policy", str(Path(os.path.abspath(args.policy)))])
+        pre = cfg.setdefault("hooks", {}).setdefault("PreToolUse", [])
+        if cfg.get("disableAllHooks"):
+            raise azt_intake.IntakeError("project settings disable all hooks; installation refused")
+        try:
+            local = os.open("settings.local.json", os.O_RDONLY | os.O_NONBLOCK | os.O_NOFOLLOW, dir_fd=fd)
+        except FileNotFoundError:
+            pass
+        else:
+            try:
+                raw, _ = azt_intake.read_fd(local, MAX_BYTES)
+                local_cfg = azt_intake.json_object(raw.decode("utf-8"))
+                azt_intake.validate_config("scan_claude_settings", local_cfg)
+                if local_cfg.get("disableAllHooks"):
+                    raise azt_intake.IntakeError("local settings disable all hooks; installation refused")
+            finally:
+                os.close(local)
+        entry = {"matcher": "Bash|Write|Edit|NotebookEdit",
+                 "hooks": [{"type": "command", "command": shlex.join(command) + " || exit 2", "timeout": 30}]}
+        if entry not in pre:
+            pre.append(entry)
+        data = json.dumps(cfg, indent=2).encode() + b"\n"
+        import secrets
+        temp = ".azt-settings-" + secrets.token_hex(12)
+        out = os.open(temp, os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW, 0o600, dir_fd=fd)
+        try:
+            if os.write(out, data) != len(data):
+                raise azt_intake.IntakeError("settings write failed")
+            os.fsync(out)
+        finally:
+            os.close(out)
+        os.replace(temp, "settings.json", src_dir_fd=fd, dst_dir_fd=fd)
+        result = {"schema_version": 1, "decision": "installed",
+                  "next": "Run scan --gate with the same state directory and policy from an operator terminal before starting the agent.",
+                  "limitation": "Workflow hook only; same-user code can alter hook, policy, and issuer key."}
+        print(json.dumps(result, sort_keys=True) if args.json else result["next"] + "\n" + result["limitation"])
+        return 0
+    except (OSError, ValueError, TypeError, AttributeError) as exc:
+        return emit_error(args, str(exc) if isinstance(exc, azt_intake.IntakeError) else "hook installation failed")
+    finally:
+        if fd is not None:
+            os.close(fd)
+
+
+def cmd_gate_check(args):
+    import signal
+    root = args.target or os.environ.get("CLAUDE_PROJECT_DIR", ".")
+    def timed_out(_signum, _frame):
+        raise GateDeadline("gate inspection timed out")
+    previous = signal.signal(signal.SIGALRM, timed_out) if hasattr(signal, "SIGALRM") else None
+    try:
+        if previous is not None:
+            signal.setitimer(signal.ITIMER_REAL, 10)
+        report = scan_report(root, args.policy, args.fail_on)
+        result = azt_gate.verify(root, args.state_dir, report, args.fail_on)
+        if args.json:
+            print(json.dumps(dict(result, schema_version=1), sort_keys=True))
+        return 0
+    except (azt_intake.IntakeError, FileNotFoundError):
+        return emit_error(args, "gate blocked: receipt missing, invalid, expired, or snapshot changed. "
+                          "Legacy workspace markers are not accepted. Review and re-admit from an operator terminal "
+                          "using scan --gate with the same --state-dir, --policy, and --fail-on.", decision="deny")
+    except (OSError, ValueError, RuntimeError, GateDeadline):
+        return emit_error(args, "operational failure during gate inspection; no authorization granted")
+    finally:
+        if previous is not None:
+            signal.setitimer(signal.ITIMER_REAL, 0)
+            signal.signal(signal.SIGALRM, previous)
 
 
 def main(argv=None):
-    ap = argparse.ArgumentParser(
+    class Parser(argparse.ArgumentParser):
+        def error(self, message):
+            if "--json" in (sys.argv[1:] if argv is None else argv):
+                print(json.dumps({"schema_version": 1, "version": __version__,
+                                  "decision": "error", "error": "invalid command arguments"}, sort_keys=True))
+            super().error(message)
+    ap = Parser(
         prog="azt",
-        description="Zero-trust repo intake for AI coding agents. Offline, deterministic, no model calls. "
+        description="Repository intake for AI coding agents. Offline, deterministic, no model calls. "
                     "A clean scan means 'no known-shape red flags', NOT 'safe'.")
     ap.add_argument("--version", action="version", version="agent-zero-trust %s" % __version__)
     sub = ap.add_subparsers(dest="cmd")
     sp = sub.add_parser("scan", help="scan a repository before an agent enters it")
     sp.add_argument("target", nargs="?", default=".")
-    sp.add_argument("--json", action="store_true", help="machine-readable output")
-    sp.add_argument("--fail-on", choices=["high", "medium", "any"], default="high")
-    sp.add_argument("--gate", action="store_true",
-                    help="on pass, write .claude/.azt-intake-pass (opens the intake gate)")
-    ih = sub.add_parser("install-hook", help="wire the intake gate into .claude/settings.json")
+    sp.add_argument("--gate", action="store_true", help="issue an external authenticated snapshot receipt on a complete passing scan")
+    sp.add_argument("--ttl-minutes", type=int, default=60, help="receipt lifetime, 1–1440 minutes (default: 60)")
+    ih = sub.add_parser("install-hook", help="install an honest workflow intake hook; not a sandbox")
     ih.add_argument("target", nargs="?", default=".")
-    sub.add_parser("gate-check", help="(hook entrypoint) exit 2 unless a fresh intake pass exists")
+    gc = sub.add_parser("gate-check", help="verify current snapshot against an operator-issued receipt")
+    gc.add_argument("target", nargs="?", default=None)
+    for parser in (sp, ih, gc):
+        parser.add_argument("--json", action="store_true", help="machine-readable output")
+        parser.add_argument("--policy", help="explicit operator policy JSON outside the workspace")
+        parser.add_argument("--state-dir", help="private external operator state directory (required for gate operations)")
+        parser.add_argument("--fail-on", choices=["high", "medium", "any"], default="high")
+    doctor = sub.add_parser("doctor", help="report runtime prerequisites; containment integration is not yet available")
+    doctor.add_argument("--backend", default="bubblewrap")
+    doctor.add_argument("--json", action="store_true")
+    import azt_safety
+    azt_safety.add_parser(sub)
     args = ap.parse_args(argv)
+    if args.cmd == "safety":
+        return azt_safety.command(args)
     if args.cmd == "scan":
         return cmd_scan(args)
     if args.cmd == "install-hook":
         return cmd_install_hook(args)
     if args.cmd == "gate-check":
         return cmd_gate_check(args)
+    if args.cmd == "doctor":
+        import azt_runtime
+        report = azt_runtime.runtime_doctor(args.backend)
+        print(json.dumps(report, indent=2, sort_keys=True))
+        return azt_runtime.doctor_exit_code(report)
     ap.print_help()
     return 2
 

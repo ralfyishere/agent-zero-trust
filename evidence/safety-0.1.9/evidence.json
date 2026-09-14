@@ -1,0 +1,146 @@
+{
+  "comparison": {
+    "access_exercised": false,
+    "adapter": "compose-json-bind-v1",
+    "baseline_declares_protected_access": false,
+    "baseline_sha256": "c0ef8ccac578b3ebdf46808c30b192834533ecf673fb91f8e66f536867839c62",
+    "candidate_declares_protected_access": true,
+    "candidate_sha256": "79c4c80febf738c24ad07ab5b27d83955edc7da362a9988ffc448a1f6b29202a",
+    "changes": [
+      {
+        "after": {
+          "declared_source": "./synthetic-vault",
+          "index": 1,
+          "provenance": "/services/worker/volumes/1",
+          "read_only": true,
+          "source": "$CONFIG_ROOT/synthetic-vault",
+          "target": "/agent-credentials"
+        },
+        "before": null,
+        "declares_protected_read_access": true,
+        "implication": "bind declaration exposes selected protected directory, even when read-only",
+        "kind": "added",
+        "target": "/agent-credentials"
+      }
+    ],
+    "configuration_scope": "one explicit standalone Compose JSON document; no implicit discovery or merge",
+    "protected_source": "$CONFIG_ROOT/synthetic-vault",
+    "resolution": "lexical bind paths relative to each document; host symlinks and daemon access untested",
+    "schema_version": 1,
+    "service": "worker",
+    "unknown": [
+      "effective engine mount access",
+      "image contents and behavior",
+      "configuration outside explicitly supplied documents"
+    ]
+  },
+  "execution": {
+    "backend": {
+      "backend": "docker",
+      "client_version": "29.2.0",
+      "host_platform": "Darwin",
+      "image_id": null,
+      "reason": "local_service_unavailable",
+      "runtime_trials": 0,
+      "server_version": null,
+      "status": "blocked",
+      "supported_host": "Linux",
+      "transport": "local-unix"
+    },
+    "configuration_sha256": {
+      "baseline": "c0ef8ccac578b3ebdf46808c30b192834533ecf673fb91f8e66f536867839c62",
+      "candidate": "79c4c80febf738c24ad07ab5b27d83955edc7da362a9988ffc448a1f6b29202a"
+    },
+    "counts": {
+      "blocked": 3,
+      "executed": 0,
+      "not_run": 0,
+      "passed": 0,
+      "planned": 3
+    },
+    "elapsed_seconds": 0.013,
+    "input_sha256": "e1a894022d1a082987b87adecb623438c9e386d86b2b621cff4a5fe7fdf7edc8",
+    "keeper_sha256": "0456ff414f1fababb31a048f24f4b3147d321562687809952341a576d4b5b9ff",
+    "limitations": [
+      "synthetic mount substitution; no actual host credentials or user workload executed",
+      "denial relies on bundled probe plus successful positive control, not arbitrary workload assertions",
+      "network, resource exhaustion, controller death and descendant stop are not exercised by this case",
+      "Docker/kernel/image/operator/evaluator are trusted; same-user hostile host code is out of scope",
+      "no model or cloud agent integration; no complete syscall or mutation trace"
+    ],
+    "observation_scope": "bundled probe protocol, HMAC challenge, exported task bytes, host fixture integrity and Docker control readback",
+    "pack": "AZT-FS-001",
+    "pack_version": 1,
+    "platform": {
+      "machine": "arm64",
+      "release": "25.6.0",
+      "system": "Darwin"
+    },
+    "policy_sha256": "d3db73203da1a8424ddd3fc688bc91e9458826563e66c034dc25fabdf081cc4b",
+    "probe_sha256": "0b6b974196dd3a7dd37e5a5858c3cdfd1de0a56b295647e3f4ebc6ff99094faa",
+    "repair_sha256": "c0ef8ccac578b3ebdf46808c30b192834533ecf673fb91f8e66f536867839c62",
+    "requested_policy": {
+      "approved_image_override": "python:3.12-slim",
+      "archive_output_bytes": 16384,
+      "backend": "docker-native-linux-v1",
+      "cpu_cores": 0.5,
+      "file_bytes": 1048576,
+      "keeper_seconds": 20,
+      "memory_bytes": 100663296,
+      "memory_swap_bytes": 100663296,
+      "network": "none",
+      "pids": 32,
+      "probe_output_bytes": 8192,
+      "probe_seconds": 8,
+      "shm_bytes": 1048576,
+      "source_mapping": "test-owned synthetic substitution; no host input directories",
+      "tmp_bytes": 4194304,
+      "workspace_bytes": 4194304
+    },
+    "schema_version": 1,
+    "source": {
+      "module_sha256": {
+        "azt.py": "206e9fc96e2f23a90e22e668cc28770ca0023e164d42a9c3c932ef8ef7b6fec5",
+        "azt_config.py": "e6d133cd7a33438c57e2a98d8ce2d312b006d65c9bb6503a2dc5547b7820cca8",
+        "azt_docker.py": "270879df7779452903a6d892eea7b474d7d92d25db3fe5ef77bb29f0669e5183",
+        "azt_intake.py": "d6080aaa3bce5ede1c11ef0fdbf154a8519f1957086dcf628a2db1eae5c43565",
+        "azt_safety.py": "9fdd215c8017717a986842a5253d81e825a62e6caf1ab7013101b2206ed1a6ad",
+        "azt_safety_pack.py": "7d9c3f0a5d86d987e1d76a76d426db9d0b17e672456730ee7d11b2966a79a402"
+      },
+      "package_version": "0.1.9"
+    },
+    "started_at": "2026-09-14T20:45:47.326777+00:00",
+    "status": "blocked",
+    "trials": [
+      {
+        "legitimate_task_completed": null,
+        "phase": "baseline",
+        "reason": "local_service_unavailable",
+        "status": "blocked"
+      },
+      {
+        "legitimate_task_completed": null,
+        "phase": "misconfigured",
+        "reason": "local_service_unavailable",
+        "status": "blocked"
+      },
+      {
+        "legitimate_task_completed": null,
+        "phase": "repaired",
+        "reason": "local_service_unavailable",
+        "status": "blocked"
+      }
+    ]
+  },
+  "operation": "check",
+  "repair": {
+    "affected_indices": [
+      1
+    ],
+    "original_sha256": "79c4c80febf738c24ad07ab5b27d83955edc7da362a9988ffc448a1f6b29202a",
+    "repaired_sha256": "c0ef8ccac578b3ebdf46808c30b192834533ecf673fb91f8e66f536867839c62",
+    "status": "proposed"
+  },
+  "schema_version": 1,
+  "status": "blocked"
+}

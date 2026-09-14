@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "AZT project-owned intake benchmark evidence v1",
+  "type": "object",
+  "required": ["schema", "version", "source_manifest", "artifact", "platform", "backend", "effective_policy", "counts", "elapsed_seconds", "cases", "not_run", "limitations"],
+  "properties": {
+    "schema": {"const": "azt.containmentbench.v1"},
+    "version": {"type": "string"},
+    "source_manifest": {"type": "object", "additionalProperties": {"type": "string", "pattern": "^[a-f0-9]{64}$"}},
+    "artifact": {"type": ["object", "null"]}, "platform": {"type": "object"},
+    "backend": {"type": "object", "required": ["name", "version", "runtime_trials"], "properties": {"runtime_trials": {"const": 0}}},
+    "effective_policy": {"type": "object"},
+    "counts": {"type": "object", "required": ["passed", "failed", "executed", "runtime_scenarios_not_run"],
+      "additionalProperties": {"type": "integer", "minimum": 0}},
+    "elapsed_seconds": {"type": "number", "minimum": 0},
+    "cases": {"type": "array", "items": {"type": "object", "required": ["name", "status", "workload_claim", "azt_observed", "evaluator_verified"],
+      "properties": {"status": {"enum": ["passed", "failed"]}, "evaluator_verified": {"type": "object"}}}},
+    "not_run": {"type": "array", "items": {"type": "string"}},
+    "limitations": {"type": "array", "items": {"type": "string"}}
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/ralfyishere/agent-zero-trust/schemas/policy-v1.schema.json",
+  "title": "AZT operator policy v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "exceptions", "exclusions"],
+  "properties": {
+    "schema_version": {"const": 1},
+    "exceptions": {"type": "array", "maxItems": 1000, "items": {
+      "type": "object", "additionalProperties": false,
+      "required": ["path", "rule", "sha256", "reason"],
+      "properties": {
+        "path": {"$ref": "#/$defs/path"},
+        "rule": {"type": "string", "pattern": "^[a-z_]+[.][a-z_]+$"},
+        "sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+        "reason": {"$ref": "#/$defs/reason"}
+      }
+    }},
+    "exclusions": {"type": "array", "maxItems": 1000, "items": {
+      "type": "object", "additionalProperties": false, "required": ["path", "reason"],
+      "properties": {"path": {"$ref": "#/$defs/path"}, "reason": {"$ref": "#/$defs/reason"}}
+    }}
+  },
+  "$defs": {
+    "path": {"type": "string", "minLength": 1, "maxLength": 512,
+      "description": "Exact relative POSIX path; runtime additionally rejects dot components, glob characters, backslashes, colons and non-ASCII/control characters."},
+    "reason": {"type": "string", "minLength": 1, "maxLength": 512, "pattern": "\\S"}
+  }
+}

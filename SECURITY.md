@@ -1,42 +1,76 @@
 # Security
 
-## The tool's own posture
+## Experimental safety pack
 
-- Deterministic, offline, no model calls. Nothing in the core interprets
-  prompts, so nothing in it can be prompt-injected (the bootstrap-paradox
-  argument is in [docs/threat-model.md](threat-model.md)).
-- It reads files. It never executes repo content.
-- Gate mode is a speed bump, not a sandbox: it enforces "a scan happened,"
-  not "the agent is contained."
+AZT-FS-001's static adapter and repair logic are offline-tested. Its Docker
+orchestration is implemented but real container integration remains unverified.
+Do not use it as proof of protection for real credentials or agents. Only
+synthetic resources and bundled reviewed code execute. See the
+[pack boundaries and TCB](packs/AZT-FS-001/v1/README.md). Configuration readback
+is not a test of every kernel boundary; no model, network or descendant-stop
+outcome is claimed. Review proposals before sharing: operator-selected inputs
+can contain private paths or labels.
+
+## Scanner boundary
+
+AZT inspects repository content without executing it or calling a model.
+Its security-sensitive components are the filesystem reader, configuration
+validation, exception policy and optional admission receipt lifecycle.
+A passing scan means no active known-shape finding met the selected threshold
+within the declared scope. It does not mean the repository is safe.
+
+## Trust boundary
+
+The target's `.azt-ignore` has no suppression authority. Explicit operator
+policy must be outside the workspace. Exceptions require an exact rule, path,
+file digest and reason; suppressed findings remain in the report.
+
+The optional gate verifies HMAC-authenticated snapshot receipts in a private
+external state directory. It rejects legacy workspace markers and changed,
+expired, future-dated or mismatched evidence. HMAC authenticity depends on
+protecting its key. Same-user hostile code can read that key, alter policy or
+disable the hook. No filesystem location alone fixes that authority problem.
+
+Generated hook failures map to exit 2; gate checking has a 10-second inspection
+deadline inside the generated 30-second hook timeout. The local lifecycle is
+tested, but complete behavior inside a coding-agent application has
+not been tested. User-level configuration, disabled hooks, uncovered tools and
+already-running processes remain outside this workflow gate.
+
+There is no AZT runtime isolation boundary in this release candidate.
+See [threat model](docs/threat-model.md), [runtime status](docs/runtime.md)
+and [coverage](COVERAGE.md).
 
 ## Reporting
 
-- **Non-sensitive** (a bypass, a false positive): open an issue. Templates
-  guide you through what we need.
-- **Sensitive** (a shape you believe is being exploited in the wild): use
-  GitHub's private vulnerability reporting on this repo.
+Use a public issue for a synthetic bypass, false positive or documentation error
+that does not expose sensitive information. Include a minimal fixture,
+`azt --version`, the exact command, expected outcome and actual output.
+Do not include working credentials, private repository content or customer data.
 
-## Bypasses are the contribution we want most
+For sensitive reports, use GitHub's private vulnerability reporting if enabled
+on this repository. If it is unavailable, open a public issue requesting a
+private reporting channel without disclosing the exploit or affected parties.
+Do not assume a private channel is enabled merely because this document mentions it.
 
-Craft repo content that *should* be flagged and isn't, and report it. Each
-confirmed bypass becomes one of two things, publicly and credited:
+Confirmed limitations should become either a failing regression with a fix or
+a clearly labeled entry in the known-miss ledger. Reporters and contributors
+are credited with their consent; do not disclose private identities by default.
 
-- a new rule, with a fixture that trips it, or
-- a documented entry in [COVERAGE.md](../COVERAGE.md)'s known-misses ledger.
+## Security correction in 0.1.8 (unreleased)
 
-Both improve the ledger. Only silence doesn't.
+Earlier documentation described the legacy pass marker as signed or content-bound.
+That description was incorrect: the implementation accepted plain JSON with
+`"verdict": "pass"` and used file age. Broadening a hook's tool matcher did
+not authenticate the marker. Do not rely on the old disclosure entries as proof
+that hostile-process forgery was fixed.
 
-## Disclosure log
+This candidate replaces that mechanism with authenticated snapshot receipts,
+removes target-controlled suppression, and makes relevant incomplete inspection
+a non-success result. It does not claim to contain an already-running hostile
+program. [Migration instructions](docs/migration.md) describe the breaking changes.
 
-- **v0.1.1 — gate bypass fixed.** The intake hook originally matched only
-  Bash, so an agent's file-write tools could forge the pass marker. Found in
-  our own first live-session test; fixed the same day (broadened matcher plus
-  a signed marker). Logged here because a gate that quietly patches its
-  bypasses is not a gate you should trust.
-
-## What a clean scan means
-
-"No known-shape red flags found." Never "safe." Pattern matching cannot catch
-cleverly worded natural-language manipulation — we ship working examples of
-exactly that in `corpus/misses/`. The instruction-environment inventory the
-scan prints is arguably its most important output; read it.
+The default report omits raw file excerpts and arbitrary configuration commands.
+Paths and operator-authored reasons can still be sensitive; review exported
+reports before sharing them. State directories contain the issuer key:
+never publish, upload or commit them. See [evidence format and retention](docs/evidence.md).

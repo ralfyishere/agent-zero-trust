@@ -1,0 +1,21 @@
+{
+  "artifact": "agent_zero_trust-0.1.9-py3-none-any.whl",
+  "artifact_sha256": "b05e73b67c09b43f9091797c91a58dabaaf778bf11b16b911aa484964c1ec40c",
+  "command": "python scripts/test_safety_integration.py --wheel <candidate.whl> --output <new-private-directory> --docker-host <local-unix-endpoint> --image <approved-preloaded-image>",
+  "elapsed_seconds_including_install": 1.82,
+  "exit_code": 2,
+  "integration_script_sha256": "ac44a06e46269aa6c312e0918286df9e765ade32f8004b280387bb65f1825bec",
+  "limitations": "Project-owned evaluator, not a third-party audit. No model calls. Blocked is not runtime denial.",
+  "pack": "AZT-FS-001",
+  "pack_version": 1,
+  "package_version": "0.1.9",
+  "result": "blocked",
+  "runtime_counts": {
+    "blocked": 3,
+    "executed": 0,
+    "not_run": 0,
+    "passed": 0,
+    "planned": 3
+  },
+  "schema_version": 1
+}

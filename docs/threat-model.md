@@ -1,79 +1,106 @@
 # Threat model
 
-## The premise
+AZT's current purpose is repository intake before a developer gives a coding
+agent access to unfamiliar content. Its output supports review; it does not
+turn that repository into a safe execution environment.
 
-An AI coding agent reads files and follows instructions with tool access. To
-such an agent, a repository is not data — it is an **instruction
-environment**: every Markdown file, agent config, hook definition, MCP server
-entry, lifecycle script, and CI workflow is potentially executable influence.
-Cloning an unknown repo and starting an agent in it is running untrusted code
-with your credentials.
+An attacker may control repository files, configuration, names, symlinks,
+ignore requests and instructions. The attacker may attempt to conceal findings,
+supply malformed inputs, forge admission state or change the tree after a scan.
+The scanner treats that content as data and does not execute repository setup
+scripts, hooks or fixture commands.
 
-## Attacker stories (in scope)
+## Trusted components and authority
 
-1. **The malicious repo you clone.** A plausible-looking project whose
-   TROUBLESHOOTING.md, CONTRIBUTING.md, or hidden HTML comments instruct the
-   agent to fetch-and-execute, exfiltrate environment data, or conceal
-   activity from the user. Documented in the wild (HTML-comment injection,
-   "helpful diagnostic command" lures).
-2. **The malicious contribution into a repo you trust.** A PR or dependency
-   adds an instruction file, an MCP server, a postinstall script, a
-   pull_request_target workflow, or a devcontainer command that activates the
-   next time an agent (or CI) touches the repo.
-3. **The compromised instruction file.** A previously benign CLAUDE.md /
-   .cursor/rules / skill / hook edited to add an always-run directive or an
-   exfiltration step — small diffs in files humans rarely re-read.
+For static intake, the operator, Python runtime, AZT installation and host
+filesystem/kernel are trusted. The operator chooses the root, threshold and
+any explicit external policy. A command-line flag is not evidence of a human
+approval: an already-running agent can invoke the same command.
 
-## What azt does about them
+Target `.azt-ignore` content is visible as a request and has no suppression
+authority. Trusted exceptions must name an exact rule, canonical relative path,
+reviewed content hash and reason. They cannot use wildcards. Explicit exclusions
+remove exact paths from scope and remain visible. Built-in dependency/VCS/build
+exclusions are also part of the declared scope.
 
-- **Inventory** the full instruction environment (14+ file classes) so nothing
-  influences an agent invisibly.
-- **Flag known shapes**: pipe-to-shell, encoded execution, reverse shells,
-  DNS-TXT command retrieval, exfiltration pipes, credential reads,
-  instruction overrides, concealment directives, agent-directed imperatives
-  in human docs, hidden unicode, HTML-comment imperatives, auto-exec configs
-  (MCP servers, folderOpen tasks, .envrc, lifecycle scripts, hooks,
-  pull_request_target checkouts), token shapes, private keys, symlink escapes.
-- **Gate, optionally**: `azt install-hook` blocks an agent's mutating tools
-  (Bash/Write/Edit/NotebookEdit) in a workspace until `azt scan --gate` has
-  passed, so intake cannot be forgotten. This is a speed bump, not a sandbox:
-  it enforces "a scan happened," not "the agent is contained." It reduces the
-  chance of skipping intake; it does not confine an agent that is already
-  running, and its own v0.1.0 bypass is in the disclosure log (SECURITY.md).
+Policy is required to reside outside the workspace and meet file ownership,
+link and write-permission checks. These checks reject several accidental or
+target-file substitutions. They do not isolate policy from arbitrary code
+running as the same operator. Do not pass authority through repository text.
 
-## Design commitments
+## What intake establishes
 
-- **The core is deterministic and offline — never an agent, never a model
-  call.** There is a bootstrap paradox in LLM-based screening: content being
-  judged can inject the judge. A security scanner vulnerable to the attack it
-  screens is worse than none, because it manufactures false confidence. azt's
-  core cannot be prompt-injected because nothing in it interprets prompts.
-- **Findings are evidence, not verdicts.** Every finding carries the rule id,
-  file, line, and excerpt so a human can check the claim in seconds.
-- **False positives are treated as bugs** (rule-scoped, path-scoped
-  `.azt-ignore`; a benign-repo regression fixture in CI).
+The report records a bounded inventory, pattern and selected configuration
+analyses, a content manifest, policy provenance and incomplete-inspection reasons.
+Complete means complete within that declared scope, not complete understanding
+of repository intent. Unsupported content can be hashed without being analyzed.
 
-## Explicit non-goals (out of scope)
+Regular inputs are opened relative to directory descriptors without following
+symlinks. Special files are rejected; byte, entry, depth, line and finding limits
+bound work. Files changed during reads are reported. Admission repeats the scan
+and compares reports before issuing evidence.
 
-- **Semantic judgment of natural language.** Pure social engineering with no
-  trigger shapes will pass the scan. This is a hard limit of pattern
-  matching, we publish the misses (corpus/misses/, COVERAGE.md), and the
-  trust verdict says so on every clean scan.
-- **Secrets scanning depth.** We flag token *shapes* we meet along the way;
-  run a dedicated tool (gitleaks, trufflehog) for real secrets coverage.
-- **Your agent's own tool stack.** MCP servers configured on YOUR machine,
-  marketplace skills, and agent app configs are [Snyk agent-scan /
-  mcp-scan](https://github.com/invariantlabs-ai/mcp-scan)'s territory; azt
-  scans the REPO you're about to enter. Run both — they compose.
-- **Runtime behavior monitoring.** azt is static intake. What the agent does
-  after admission is the discipline layer's job
-  ([rules-with-receipts](https://github.com/ralfyishere/rules-with-receipts)).
-- **Sandboxing / policy enforcement frameworks.** See Microsoft's
-  agent-governance-toolkit for that layer.
+These measures do not create an atomic filesystem snapshot. A hostile writer
+can race checks, and files may change immediately afterward. Intake should run
+on a quiescent tree. Nothing prevents later code from reading a secret, opening
+a socket, modifying a file or creating descendants.
 
-## Residual risk after a clean scan
+Raw excerpts and arbitrary config commands are omitted from findings. Reports
+still contain paths and operator-supplied reasons; protect exports accordingly.
 
-Real and stated on every run: novel shapes, natural-language manipulation,
-instructions split across files, content fetched at runtime, and anything in
-files over 1 MB or binary formats. A clean scan buys you an inventory and the
-absence of known shapes — nothing more. Read the instruction environment.
+## Four different receipt properties
+
+| Property | Current mechanism and assumption |
+| --- | --- |
+| Content binding | SHA-256 manifest plus workspace identity, scope, scanner source/version, policy and threshold bindings |
+| Authenticated issuance | HMAC-SHA256 over the receipt using a random private issuer key |
+| Freshness | Authenticated issue/expiry times checked against the trusted host clock; maximum lifetime 24 hours |
+| Authority isolation | Not established against same-user hostile code; external private state is a workflow safeguard |
+
+The HMAC key and receipts reside in an operator-owned mode-0700 directory
+outside the workspace; private state files require mode 0600. A hash alone
+is not a signature. HMAC verifies possession of the secret key; it is not
+publicly verifiable signing or independent human authorization.
+
+The host clock is trusted. Receipt deletion, replacement by an actor with the
+key, host compromise and post-check changes are outside the authenticity claim.
+This is not an append-only audit log and does not establish event completeness.
+
+## Optional hook and edit lifecycle
+
+The hook calls the local scanner to compare the current tree against the
+admitted snapshot. The generated configuration covers Bash, Write, Edit and
+NotebookEdit. Local installation and command behavior are tested; live coding-agent
+application integration is not verified. The hook cannot constrain tools outside
+its matcher, external processes or an application that does not honor it.
+
+Install and admit from an operator terminal before starting the agent.
+An ordinary in-scope edit invalidates the receipt. Review the changed tree and
+re-admit from that terminal using the same state directory, policy and threshold.
+A receipt describes an admitted snapshot; it does not approve all future changes.
+
+The generated command maps failures to the blocking exit code and gives gate
+inspection a shorter deadline than its configured hook timeout. Other user-level
+settings can disable hooks; the current installer rejects known project/local
+`disableAllHooks` settings but cannot establish the application's entire effective
+configuration. Same-user code can change the hook, policy or key.
+
+Legacy plain-JSON pass markers are rejected. Earlier claims of a signed legacy
+marker were incorrect; [SECURITY.md](../SECURITY.md) records the correction.
+
+## Outside current claims
+
+Natural-language manipulation, split instructions, unknown patterns, dynamically
+fetched content and unsupported-format semantics remain limitations. AZT does
+not solve prompt injection, alignment or general agent safety. It does not replace
+a dedicated secrets scanner or inspect all installed agent tools.
+
+No runtime launcher is implemented. Network denial, filesystem isolation,
+resource limits, descendant shutdown, credential brokering and cross-session
+isolation are not delivered protections. [Runtime design and acceptance](runtime.md)
+names the additional trusted kernel/backend/supervisor components and tests
+required before making those claims.
+
+Related projects have separate roles: rules-with-receipts addresses operating
+discipline, rulebench behavioral testing, and agent-failure-modes failure taxonomy.
+Rules or semantic judgments must never become the root of execution authority.

@@ -3,3 +3,4 @@ build/
 __pycache__/
 *.egg-info/
 .claude/.azt-intake-pass
+.azt-local/

@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "AZT review-only bind repair v1; semantic verification must regenerate the proposal",
+  "type": "object",
+  "required": ["schema_version", "adapter", "service", "protected_source", "original_sha256", "baseline_sha256", "repaired_sha256", "repaired_content", "affected_indices", "status", "diff", "authority"],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {"const": 1},
+    "adapter": {"const": "compose-json-bind-v1"},
+    "service": {"type": "string"},
+    "protected_source": {"type": "string"},
+    "original_sha256": {"$ref": "#/$defs/hash"},
+    "baseline_sha256": {"$ref": "#/$defs/hash"},
+    "repaired_sha256": {"$ref": "#/$defs/hash"},
+    "repaired_content": {"type": "string", "maxLength": 65536},
+    "affected_indices": {"type": "array", "maxItems": 32, "items": {"type": "integer", "minimum": 0, "maximum": 31}},
+    "status": {"enum": ["proposed", "no_change"]},
+    "diff": {"type": "string", "maxLength": 262144},
+    "authority": {"type": "string"}
+  },
+  "$defs": {"hash": {"type": "string", "pattern": "^[0-9a-f]{64}$"}}
+}
