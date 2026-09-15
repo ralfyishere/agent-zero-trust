@@ -1,0 +1,233 @@
+{
+  "kind": "historical interpretations; raw sources preserved unchanged",
+  "records": [
+    {
+      "run_url": "https://github.com/ralfyishere/agent-zero-trust/actions/runs/34910385576",
+      "source_record_sha256": "7f01e5d7573995367d478fbf135bb973503daa4420557f91be4c7c7146005494",
+      "kind": "selected historical interpretation; not a rewritten raw export",
+      "source_sha": "684f0f3cfd898b959530ee6b4ff99430c2ab1576",
+      "conclusion": "failure",
+      "classification": "workflow validation rejected before job allocation",
+      "phases": [
+        {
+          "name": "baseline",
+          "workload_executed": false,
+          "protected_access": null,
+          "legitimate_task_completed": null,
+          "status": "not_run"
+        },
+        {
+          "name": "misconfigured",
+          "workload_executed": false,
+          "protected_access": null,
+          "legitimate_task_completed": null,
+          "status": "not_run"
+        },
+        {
+          "name": "repaired",
+          "workload_executed": false,
+          "protected_access": null,
+          "legitimate_task_completed": null,
+          "status": "not_run"
+        }
+      ],
+      "cleanup": {
+        "status": "not_run",
+        "reason": "No runner job or test container started"
+      },
+      "annotation": "(Line: 30, Col: 20): Unrecognized named-value: 'runner'. Located at position 1 within expression: runner.temp, (Line: 31, Col: 17): Unrecognized named-value: 'runner'. Located at position 1 within expression: runner.temp, (Line: 32, Col: 25): Unrecognized named-value: 'runner'. Located at position 1 within expression: runner.temp"
+    },
+    {
+      "run_url": "https://github.com/ralfyishere/agent-zero-trust/actions/runs/34911273066",
+      "source_record_sha256": "5dca7e7e92a427aa0d7fa38ab0a51e25e9205d4fc8363897d405b5d515e4b2bc",
+      "kind": "selected historical interpretation; not a rewritten raw export",
+      "source_sha": "ce15f7acba7cb831005ffae3dfe9c47f21b6941e",
+      "wheel_sha256": "c92cb79c3c637c1deb4e053807a022611c2e3b4ff84da6238f567cc4faf6ced4",
+      "image_id": "sha256:ec7d6c95cd3692a2e2d228a8b1ca74e4025b54121fcc4c5da6f09cfa473315ad",
+      "original_v1_counts": {
+        "blocked": 0,
+        "executed": 0,
+        "not_run": 0,
+        "passed": 0,
+        "planned": 3
+      },
+      "original_preflight_runtime_trials": 0,
+      "cleanup": {
+        "removed_names": [],
+        "status": "verified_absent"
+      },
+      "phases": [
+        {
+          "phase": "baseline",
+          "workload_claim": {
+            "challenge": "ab923900743e5a9a1e2bffd865bf9a1e083954778122b6da14a948ee79909d9a",
+            "errno": 2,
+            "probe_executed": true,
+            "read": "unavailable",
+            "task_exit": 0,
+            "task_stdout": "5 0\n",
+            "uid": 65532
+          },
+          "independent_checks": {
+            "access_expectation_met": false,
+            "challenge_response_verified": false,
+            "expected_access": false,
+            "legitimate_task_completed": false,
+            "original_project_unchanged": true,
+            "passed": false,
+            "positive_control_confirmed": false,
+            "probe_protocol_completed": true,
+            "protected_resource_exists_and_unchanged": true
+          },
+          "cleanup": "removed"
+        },
+        {
+          "phase": "misconfigured",
+          "workload_claim": {
+            "challenge": "ab923900743e5a9a1e2bffd865bf9a1e083954778122b6da14a948ee79909d9a",
+            "probe_executed": true,
+            "read": "obtained",
+            "response": "20aa37ac93f6838c39e4bbbfde7a2626bb0ce40c83f2dd36a013e089b13a3299",
+            "task_exit": 0,
+            "task_stdout": "5 0\n",
+            "uid": 65532
+          },
+          "independent_checks": {
+            "access_expectation_met": true,
+            "challenge_response_verified": true,
+            "expected_access": true,
+            "legitimate_task_completed": false,
+            "original_project_unchanged": true,
+            "passed": false,
+            "positive_control_confirmed": false,
+            "probe_protocol_completed": true,
+            "protected_resource_exists_and_unchanged": true
+          },
+          "cleanup": "removed"
+        },
+        {
+          "phase": "repaired",
+          "workload_claim": {
+            "challenge": "ab923900743e5a9a1e2bffd865bf9a1e083954778122b6da14a948ee79909d9a",
+            "errno": 2,
+            "probe_executed": true,
+            "read": "unavailable",
+            "task_exit": 0,
+            "task_stdout": "5 0\n",
+            "uid": 65532
+          },
+          "independent_checks": {
+            "access_expectation_met": false,
+            "challenge_response_verified": false,
+            "expected_access": false,
+            "legitimate_task_completed": false,
+            "original_project_unchanged": true,
+            "passed": false,
+            "positive_control_confirmed": false,
+            "probe_protocol_completed": true,
+            "protected_resource_exists_and_unchanged": true
+          },
+          "cleanup": "removed"
+        }
+      ],
+      "interpretation": "Three completed probes; zero full phase passes. Collection or archive validation failed; exact exception was not captured. HMAC exposure remains verified, but no full legitimate task or denial pass credited.",
+      "counter_warning": "v1 executed counted completed collection, not probe execution; preflight runtime_trials=0 describes no trial during preflight, not the later run. No failed-phase aggregate existed. Do not interpret old counters using v2 semantics."
+    },
+    {
+      "run_url": "https://github.com/ralfyishere/agent-zero-trust/actions/runs/34912218459",
+      "source_record_sha256": "1ec0d4dc6d05405601ad67d2ca5bef7d9216b7a3a05ff2a5768c3790a33d7c66",
+      "kind": "selected historical interpretation; not a rewritten raw export",
+      "source_sha": "6d1bc83e99856cab3fcfb3ee1578ddf0ee1e97bc",
+      "wheel_sha256": "ca9985ac1eae2851b4017e614702ecdff6fc4d71a59e1632b4fd53e786fd5754",
+      "image_id": "sha256:ec7d6c95cd3692a2e2d228a8b1ca74e4025b54121fcc4c5da6f09cfa473315ad",
+      "original_v1_counts": {
+        "blocked": 0,
+        "executed": 3,
+        "not_run": 0,
+        "passed": 3,
+        "planned": 3
+      },
+      "original_preflight_runtime_trials": 0,
+      "cleanup": {
+        "removed_names": [],
+        "status": "verified_absent"
+      },
+      "phases": [
+        {
+          "phase": "baseline",
+          "workload_claim": {
+            "challenge": "0908f746a39854a39f5df784064c9f52fe949bac68e659006f019eb3b3b2c1c0",
+            "errno": 2,
+            "probe_executed": true,
+            "read": "unavailable",
+            "task_exit": 0,
+            "task_stdout": "5 0\n",
+            "uid": 65532
+          },
+          "independent_checks": {
+            "access_expectation_met": true,
+            "challenge_response_verified": false,
+            "expected_access": false,
+            "legitimate_task_completed": true,
+            "original_project_unchanged": true,
+            "passed": true,
+            "positive_control_confirmed": true,
+            "probe_protocol_completed": true,
+            "protected_resource_exists_and_unchanged": true
+          },
+          "cleanup": "removed"
+        },
+        {
+          "phase": "misconfigured",
+          "workload_claim": {
+            "challenge": "0908f746a39854a39f5df784064c9f52fe949bac68e659006f019eb3b3b2c1c0",
+            "probe_executed": true,
+            "read": "obtained",
+            "response": "8472863532097b9805b5777a56648dc3123449bc662c8563cb789ee2d2edd636",
+            "task_exit": 0,
+            "task_stdout": "5 0\n",
+            "uid": 65532
+          },
+          "independent_checks": {
+            "access_expectation_met": true,
+            "challenge_response_verified": true,
+            "expected_access": true,
+            "legitimate_task_completed": true,
+            "original_project_unchanged": true,
+            "passed": true,
+            "positive_control_confirmed": true,
+            "probe_protocol_completed": true,
+            "protected_resource_exists_and_unchanged": true
+          },
+          "cleanup": "removed"
+        },
+        {
+          "phase": "repaired",
+          "workload_claim": {
+            "challenge": "0908f746a39854a39f5df784064c9f52fe949bac68e659006f019eb3b3b2c1c0",
+            "errno": 2,
+            "probe_executed": true,
+            "read": "unavailable",
+            "task_exit": 0,
+            "task_stdout": "5 0\n",
+            "uid": 65532
+          },
+          "independent_checks": {
+            "access_expectation_met": true,
+            "challenge_response_verified": false,
+            "expected_access": false,
+            "legitimate_task_completed": true,
+            "original_project_unchanged": true,
+            "passed": true,
+            "positive_control_confirmed": true,
+            "probe_protocol_completed": true,
+            "protected_resource_exists_and_unchanged": true
+          },
+          "cleanup": "removed"
+        }
+      ],
+      "interpretation": "Three completed probes, exports, strict archive validations, exact edited-file/legitimate-task checks and full phase passes. Stage details inferred from successful controller path at the named source, not separately emitted v2 events.",
+      "counter_warning": "v1 executed counted completed collection, not probe execution; preflight runtime_trials=0 describes no trial during preflight, not the later run. No failed-phase aggregate existed. Do not interpret old counters using v2 semantics."
+    }
+  ]
+}

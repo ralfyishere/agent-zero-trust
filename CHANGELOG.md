@@ -24,6 +24,12 @@ See the evidence index and release review for the exact verified candidate and
 remaining limitations. Static comparison needs no gate or execution backend.
 No release has been published.
 
+Final experimental verification: code `94a802bbe8b54e86b730203051b9abc162cf0da8`,
+[run 34915008373](https://github.com/ralfyishere/agent-zero-trust/actions/runs/34915008373).
+Canonical and frozen variant each passed all three phases, including legitimate
+task, original integrity and cleanup. The later evidence/documentation commit
+does not identify a newly tested artifact. See [exact records](evidence/fs001-0.1.9/README.md).
+
 ## 0.1.8 — unreleased scanner-hardening candidate
 
 - Target `.azt-ignore` no longer suppresses findings. External operator

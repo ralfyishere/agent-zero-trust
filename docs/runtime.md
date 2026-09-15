@@ -9,7 +9,7 @@ it shares version 0.1.9. Follow the [clean reproduction](reproduce-fs001.md).
 | --- | --- | --- |
 | Strict Compose JSON mount comparison and narrow digest-bound repair | Implemented, offline-tested | Adapter, CLI and installed-artifact tests |
 | Canonical synthetic read / repair / legitimate coding task | Implemented, execution-tested | Baseline unavailable, intentional exposure verified, repaired unavailable; exact result bytes, original integrity and cleanup |
-| Frozen nested-source configuration variant | Implemented; consult exact run index for verification | Another input to FS-001, not another pack |
+| Frozen nested-source configuration variant | Implemented, execution-tested | Three completed phases in the final run; another input to FS-001, not another pack |
 | Bounded I/O, archive validation and failure reporting | Implemented, unit-tested and exercised by canonical export | Failure injection is not a kernel isolation trial |
 | Network, descendants, controller death, exhaustion, cross-session tests | Not tested | Control readback is not an exercised denial |
 | Real coding-agent/cloud integration | Unsupported | No model calls, broker or provider credentials |

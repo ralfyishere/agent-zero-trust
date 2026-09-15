@@ -2,6 +2,16 @@
 
 ## Experimental filesystem regression
 
+**Final candidate:** code `94a802bbe8b54e86b730203051b9abc162cf0da8`,
+[run 34915008373](https://github.com/ralfyishere/agent-zero-trust/actions/runs/34915008373),
+canonical **3/3** and nested-source variant **3/3** complete phases passed.
+Read the [results, artifacts and limitations](fs001-0.1.9/README.md) and
+[sanitized machine-readable record](fs001-0.1.9/34915008373.json).
+Progress stages overlap; six stages per phase are not six independent successes.
+This index was added in a later evidence/documentation-only commit, not another
+runtime verification. [Historical interpretations](fs001-0.1.9/history.json)
+are labeled derivatives, not edits to old raw exports.
+
 Canonical AZT-FS-001 passed baseline / deliberate exposure / repaired checks
 at source `6d1bc83e99856cab3fcfb3ee1578ddf0ee1e97bc` in
 [run 34912218459](https://github.com/ralfyishere/agent-zero-trust/actions/runs/34912218459).
@@ -18,8 +28,8 @@ and had no fully passed phases. Its old `executed=0` meant no completed result
 collections, not no probes. Raw historical records are not rewritten.
 
 See [reproduction](../docs/reproduce-fs001.md), [reporting semantics](../docs/safety-reporting-v2.md)
-and the frozen [variant](../packs/AZT-FS-001/v1/variant/README.md). A final
-candidate record will identify its own code/artifact/run, separate from these
+and the frozen [variant](../packs/AZT-FS-001/v1/variant/README.md). The final
+candidate record above identifies its own code/artifact/run, separate from these
 historical results. No intake count below is runtime evidence.
 
 ## Historical scanner-hardening record

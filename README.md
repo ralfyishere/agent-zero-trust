@@ -22,6 +22,13 @@ path has a real, bounded three-phase Docker/Linux result. It does not run your
 repository's commands or a live coding agent: it substitutes synthetic resources
 and executes a bundled trusted probe. See the [evidence index](evidence/README.md).
 
+For a developer reviewing an unfamiliar agent-execution configuration, AZT
+makes selected filesystem-access changes easier to check by comparing mounts,
+proposing a narrow repair and retesting it with synthetic resources—work they
+would otherwise assemble manually across configuration diffs, Docker commands
+and result checks. The canonical and nested-source inputs both completed the
+three-phase experiment at the [verified code revision](evidence/fs001-0.1.9/README.md).
+
 ## Try it without installing
 
 From this checkout:
@@ -45,22 +52,19 @@ It uses temporary synthetic inputs and reports intake/admission outcomes
 separately from runtime cases that have not been run. This project benchmark
 is not a certification or a model safety score. See [evidence](docs/evidence.md).
 
-To install the candidate checkout in an isolated Python environment:
+To install the candidate, first build the trusted clean checkout using the
+[explicit build prerequisites](docs/reproduce-fs001.md), then install offline:
 
 ```sh
 python3 -m venv .venv
-.venv/bin/python -m pip install .
+.venv/bin/python -m pip install --no-index --no-deps dist/agent_zero_trust-0.1.9-py3-none-any.whl
 .venv/bin/azt scan /path/to/unfamiliar-repo --json
 ```
 
-Installation may need network access or cached build dependencies. Scanning
-does not. Build and install AZT's trusted checkout; never install the repository
+Build preparation may need the explicitly listed downloads. Scanning and wheel
+installation do not. Build and install AZT's trusted checkout; never install the repository
 you are inspecting merely to scan it. The published PyPI package can lag this
 unreleased checkout.
-
-With an already-built local wheel, installation also works offline:
-`.venv/bin/python -m pip install --no-index --no-deps dist/agent_zero_trust-0.1.9-py3-none-any.whl`.
-See [packaging instructions](CONTRIBUTING.md) to create that wheel.
 
 ## Read the result
 
