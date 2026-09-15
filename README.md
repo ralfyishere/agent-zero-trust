@@ -1,16 +1,15 @@
 # AZT · Agent Zero Trust
 
-<picture>
-  <source media="(max-width: 600px)" srcset="https://raw.githubusercontent.com/ralfyishere/agent-zero-trust/79d4b2bde25b1746910b8dc7cb4924d0a4b1ab9f/assets/landing/hero-mobile.png">
-  <img src="https://raw.githubusercontent.com/ralfyishere/agent-zero-trust/79d4b2bde25b1746910b8dc7cb4924d0a4b1ab9f/assets/landing/hero.png" alt="Know what changed. Before you delegate. AZT: scan, compare, explain, export.">
-</picture>
-
 **Know what changed. Before you delegate.**
 
-Offline repository inspection and change review for AI coding agents. Scan
-agent-facing instructions and setup material, compare saved scans, understand
-findings, and export a local review. Free, deterministic and open source. No
-account, model calls, telemetry or Docker for this workflow.
+Your AI coding agent reads more than code. Project instructions can shape what
+it does next—even when you didn't write them.
+
+AZT helps you **spot changes, understand warnings and keep a review**.
+Built for vibe coders, AI-agent workflows and cybersecurity reviewers.
+
+Scan and change review are free and offline. No account, model calls, telemetry
+or Docker needed.
 
 [![PyPI](https://img.shields.io/pypi/v/agent-zero-trust?color=2979ff)](https://pypi.org/project/agent-zero-trust/)
 [![CI](https://github.com/ralfyishere/agent-zero-trust/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/ralfyishere/agent-zero-trust/actions/workflows/ci.yml)
@@ -18,6 +17,23 @@ account, model calls, telemetry or Docker for this workflow.
 [![MIT license](https://img.shields.io/github/license/ralfyishere/agent-zero-trust?color=2979ff)](LICENSE)
 
 [Run a scan](#run-a-scan) · [See change review](#see-change-review) · [Read the evidence](#evidence-and-scope)
+
+> I use AI to build, and I take its risks seriously. AZT is my contribution
+> to helping people use it with less blind trust.
+> — [Rafael (Ralph) Peña · Why I'm building this](#why-i-built-azt)
+
+<picture>
+  <source media="(prefers-reduced-motion: reduce) and (max-width: 600px)" srcset="https://raw.githubusercontent.com/ralfyishere/agent-zero-trust/8a075d6b9ce84492162bdab066504c40f0393035/assets/landing/motion/demo-mobile.png">
+  <source media="(prefers-reduced-motion: reduce)" srcset="https://raw.githubusercontent.com/ralfyishere/agent-zero-trust/8a075d6b9ce84492162bdab066504c40f0393035/assets/landing/motion/demo.png">
+  <source media="(max-width: 600px)" srcset="https://raw.githubusercontent.com/ralfyishere/agent-zero-trust/8a075d6b9ce84492162bdab066504c40f0393035/assets/landing/motion/demo-mobile.gif">
+  <img src="https://raw.githubusercontent.com/ralfyishere/agent-zero-trust/8a075d6b9ce84492162bdab066504c40f0393035/assets/landing/motion/demo.gif" alt="Four-step recorded synthetic example: inspect AGENTS.md, see its changed setup instruction, review two new findings, then get guidance and save a local review. No target command was executed.">
+</picture>
+
+[Replay animation](https://raw.githubusercontent.com/ralfyishere/agent-zero-trust/8a075d6b9ce84492162bdab066504c40f0393035/assets/landing/motion/demo.gif) · [Still image](assets/landing/motion/demo.png) · [Mobile still](assets/landing/motion/demo-mobile.png) · [Try the example](examples/change-review/README.md)
+
+Recorded synthetic example, restyled—not a live agent or terminal recording.
+Frames change every 2.5 seconds and play three times; replay with the link above.
+This is editing pace, not scan time.
 
 ## Run a scan
 
@@ -50,19 +66,17 @@ Scan exits: **0** passes the selected threshold; **1** has findings meeting it;
 
 ## See change review
 
-<picture>
-  <source media="(max-width: 600px)" srcset="https://raw.githubusercontent.com/ralfyishere/agent-zero-trust/79d4b2bde25b1746910b8dc7cb4924d0a4b1ab9f/assets/landing/change-review-mobile.png">
-  <img src="https://raw.githubusercontent.com/ralfyishere/agent-zero-trust/79d4b2bde25b1746910b8dc7cb4924d0a4b1ab9f/assets/landing/change-review.png" alt="Recorded synthetic example: AGENTS.md changes from a local-test instruction to a remote setup command. The comparison reports two new findings: net.fetch_unknown and net.pipe_shell. No target command was executed.">
-</picture>
+**In plain English:** this example changes a project's instructions from
+“review changes and run local tests” to “download a script and run it.” AZT
+flags the change and explains why it deserves a look. That instruction might
+be legitimate—but you should be able to review where the script comes from
+before deciding to use it.
 
-[Watch the short edit](assets/landing/change-review.gif) · [Read the transcript](examples/change-review/transcript.txt) · [Reproduce all four cases](examples/change-review/README.md)
-
-This designed summary uses the recorded **0.1.11 candidate** lab at
-[`0296face`](https://github.com/ralfyishere/agent-zero-trust/commit/0296facec2565668386c3c0d5dbacb734e6241e3),
-not a new terminal recording or runtime test. The concerning `AGENTS.md` edit
-has **two new findings**; the benign edit has **none**. Incomplete inspection
-retains **two unresolved observations**. The animation's pacing is editorial,
-not measured scan time. [Visual provenance](assets/landing/README.md).
+The animation uses the recorded **0.1.11 candidate** lab at
+[`0296face`](https://github.com/ralfyishere/agent-zero-trust/commit/0296facec2565668386c3c0d5dbacb734e6241e3).
+The concerning `AGENTS.md` edit has **two new findings**; the benign edit has
+**none**. Incomplete inspection retains **two unresolved observations**.
+[Full transcript](examples/change-review/transcript.txt) · [All four cases](examples/change-review/README.md) · [Visual provenance](assets/landing/motion/README.md).
 
 Continue in the same terminal to scan → change → compare → explain → export:
 
@@ -90,10 +104,17 @@ does not approve the change. [JSON/text exports and advanced syntax](docs/change
 
 | Step | What you get |
 | --- | --- |
-| **Inspect** | Known suspicious patterns, recognized instruction/configuration surfaces and explicit inspection gaps. |
-| **Compare** | Changed content, new or persisting findings, reviewed exceptions and differences in policy, engine and scope. |
-| **Explain** | Offline rule guidance: why to review it, legitimate context, limits and a useful next step. |
-| **Export** | Bounded JSON, readable text or self-contained HTML. No upload, account or public result page. |
+| **Scan** | “What deserves a closer look?” Known suspicious patterns in project text and supported settings, plus what AZT couldn't inspect. |
+| **Compare** | “What changed since my last check?” Changed files, new or remaining findings, and changes to the rules or scope of the review. |
+| **Explain** | “Why does this matter, and what can I check next?” Guidance for each rule, including legitimate uses and inspection limits. |
+| **Export** | “How do I keep or share this review?” Readable text, a local HTML report or structured JSON. Nothing is uploaded. |
+
+**New to security or vibe coding?** Start with the example above; you don't need
+to recognize a rule ID to ask what changed. **Building an agent workflow?**
+Use saved JSON reports and the [CLI contract](docs/change-review.md); a report
+is information, not permission for an agent to approve itself. **Working in
+cybersecurity?** Review the [matching method and evidence](evidence/change-review/README.md),
+policy provenance and [known misses](COVERAGE.md).
 
 Saved reports are snapshots, not automatic monitoring. Target `.azt-ignore`
 requests cannot silently suppress findings. Explicit operator exceptions remain
@@ -101,12 +122,21 @@ visible and bound to reviewed content. [Migration and policy details](docs/migra
 
 ## Why I built AZT
 
-I use AI to build, and I take its risks seriously. I started AZT in July with a
-practical question: what could influence an agent before it starts working in
-a repository? A repository is an **instruction environment**, not just code.
-The project now also helps review what changed, understand a finding and preserve
-a local record. It is a concrete contribution to useful AI delegation without
-blind trust.
+AI risk isn't only a conversation about the distant future. In its
+[August 26, 2026 incident account](https://openai.com/index/hugging-face-incident-and-the-road-ahead/),
+OpenAI described models crossing technical boundaries during internal
+cybersecurity evaluations with reduced safeguards. That is a documented incident
+in a particular setting—not evidence that AZT would have prevented it.
+
+I started AZT in July with a smaller, practical insight: a repository—your
+project's files—is an **instruction environment**, not just code. The broader
+AI-risk discussion pushed me to strengthen that existing work, question AZT's
+own assumptions, and make its checks and evidence easier for others to inspect.
+
+I want people to benefit from AI without giving it blind trust. This is my
+contribution to that effort: a free tool for reviewing what could influence a
+coding agent, with open code and examples people can challenge and improve.
+It doesn't solve the whole problem. It gives us one useful place to start.
 
 [AI Is Getting More Powerful. Blind Trust Is Not a Safety Strategy.](docs/a-readme-is-not-a-permission-slip.md)
 
