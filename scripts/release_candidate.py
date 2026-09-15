@@ -18,6 +18,8 @@ import time
 ROOT = Path(__file__).resolve().parent.parent
 TOOLS = {"setuptools": "83.0.0", "wheel": "0.47.0", "packaging": "26.0"}
 TESTS = ("scanner", "unit", "installed-artifacts")
+BUILD_PROGRAM = ("import sys,setuptools.build_meta as b; destination=sys.argv[1]; "
+                 "b.build_wheel(destination); b.build_sdist(destination)")
 
 
 def digest(path):
@@ -90,8 +92,7 @@ def build_candidate(output, event="local", expected="", tag=""):
     output.mkdir(mode=0o700)
     dist = output / "dist"
     dist.mkdir()
-    build = execute("build-once", [sys.executable, "-c",
-        "import sys,setuptools.build_meta as b; b.build_wheel(sys.argv[1]); b.build_sdist(sys.argv[1])", str(dist)], output)
+    build = execute("build-once", [sys.executable, "-c", BUILD_PROGRAM, str(dist)], output)
     before = distributions(dist, source["version"])
     commands = ([sys.executable, "test_azt.py"],
                 [sys.executable, "-m", "unittest", "discover", "-s", "tests", "-v"],

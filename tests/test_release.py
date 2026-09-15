@@ -7,6 +7,7 @@ from pathlib import Path
 import subprocess
 import sys
 import tempfile
+import types
 import unittest
 from unittest.mock import patch
 
@@ -136,6 +137,21 @@ class ReleaseTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "failed"):
             release.execute("negative-control", [sys.executable, "-c", "raise SystemExit(7)"], self.root)
         self.assertFalse((self.root / "release-manifest.json").exists())
+
+    def test_build_backend_argv_mutation_cannot_retarget_sdist(self):
+        backend = types.ModuleType("setuptools.build_meta")
+        parent = types.ModuleType("setuptools")
+        parent.build_meta = backend
+        destinations = []
+        def wheel(destination):
+            destinations.append(destination)
+            sys.argv = ["backend", "bdist_wheel", "--dist-dir", "backend-temporary"]
+        backend.build_wheel = wheel
+        backend.build_sdist = destinations.append
+        with patch.dict(sys.modules, {"setuptools": parent, "setuptools.build_meta": backend}), \
+                patch.object(sys, "argv", ["-c", str(self.dist)]):
+            exec(release.BUILD_PROGRAM, {})  # Fixed bundled build program, not repository input.
+        self.assertEqual([str(self.dist), str(self.dist)], destinations)
 
     def test_artifact_inventory_rejects_extra_files_and_empty_bytes(self):
         (self.dist / self.names[0]).write_bytes(b"")
