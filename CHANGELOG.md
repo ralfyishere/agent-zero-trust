@@ -1,5 +1,26 @@
 # Release notes
 
+## 0.1.11: unreleased change-review candidate
+
+- Compare saved scans with `azt changes`: content and recognized surface changes,
+  finding multiplicity, visible exceptions, target requests and provenance/scope
+  differences. Unreadable or contradictory observations remain unresolved.
+- Add bounded scan-v1 adapter and versioned review/change/guidance schemas.
+  New scans record engine/rule identity and explicit approved exception hashes;
+  supported older scan-v1 reports remain readable with missing-provenance cautions.
+- Add offline `azt explain` guidance for every emitted rule and create-only local
+  JSON/text/HTML exports. Raw excerpts and source descriptions are omitted.
+- Correct the special-file inventory label: zero recognized special surfaces
+  does not mean zero inspected files or zero possible influence.
+- Add a frozen four-case lab and saved-report evaluation, installed wheel/sdist
+  checks, safe-output tests and version-neutral publication instructions.
+- No rule detections, FS-001 adapter/probe/expectations, license, dependencies or
+  telemetry added/changed. Engine identity changes require explicit re-admission
+  if using the optional strict snapshot gate. No new runtime trial is claimed.
+
+See [change-review semantics](docs/change-review.md), [migration](docs/migration.md)
+and [the reproducible lab](examples/change-review/README.md). Publication is separate.
+
 ## 0.1.10: presentation and metadata maintenance
 
 - Refresh installation, migration, coverage and release-status documentation.

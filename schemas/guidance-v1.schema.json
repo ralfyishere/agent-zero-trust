@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "Structural contract; azt_review additionally enforces byte/depth/node/path bounds, canonical manifest digest, dispositions, decisions and exception binding. No authentication. No remote references are resolved by AZT.",
+  "type": "object",
+  "required": [
+    "schema",
+    "rule",
+    "meaning",
+    "why_review",
+    "context_example",
+    "limits",
+    "next_step"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "schema": {
+      "const": "azt.guidance.v1"
+    },
+    "rule": {
+      "type": "string",
+      "minLength": 1
+    },
+    "meaning": {
+      "type": "string",
+      "minLength": 1
+    },
+    "why_review": {
+      "type": "string",
+      "minLength": 1
+    },
+    "context_example": {
+      "type": "string",
+      "minLength": 1
+    },
+    "limits": {
+      "type": "string",
+      "minLength": 1
+    },
+    "next_step": {
+      "type": "string",
+      "minLength": 1
+    }
+  }
+}

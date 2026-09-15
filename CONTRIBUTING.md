@@ -68,6 +68,13 @@ Do not add a blanket exception to make CI green.
 
 ## Changes we can review
 
+For saved-scan review, run the [change-review lab](examples/change-review/README.md)
+and `python3 -m unittest discover -s tests -p test_review.py -v`.
+The frozen case list lives beside the lab; change expectations explicitly before
+measuring. Keep incomplete/ambiguous observations visible and include benign
+controls. [Three small contributor issue drafts](docs/change-review-contributions.md)
+have tests and definitions of done; no extra public issues are required.
+
 For a detection change, include a malicious fixture that triggers the rule
 and a benign case that should remain clean. Explain the format and scope the
 rule covers. Prefer an actual evasion or configuration edge case to a string

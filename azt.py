@@ -34,7 +34,7 @@ from pathlib import Path
 import azt_intake
 import azt_gate
 
-__version__ = "0.1.10"
+__version__ = "0.1.11"
 
 SEV_ORDER = {"HIGH": 0, "MEDIUM": 1, "INFO": 2}
 
@@ -305,6 +305,8 @@ STRUCTURAL = [
 
 def scan_report(root, policy=None, fail_on="high"):
     report = azt_intake.inspect(root, sys.modules[__name__], policy)
+    import azt_review
+    report["engine"] = azt_review.engine_identity(sys.modules[__name__])
     threshold = {"high": 0, "medium": 1, "any": 2}[fail_on]
     failed = any(SEV_ORDER[f["severity"]] <= threshold for f in report["findings"])
     report["threshold"] = fail_on
@@ -323,7 +325,8 @@ def scan_repo(root):
 
 def print_report(root, inventory, findings):
     print("agent-zero-trust — repo intake scan of %s\n" % azt_intake.safe_label(root))
-    print("INSTRUCTION ENVIRONMENT: %d file(s) can influence an agent here" % len(inventory))
+    print("RECOGNIZED SPECIAL SURFACES: %d file(s) match inventory patterns" % len(inventory))
+    print("Other inspected content, including README files, can also influence an agent.")
     by_class = {}
     for h in inventory:
         by_class.setdefault(h["class"], []).append(h["path"])
@@ -545,7 +548,11 @@ def main(argv=None):
     doctor.add_argument("--json", action="store_true")
     import azt_safety
     azt_safety.add_parser(sub)
+    import azt_review
+    azt_review.add_parsers(sub)
     args = ap.parse_args(argv)
+    if args.cmd in ("changes", "explain", "report"):
+        return azt_review.command(args)
     if args.cmd == "safety":
         return azt_safety.command(args)
     if args.cmd == "scan":

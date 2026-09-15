@@ -1,0 +1,197 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "Structural contract; azt_review additionally enforces byte/depth/node/path bounds, canonical manifest digest, dispositions, decisions and exception binding. No authentication. No remote references are resolved by AZT.",
+  "type": "object",
+  "required": [
+    "schema",
+    "source_report_sha256",
+    "scan",
+    "guidance",
+    "notice",
+    "redaction"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "schema": {
+      "const": "azt.review.v1"
+    },
+    "source_report_sha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "scan": {
+      "$ref": "#/$defs/scan"
+    },
+    "guidance": {
+      "type": "object"
+    },
+    "notice": {
+      "type": "string"
+    },
+    "redaction": {
+      "type": "string"
+    }
+  },
+  "$defs": {
+    "scan": {
+      "title": "AZT complete scan report v1 (errors use error-v1)",
+      "type": "object",
+      "required": [
+        "schema_version",
+        "version",
+        "decision",
+        "threshold",
+        "input_digest",
+        "manifest",
+        "policy",
+        "scope",
+        "inventory",
+        "findings",
+        "suppressed_findings",
+        "target_requests"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": 1
+        },
+        "version": {
+          "type": "string"
+        },
+        "decision": {
+          "enum": [
+            "pass",
+            "deny",
+            "incomplete"
+          ]
+        },
+        "threshold": {
+          "enum": [
+            "high",
+            "medium",
+            "any"
+          ]
+        },
+        "input_digest": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "manifest": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "path",
+              "kind"
+            ],
+            "properties": {
+              "path": {
+                "type": "string"
+              },
+              "kind": {
+                "enum": [
+                  "file",
+                  "directory",
+                  "symlink",
+                  "excluded"
+                ]
+              },
+              "sha256": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              },
+              "executable": {
+                "type": "boolean"
+              },
+              "target_digest": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              }
+            }
+          }
+        },
+        "scope": {
+          "type": "object",
+          "required": [
+            "complete",
+            "inspected",
+            "skipped",
+            "errors",
+            "limits",
+            "bytes_read"
+          ],
+          "properties": {
+            "complete": {
+              "type": "boolean"
+            },
+            "inspected": {
+              "type": "array"
+            },
+            "skipped": {
+              "type": "array"
+            },
+            "errors": {
+              "type": "array"
+            },
+            "limits": {
+              "type": "object"
+            },
+            "bytes_read": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        },
+        "policy": {
+          "type": "object",
+          "required": [
+            "source",
+            "digest"
+          ],
+          "properties": {
+            "source": {
+              "type": "string"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          }
+        },
+        "inventory": {
+          "type": "array"
+        },
+        "findings": {
+          "type": "array"
+        },
+        "suppressed_findings": {
+          "type": "array"
+        },
+        "target_requests": {
+          "type": "array"
+        },
+        "engine": {
+          "type": "object",
+          "required": [
+            "version",
+            "implementation_sha256",
+            "text_rules_sha256"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "version": {
+              "type": "string"
+            },
+            "implementation_sha256": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            },
+            "text_rules_sha256": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          }
+        }
+      }
+    }
+  }
+}

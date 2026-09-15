@@ -5,6 +5,11 @@
   "required": ["schema_version", "version", "decision", "threshold", "input_digest", "manifest", "policy", "scope", "inventory", "findings", "suppressed_findings", "target_requests"],
   "properties": {
     "schema_version": {"const": 1}, "version": {"type": "string"},
+    "engine": {"type": "object", "required": ["version", "implementation_sha256", "text_rules_sha256"], "additionalProperties": false, "properties": {
+      "version": {"type": "string"},
+      "implementation_sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+      "text_rules_sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"}
+    }},
     "decision": {"enum": ["pass", "deny", "incomplete"]},
     "threshold": {"enum": ["high", "medium", "any"]},
     "input_digest": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
