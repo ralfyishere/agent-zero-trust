@@ -247,10 +247,10 @@ class SafetyTests(unittest.TestCase):
 
             def command(*args, **kwargs):
                 calls.append(args)
+                if "/usr/bin/tar" in args:
+                    return 0, b"not a tar archive", b""
                 if args[0] == "exec":
                     return 0, b'{"read":"unavailable"}', b""
-                if args[0] == "cp":
-                    return 0, b"not a tar archive", b""
                 if args[0] == "rm" and cleanup_fails:
                     raise azt_docker.ExecutionFailed("synthetic cleanup failure")
                 return 0, b"", b""
@@ -259,9 +259,74 @@ class SafetyTests(unittest.TestCase):
                 record = docker.trial("test-owned", "image", self.root / "probe", self.root / "project",
                                       [], "challenge", "/selected/canary.bin")
             self.assertEqual("failed", record["status"])
+            self.assertEqual("result_archive_validation", record["error_stage"])
             self.assertEqual("failed" if cleanup_fails else "removed", record["cleanup"])
             self.assertIn(("rm", "--force", "test-owned"), calls)
             self.assertNotIn("result_bytes", record)
+
+    def test_mocked_result_export_uses_unprivileged_exec_not_tmpfs_cp(self):
+        with patch("azt_docker.docker_binary", return_value=None):
+            docker = azt_docker.Docker("unix:///unused.sock", self.root)
+        expected, challenge, _ = self.record(True)
+        calls = []
+        def command(*args, **kwargs):
+            calls.append((args, kwargs))
+            if "/usr/bin/tar" in args:
+                self.assertEqual(("exec", "--user", "65532:65532", "test-owned", "/usr/bin/env", "-i",
+                    "PATH=/usr/local/bin:/usr/bin:/bin", "/usr/bin/tar", "--format=ustar", "-C",
+                    "/workspace", "-cf", "-", "--", "task.py"), args)
+                self.assertEqual({"timeout": 4, "limit": 16384}, kwargs)
+                return 0, self.archive(data=AFTER.encode()), b""
+            if args[0] == "exec":
+                return 0, json.dumps(expected["workload_claim"]).encode(), b""
+            self.assertNotEqual("cp", args[0])
+            return 0, b"", b""
+        with patch.object(docker, "command", side_effect=command), patch.object(docker, "inspect_controls", return_value={}):
+            result = docker.trial("test-owned", "image", self.root, self.root, [], challenge, "/selected/canary.bin")
+        self.assertEqual("executed", result["status"])
+        self.assertEqual(AFTER.encode(), result["result_bytes"])
+        self.assertEqual("removed", result["cleanup"])
+        self.assertEqual(2, sum(args[0] == "exec" for args, _ in calls))
+
+    def test_mocked_export_failure_preserves_claim_and_stage_without_raw_error(self):
+        with patch("azt_docker.docker_binary", return_value=None):
+            docker = azt_docker.Docker("unix:///unused.sock", self.root)
+        def command(*args, **kwargs):
+            if "/usr/bin/tar" in args:
+                raise azt_docker.ExecutionFailed("synthetic-private-path-or-secret")
+            return (0, b'{"probe_executed":true}', b"") if args[0] == "exec" else (0, b"", b"")
+        with patch.object(docker, "command", side_effect=command), patch.object(docker, "inspect_controls", return_value={}):
+            result = docker.trial("test-owned", "image", self.root, self.root, [], "challenge", "/selected/canary.bin")
+        self.assertEqual("result_export", result["error_stage"])
+        self.assertTrue(result["workload_claim"]["probe_executed"])
+        self.assertEqual("failed", result["status"])
+        self.assertEqual("removed", result["cleanup"])
+        self.assertNotIn("synthetic-private", json.dumps(result))
+
+    def test_local_tar_stream_compatibility_and_unsafe_members_not_containment(self):
+        # Real local tar on test-owned files; NOT Docker/tmpfs execution evidence.
+        task = self.root / "task.py"
+        cases = ("regular", "symlink", "fifo", "oversized")
+        for kind in cases:
+            if kind == "regular":
+                task.write_bytes(AFTER.encode())
+            elif kind == "symlink":
+                task.symlink_to(self.root / "absent")
+            elif kind == "fifo":
+                os.mkfifo(task)
+            else:
+                task.write_bytes(b"x" * 4097)
+            try:
+                code, out, _ = azt_docker.bounded_command(["/usr/bin/tar", "--format=ustar", "-C",
+                    str(self.root), "-cf", "-", "--", "task.py"], timeout=4, limit=16384)
+                self.assertEqual(0, code)
+                if kind == "regular":
+                    self.assertEqual(AFTER.encode(), azt_docker.result_from_tar(out))
+                else:
+                    with self.assertRaises(azt_docker.ExecutionFailed):
+                        azt_docker.result_from_tar(out)
+            finally:
+                task.unlink()
 
     def test_cli_repeated_static_compare_and_missing_endpoint_are_machine_readable(self):
         baseline, candidate, _, _ = self.configs()

@@ -221,26 +221,39 @@ class Docker:
     def trial(self, name, image_id, pack_dir, project_dir, mounts, challenge, probe_path):
         created = False
         record = {"session_id": name, "status": "failed", "workload_claim": None, "cleanup": "not_started"}
+        stage = "create"
         try:
             # Name is evaluator-generated, so removal after a timed-out create is
             # confined to this unique test session even if creation did succeed.
             created = True
             self.command(*self.create_args(name, image_id, pack_dir, project_dir, mounts))
+            stage = "control_readback"
             record["controls"] = self.inspect_controls(name, [(pack_dir, "/azt-pack"), (project_dir, "/input")]
                                                        + [(s, t) for s, t, _ in mounts])
+            stage = "start"
             self.command("start", name)
+            stage = "probe_exec"
             _, stdout, _ = self.command("exec", "--user", "65532:65532", name,
                                        "/usr/bin/env", "-i", "PATH=/usr/local/bin:/usr/bin:/bin",
                                        "/usr/local/bin/python3", "-I", "/azt-pack/workload.py",
                                        challenge, probe_path, timeout=8, limit=8192)
+            stage = "probe_decode"
             record["workload_claim"] = json.loads(stdout)
-            # Copy the bounded result while the tmpfs is mounted. Never extract
-            # an archive into the host filesystem or follow a workload symlink.
-            _, archived, _ = self.command("cp", name + ":/workspace/task.py", "-", timeout=4, limit=16384)
+            # Docker cp cannot reliably read tmpfs. Use the documented exec/tar
+            # route with fixed arguments, the same unprivileged UID, no shell,
+            # and the existing strict archive validator/output/deadline limits.
+            # https://docs.docker.com/reference/cli/docker/container/cp/#corner-cases
+            stage = "result_export"
+            _, archived, _ = self.command("exec", "--user", "65532:65532", name,
+                "/usr/bin/env", "-i", "PATH=/usr/local/bin:/usr/bin:/bin",
+                "/usr/bin/tar", "--format=ustar", "-C", "/workspace", "-cf", "-", "--", "task.py",
+                timeout=4, limit=16384)
+            stage = "result_archive_validation"
             record["result_bytes"] = result_from_tar(archived)
             record["status"] = "executed"
         except (OSError, ValueError, KeyError, subprocess.SubprocessError, IntakeError, tarfile.TarError):
             record["error"] = "trial failed before independent verification; no denial credited"
+            record["error_stage"] = stage  # Fixed category only; never raw paths, output or secrets.
         finally:
             if created:
                 try:
