@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "AZT complete scan report v1 (errors use error-v1)",
+  "type": "object",
+  "required": ["schema_version", "version", "decision", "threshold", "input_digest", "manifest", "policy", "scope", "inventory", "findings", "suppressed_findings", "target_requests"],
+  "properties": {
+    "schema_version": {"const": 1}, "version": {"type": "string"},
+    "decision": {"enum": ["pass", "deny", "incomplete"]},
+    "threshold": {"enum": ["high", "medium", "any"]},
+    "input_digest": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "manifest": {"type": "array", "items": {"type": "object", "required": ["path", "kind"], "properties": {
+      "path": {"type": "string"}, "kind": {"enum": ["file", "directory", "symlink", "excluded"]},
+      "sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"}, "executable": {"type": "boolean"},
+      "target_digest": {"type": "string", "pattern": "^[a-f0-9]{64}$"}
+    }}},
+    "scope": {"type": "object", "required": ["complete", "inspected", "skipped", "errors", "limits", "bytes_read"], "properties": {
+      "complete": {"type": "boolean"}, "inspected": {"type": "array"}, "skipped": {"type": "array"},
+      "errors": {"type": "array"}, "limits": {"type": "object"}, "bytes_read": {"type": "integer", "minimum": 0}
+    }},
+    "policy": {"type": "object", "required": ["source", "digest"], "properties": {
+      "source": {"type": "string"}, "digest": {"type": "string", "pattern": "^[a-f0-9]{64}$"}
+    }},
+    "inventory": {"type": "array"}, "findings": {"type": "array"},
+    "suppressed_findings": {"type": "array"}, "target_requests": {"type": "array"},
+    "admission": {"$ref": "receipt-v1.schema.json"}
+  }
+}

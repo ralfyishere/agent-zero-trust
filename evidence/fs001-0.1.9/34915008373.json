@@ -1,0 +1,918 @@
+{
+  "provenance": {
+    "kind": "selected sanitized public derivative; not byte-identical to private raw export",
+    "run_url": "https://github.com/ralfyishere/agent-zero-trust/actions/runs/34915008373",
+    "job_id": 104210644902,
+    "conclusion": "success",
+    "raw_export_sha256": "60a4afe4b78ba6284b2e2f302de9dd5654606ea2ffe029d4947a034a3d750569",
+    "sanitized_log_sha256": "1da181749469b05c2b80ca314b3455ce0f4feb0da626d3808c9dc08b0e41d7e7",
+    "selection": "CI-selected synthetic evidence/artifact/controller records only. No logs, capsules, auth files, raw proposals or canary values. Hosted paths replaced by placeholders by exporter. JSON reformatted and provenance added here.",
+    "code_commit": "94a802bbe8b54e86b730203051b9abc162cf0da8",
+    "publication": "Later documentation/evidence-only commit; not a new tested wheel or runtime candidate."
+  },
+  "local_review": {
+    "schema": "safety-evidence-v2",
+    "schema_validation": "passed",
+    "source_module_and_case_digest_crosscheck": "passed",
+    "counts_and_positive_controls": "passed",
+    "scope": "Project-owned external evaluator plus maintainer consistency checks, not a third-party audit."
+  },
+  "export": {
+    "cleanup": {
+      "removed_names": [],
+      "status": "verified_absent"
+    },
+    "records": {
+      "canonical/artifact.json": {
+        "artifact": "agent_zero_trust-0.1.9-py3-none-any.whl",
+        "artifact_sha256": "7ad73af671236610662ba3940170d3987db48fbd8c4a269aa8b8d384a6762aae",
+        "case": "canonical",
+        "command": "python scripts/test_safety_integration.py --case canonical --wheel <candidate.whl> --output <new-private-directory> --docker-host <local-unix-endpoint> --image <approved-preloaded-image>",
+        "configuration_sha256": {
+          "baseline": "c0ef8ccac578b3ebdf46808c30b192834533ecf673fb91f8e66f536867839c62",
+          "candidate": "79c4c80febf738c24ad07ab5b27d83955edc7da362a9988ffc448a1f6b29202a"
+        },
+        "elapsed_seconds_including_install": 5.753,
+        "exit_code": 0,
+        "integration_script_sha256": "93d7ca9fa80eae7ef0aa66f678210481ffc93433d94a671f18c06421e0b711ef",
+        "limitations": "Project-owned evaluator, not a third-party audit. No model calls. Blocked is not runtime denial.",
+        "pack": "AZT-FS-001",
+        "pack_version": 1,
+        "package_version": "0.1.9",
+        "protected_source": "./synthetic-vault",
+        "result": "passed",
+        "runtime_counts": {
+          "outcomes": {
+            "blocked": 0,
+            "failed": 0,
+            "not_run": 0,
+            "passed": 3,
+            "unknown": 0
+          },
+          "planned": 3,
+          "stages": {
+            "archive_validated": 3,
+            "container_started": 3,
+            "probe_protocol_completed": 3,
+            "probe_returned": 3,
+            "result_exported": 3,
+            "verification_completed": 3
+          }
+        },
+        "schema_version": 2
+      },
+      "canonical/evidence.json": {
+        "comparison": {
+          "access_exercised": false,
+          "adapter": "compose-json-bind-v1",
+          "baseline_declares_protected_access": false,
+          "baseline_sha256": "c0ef8ccac578b3ebdf46808c30b192834533ecf673fb91f8e66f536867839c62",
+          "candidate_declares_protected_access": true,
+          "candidate_sha256": "79c4c80febf738c24ad07ab5b27d83955edc7da362a9988ffc448a1f6b29202a",
+          "changes": [
+            {
+              "after": {
+                "declared_source": "./synthetic-vault",
+                "index": 1,
+                "provenance": "/services/worker/volumes/1",
+                "read_only": true,
+                "source": "$CONFIG_ROOT/synthetic-vault",
+                "target": "/agent-credentials"
+              },
+              "before": null,
+              "declares_protected_read_access": true,
+              "implication": "bind declaration exposes selected protected directory, even when read-only",
+              "kind": "added",
+              "target": "/agent-credentials"
+            }
+          ],
+          "configuration_scope": "one explicit standalone Compose JSON document; no implicit discovery or merge",
+          "protected_source": "$CONFIG_ROOT/synthetic-vault",
+          "resolution": "lexical bind paths relative to each document; host symlinks and daemon access untested",
+          "schema_version": 1,
+          "service": "worker",
+          "unknown": [
+            "effective engine mount access",
+            "image contents and behavior",
+            "configuration outside explicitly supplied documents"
+          ]
+        },
+        "execution": {
+          "backend": {
+            "backend": "docker",
+            "cgroup_version": "2",
+            "client_version": "28.0.4",
+            "host_platform": "Linux",
+            "image_id": "sha256:ec7d6c95cd3692a2e2d228a8b1ca74e4025b54121fcc4c5da6f09cfa473315ad",
+            "image_repo_digests": [
+              "python@sha256:78387bc3881b8273120a12ebe6c1ab22b018ccc2c9adf565ae1ac9b536e184ea"
+            ],
+            "observation_scope": "prerequisites only; no workload launched",
+            "reason": null,
+            "security_options": [
+              "name=seccomp,profile=builtin"
+            ],
+            "server_version": "28.0.4",
+            "status": "available",
+            "supported_host": "Linux",
+            "transport": "local-unix"
+          },
+          "configuration_sha256": {
+            "baseline": "c0ef8ccac578b3ebdf46808c30b192834533ecf673fb91f8e66f536867839c62",
+            "candidate": "79c4c80febf738c24ad07ab5b27d83955edc7da362a9988ffc448a1f6b29202a"
+          },
+          "counts": {
+            "outcomes": {
+              "blocked": 0,
+              "failed": 0,
+              "not_run": 0,
+              "passed": 3,
+              "unknown": 0
+            },
+            "planned": 3,
+            "stages": {
+              "archive_validated": 3,
+              "container_started": 3,
+              "probe_protocol_completed": 3,
+              "probe_returned": 3,
+              "result_exported": 3,
+              "verification_completed": 3
+            }
+          },
+          "elapsed_seconds": 2.626,
+          "input_sha256": "e1a894022d1a082987b87adecb623438c9e386d86b2b621cff4a5fe7fdf7edc8",
+          "keeper_sha256": "0456ff414f1fababb31a048f24f4b3147d321562687809952341a576d4b5b9ff",
+          "limitations": [
+            "synthetic mount substitution; no actual host credentials or user workload executed",
+            "denial relies on bundled probe plus successful positive control, not arbitrary workload assertions",
+            "network, resource exhaustion, controller death and descendant stop are not exercised by this case",
+            "Docker/kernel/image/operator/evaluator are trusted; same-user hostile host code is out of scope",
+            "no model or cloud agent integration; no complete syscall or mutation trace"
+          ],
+          "observation_scope": "bundled probe protocol, HMAC challenge, exported task bytes, host fixture integrity and Docker control readback",
+          "pack": "AZT-FS-001",
+          "pack_version": 1,
+          "platform": {
+            "machine": "x86_64",
+            "release": "6.17.0-1022-azure",
+            "system": "Linux"
+          },
+          "policy_sha256": "760c6484d5a595143c8f055a1aabe348935c50778ebd8a0687c8d1e3dbc36701",
+          "probe_sha256": "0b6b974196dd3a7dd37e5a5858c3cdfd1de0a56b295647e3f4ebc6ff99094faa",
+          "repair_sha256": "c0ef8ccac578b3ebdf46808c30b192834533ecf673fb91f8e66f536867839c62",
+          "requested_policy": {
+            "approved_image_override": "sha256:ec7d6c95cd3692a2e2d228a8b1ca74e4025b54121fcc4c5da6f09cfa473315ad",
+            "archive_output_bytes": 16384,
+            "backend": "docker-native-linux-v1",
+            "cpu_cores": 0.5,
+            "file_bytes": 1048576,
+            "keeper_seconds": 20,
+            "memory_bytes": 100663296,
+            "memory_swap_bytes": 100663296,
+            "network": "none",
+            "pids": 32,
+            "probe_output_bytes": 8192,
+            "probe_seconds": 8,
+            "shm_bytes": 1048576,
+            "source_mapping": "test-owned synthetic substitution; no host input directories",
+            "tmp_bytes": 4194304,
+            "workspace_bytes": 4194304
+          },
+          "schema_version": 2,
+          "source": {
+            "module_sha256": {
+              "azt.py": "206e9fc96e2f23a90e22e668cc28770ca0023e164d42a9c3c932ef8ef7b6fec5",
+              "azt_config.py": "e6d133cd7a33438c57e2a98d8ce2d312b006d65c9bb6503a2dc5547b7820cca8",
+              "azt_docker.py": "d7cfb54b7cbeee428cda55900289af5e1e5f973b5fe30e1fc3c9110f54e14db5",
+              "azt_intake.py": "d6080aaa3bce5ede1c11ef0fdbf154a8519f1957086dcf628a2db1eae5c43565",
+              "azt_safety.py": "6e9d80c78a6085c4daf3b552a363548878f01d47f546a8ff09bb627df4bf982e",
+              "azt_safety_pack.py": "7d9c3f0a5d86d987e1d76a76d426db9d0b17e672456730ee7d11b2966a79a402"
+            },
+            "package_version": "0.1.9"
+          },
+          "started_at": "2026-09-15T00:53:56.705951+00:00",
+          "status": "passed",
+          "synthetic_inputs": {
+            "canary_bytes": 32,
+            "canary_value_exported": false,
+            "challenge": "f857d59c875dfe257421d091082cbf5975eff43686d2df0362c671f414488d44",
+            "probe_target": "/agent-credentials/canary.bin",
+            "project": "task.py"
+          },
+          "trials": [
+            {
+              "cleanup": "removed",
+              "controls": {
+                "all_capabilities_dropped": true,
+                "configured_and_read_back": {
+                  "CgroupnsMode": "private",
+                  "Init": true,
+                  "IpcMode": "private",
+                  "Memory": 100663296,
+                  "MemorySwap": 100663296,
+                  "NanoCpus": 500000000,
+                  "NetworkMode": "none",
+                  "PidsLimit": 32,
+                  "Privileged": false,
+                  "ReadonlyRootfs": true,
+                  "ShmSize": 1048576
+                },
+                "deadline_seconds": 20,
+                "host_mounts": "synthetic read-only inputs only",
+                "no_new_privileges": true,
+                "scope": "Docker configuration readback; only selected file read is exercised",
+                "writable_storage": {
+                  "shm_bytes": 1048576,
+                  "tmp_bytes": 4194304,
+                  "workspace_bytes": 4194304
+                }
+              },
+              "independent_checks": {
+                "access_expectation_met": true,
+                "challenge_response_verified": false,
+                "edited_file_matches": true,
+                "expected_access": false,
+                "legitimate_task_completed": true,
+                "original_project_unchanged": true,
+                "passed": true,
+                "positive_control_confirmed": true,
+                "probe_protocol_completed": true,
+                "protected_resource_exists_and_unchanged": true
+              },
+              "phase": "baseline",
+              "session_id": "azt-fs001-2b104ef778d40c6d2b5c69c4",
+              "stages": {
+                "archive_validated": true,
+                "container_started": true,
+                "probe_protocol_completed": true,
+                "probe_returned": true,
+                "result_exported": true,
+                "verification_completed": true
+              },
+              "status": "passed",
+              "workload_claim": {
+                "challenge": "f857d59c875dfe257421d091082cbf5975eff43686d2df0362c671f414488d44",
+                "errno": 2,
+                "probe_executed": true,
+                "read": "unavailable",
+                "task_exit": 0,
+                "task_stdout": "5 0\n",
+                "uid": 65532
+              }
+            },
+            {
+              "cleanup": "removed",
+              "controls": {
+                "all_capabilities_dropped": true,
+                "configured_and_read_back": {
+                  "CgroupnsMode": "private",
+                  "Init": true,
+                  "IpcMode": "private",
+                  "Memory": 100663296,
+                  "MemorySwap": 100663296,
+                  "NanoCpus": 500000000,
+                  "NetworkMode": "none",
+                  "PidsLimit": 32,
+                  "Privileged": false,
+                  "ReadonlyRootfs": true,
+                  "ShmSize": 1048576
+                },
+                "deadline_seconds": 20,
+                "host_mounts": "synthetic read-only inputs only",
+                "no_new_privileges": true,
+                "scope": "Docker configuration readback; only selected file read is exercised",
+                "writable_storage": {
+                  "shm_bytes": 1048576,
+                  "tmp_bytes": 4194304,
+                  "workspace_bytes": 4194304
+                }
+              },
+              "independent_checks": {
+                "access_expectation_met": true,
+                "challenge_response_verified": true,
+                "edited_file_matches": true,
+                "expected_access": true,
+                "legitimate_task_completed": true,
+                "original_project_unchanged": true,
+                "passed": true,
+                "positive_control_confirmed": true,
+                "probe_protocol_completed": true,
+                "protected_resource_exists_and_unchanged": true
+              },
+              "phase": "misconfigured",
+              "session_id": "azt-fs001-353b8ed3b3c12c7530818c89",
+              "stages": {
+                "archive_validated": true,
+                "container_started": true,
+                "probe_protocol_completed": true,
+                "probe_returned": true,
+                "result_exported": true,
+                "verification_completed": true
+              },
+              "status": "passed",
+              "workload_claim": {
+                "challenge": "f857d59c875dfe257421d091082cbf5975eff43686d2df0362c671f414488d44",
+                "probe_executed": true,
+                "read": "obtained",
+                "response": "5efdd373de04b8abe43b426a574289422e060aa8b234f167cb021e3bf296fba8",
+                "task_exit": 0,
+                "task_stdout": "5 0\n",
+                "uid": 65532
+              }
+            },
+            {
+              "cleanup": "removed",
+              "controls": {
+                "all_capabilities_dropped": true,
+                "configured_and_read_back": {
+                  "CgroupnsMode": "private",
+                  "Init": true,
+                  "IpcMode": "private",
+                  "Memory": 100663296,
+                  "MemorySwap": 100663296,
+                  "NanoCpus": 500000000,
+                  "NetworkMode": "none",
+                  "PidsLimit": 32,
+                  "Privileged": false,
+                  "ReadonlyRootfs": true,
+                  "ShmSize": 1048576
+                },
+                "deadline_seconds": 20,
+                "host_mounts": "synthetic read-only inputs only",
+                "no_new_privileges": true,
+                "scope": "Docker configuration readback; only selected file read is exercised",
+                "writable_storage": {
+                  "shm_bytes": 1048576,
+                  "tmp_bytes": 4194304,
+                  "workspace_bytes": 4194304
+                }
+              },
+              "independent_checks": {
+                "access_expectation_met": true,
+                "challenge_response_verified": false,
+                "edited_file_matches": true,
+                "expected_access": false,
+                "legitimate_task_completed": true,
+                "original_project_unchanged": true,
+                "passed": true,
+                "positive_control_confirmed": true,
+                "probe_protocol_completed": true,
+                "protected_resource_exists_and_unchanged": true
+              },
+              "phase": "repaired",
+              "session_id": "azt-fs001-9082174f5e6c43f909664e9b",
+              "stages": {
+                "archive_validated": true,
+                "container_started": true,
+                "probe_protocol_completed": true,
+                "probe_returned": true,
+                "result_exported": true,
+                "verification_completed": true
+              },
+              "status": "passed",
+              "workload_claim": {
+                "challenge": "f857d59c875dfe257421d091082cbf5975eff43686d2df0362c671f414488d44",
+                "errno": 2,
+                "probe_executed": true,
+                "read": "unavailable",
+                "task_exit": 0,
+                "task_stdout": "5 0\n",
+                "uid": 65532
+              }
+            }
+          ]
+        },
+        "operation": "check",
+        "repair": {
+          "affected_indices": [
+            1
+          ],
+          "original_sha256": "79c4c80febf738c24ad07ab5b27d83955edc7da362a9988ffc448a1f6b29202a",
+          "repaired_sha256": "c0ef8ccac578b3ebdf46808c30b192834533ecf673fb91f8e66f536867839c62",
+          "status": "proposed"
+        },
+        "schema_version": 2,
+        "status": "passed"
+      },
+      "ci-run.json": {
+        "backend": {
+          "backend": "docker",
+          "cgroup_version": "2",
+          "client_version": "28.0.4",
+          "host_platform": "Linux",
+          "image_id": "sha256:ec7d6c95cd3692a2e2d228a8b1ca74e4025b54121fcc4c5da6f09cfa473315ad",
+          "image_repo_digests": [
+            "python@sha256:78387bc3881b8273120a12ebe6c1ab22b018ccc2c9adf565ae1ac9b536e184ea"
+          ],
+          "observation_scope": "prerequisites only; no workload launched",
+          "reason": null,
+          "security_options": [
+            "name=seccomp,profile=builtin"
+          ],
+          "server_version": "28.0.4",
+          "status": "available",
+          "supported_host": "Linux",
+          "transport": "local-unix"
+        },
+        "cases": {
+          "canonical": {
+            "exit": 0,
+            "summary": {
+              "artifact": "agent_zero_trust-0.1.9-py3-none-any.whl",
+              "artifact_sha256": "7ad73af671236610662ba3940170d3987db48fbd8c4a269aa8b8d384a6762aae",
+              "case": "canonical",
+              "command": "python scripts/test_safety_integration.py --case canonical --wheel <candidate.whl> --output <new-private-directory> --docker-host <local-unix-endpoint> --image <approved-preloaded-image>",
+              "configuration_sha256": {
+                "baseline": "c0ef8ccac578b3ebdf46808c30b192834533ecf673fb91f8e66f536867839c62",
+                "candidate": "79c4c80febf738c24ad07ab5b27d83955edc7da362a9988ffc448a1f6b29202a"
+              },
+              "elapsed_seconds_including_install": 5.753,
+              "exit_code": 0,
+              "integration_script_sha256": "93d7ca9fa80eae7ef0aa66f678210481ffc93433d94a671f18c06421e0b711ef",
+              "limitations": "Project-owned evaluator, not a third-party audit. No model calls. Blocked is not runtime denial.",
+              "pack": "AZT-FS-001",
+              "pack_version": 1,
+              "package_version": "0.1.9",
+              "protected_source": "./synthetic-vault",
+              "result": "passed",
+              "runtime_counts": {
+                "outcomes": {
+                  "blocked": 0,
+                  "failed": 0,
+                  "not_run": 0,
+                  "passed": 3,
+                  "unknown": 0
+                },
+                "planned": 3,
+                "stages": {
+                  "archive_validated": 3,
+                  "container_started": 3,
+                  "probe_protocol_completed": 3,
+                  "probe_returned": 3,
+                  "result_exported": 3,
+                  "verification_completed": 3
+                }
+              },
+              "schema_version": 2
+            }
+          },
+          "variant": {
+            "exit": 0,
+            "summary": {
+              "artifact": "agent_zero_trust-0.1.9-py3-none-any.whl",
+              "artifact_sha256": "7ad73af671236610662ba3940170d3987db48fbd8c4a269aa8b8d384a6762aae",
+              "case": "variant",
+              "command": "python scripts/test_safety_integration.py --case variant --wheel <candidate.whl> --output <new-private-directory> --docker-host <local-unix-endpoint> --image <approved-preloaded-image>",
+              "configuration_sha256": {
+                "baseline": "f8f771828b138c05eaec93a0576d425ae91056d9862e6543ac8b4f4290e2b4b6",
+                "candidate": "ac8273cbd3a49a6fdf8dfa4f1a9a1b267a276866bf8813ce9f47fa01a456f3c2"
+              },
+              "elapsed_seconds_including_install": 5.744,
+              "exit_code": 0,
+              "integration_script_sha256": "93d7ca9fa80eae7ef0aa66f678210481ffc93433d94a671f18c06421e0b711ef",
+              "limitations": "Project-owned evaluator, not a third-party audit. No model calls. Blocked is not runtime denial.",
+              "pack": "AZT-FS-001",
+              "pack_version": 1,
+              "package_version": "0.1.9",
+              "protected_source": "./resources/nested-vault",
+              "result": "passed",
+              "runtime_counts": {
+                "outcomes": {
+                  "blocked": 0,
+                  "failed": 0,
+                  "not_run": 0,
+                  "passed": 3,
+                  "unknown": 0
+                },
+                "planned": 3,
+                "stages": {
+                  "archive_validated": 3,
+                  "container_started": 3,
+                  "probe_protocol_completed": 3,
+                  "probe_returned": 3,
+                  "result_exported": 3,
+                  "verification_completed": 3
+                }
+              },
+              "schema_version": 2
+            }
+          }
+        },
+        "image_compatibility": {
+          "architecture": "amd64",
+          "declared_python": "3.12.14",
+          "os": "linux",
+          "scope": "image metadata; execution checked by three-phase task"
+        },
+        "integration_invoked": true,
+        "module_sha256": {
+          "azt.py": "206e9fc96e2f23a90e22e668cc28770ca0023e164d42a9c3c932ef8ef7b6fec5",
+          "azt_config.py": "e6d133cd7a33438c57e2a98d8ce2d312b006d65c9bb6503a2dc5547b7820cca8",
+          "azt_docker.py": "d7cfb54b7cbeee428cda55900289af5e1e5f973b5fe30e1fc3c9110f54e14db5",
+          "azt_gate.py": "568044311ffa7019c7890c4c2c2a52721cb2a53462f12db93872628ac282ca0c",
+          "azt_intake.py": "d6080aaa3bce5ede1c11ef0fdbf154a8519f1957086dcf628a2db1eae5c43565",
+          "azt_runtime.py": "6cada5963800bb6fdf1412cfa8a630aa873367f0beacc8ef1d41ff242648afcc",
+          "azt_safety.py": "6e9d80c78a6085c4daf3b552a363548878f01d47f546a8ff09bb627df4bf982e",
+          "azt_safety_pack.py": "7d9c3f0a5d86d987e1d76a76d426db9d0b17e672456730ee7d11b2966a79a402"
+        },
+        "observed_daemon_controls": {
+          "CgroupVersion": "2",
+          "CpuCfsQuota": true,
+          "MemoryLimit": true,
+          "PidsLimit": true,
+          "SwapLimit": true
+        },
+        "platform": {
+          "controller_python": "3.12.3",
+          "machine": "x86_64",
+          "release": "6.17.0-1022-azure",
+          "system": "Linux"
+        },
+        "run_attempt": "1",
+        "run_id": "34915008373",
+        "runner_image": "ubuntu24",
+        "runner_image_version": "20260907.300.1",
+        "schema_version": 2,
+        "sdist": "agent_zero_trust-0.1.9.tar.gz",
+        "sdist_sha256": "4ae1b51f8d3a809f4a8860f378f1a2a65618fc1ca91e19491811973a291ac823",
+        "source_sha": "94a802bbe8b54e86b730203051b9abc162cf0da8",
+        "source_tree": "f122f501cbc1bd3cfb8a9dab8fb638d2b22cff88",
+        "status": "passed",
+        "wheel": "agent_zero_trust-0.1.9-py3-none-any.whl",
+        "wheel_sha256": "7ad73af671236610662ba3940170d3987db48fbd8c4a269aa8b8d384a6762aae"
+      },
+      "variant/artifact.json": {
+        "artifact": "agent_zero_trust-0.1.9-py3-none-any.whl",
+        "artifact_sha256": "7ad73af671236610662ba3940170d3987db48fbd8c4a269aa8b8d384a6762aae",
+        "case": "variant",
+        "command": "python scripts/test_safety_integration.py --case variant --wheel <candidate.whl> --output <new-private-directory> --docker-host <local-unix-endpoint> --image <approved-preloaded-image>",
+        "configuration_sha256": {
+          "baseline": "f8f771828b138c05eaec93a0576d425ae91056d9862e6543ac8b4f4290e2b4b6",
+          "candidate": "ac8273cbd3a49a6fdf8dfa4f1a9a1b267a276866bf8813ce9f47fa01a456f3c2"
+        },
+        "elapsed_seconds_including_install": 5.744,
+        "exit_code": 0,
+        "integration_script_sha256": "93d7ca9fa80eae7ef0aa66f678210481ffc93433d94a671f18c06421e0b711ef",
+        "limitations": "Project-owned evaluator, not a third-party audit. No model calls. Blocked is not runtime denial.",
+        "pack": "AZT-FS-001",
+        "pack_version": 1,
+        "package_version": "0.1.9",
+        "protected_source": "./resources/nested-vault",
+        "result": "passed",
+        "runtime_counts": {
+          "outcomes": {
+            "blocked": 0,
+            "failed": 0,
+            "not_run": 0,
+            "passed": 3,
+            "unknown": 0
+          },
+          "planned": 3,
+          "stages": {
+            "archive_validated": 3,
+            "container_started": 3,
+            "probe_protocol_completed": 3,
+            "probe_returned": 3,
+            "result_exported": 3,
+            "verification_completed": 3
+          }
+        },
+        "schema_version": 2
+      },
+      "variant/evidence.json": {
+        "comparison": {
+          "access_exercised": false,
+          "adapter": "compose-json-bind-v1",
+          "baseline_declares_protected_access": false,
+          "baseline_sha256": "f8f771828b138c05eaec93a0576d425ae91056d9862e6543ac8b4f4290e2b4b6",
+          "candidate_declares_protected_access": true,
+          "candidate_sha256": "ac8273cbd3a49a6fdf8dfa4f1a9a1b267a276866bf8813ce9f47fa01a456f3c2",
+          "changes": [
+            {
+              "after": {
+                "declared_source": "./resources",
+                "index": 2,
+                "provenance": "/services/worker/volumes/2",
+                "read_only": true,
+                "source": "$CONFIG_ROOT/resources",
+                "target": "/review-material"
+              },
+              "before": null,
+              "declares_protected_read_access": true,
+              "implication": "bind declaration exposes selected protected directory, even when read-only",
+              "kind": "added",
+              "target": "/review-material"
+            }
+          ],
+          "configuration_scope": "one explicit standalone Compose JSON document; no implicit discovery or merge",
+          "protected_source": "$CONFIG_ROOT/resources/nested-vault",
+          "resolution": "lexical bind paths relative to each document; host symlinks and daemon access untested",
+          "schema_version": 1,
+          "service": "worker",
+          "unknown": [
+            "effective engine mount access",
+            "image contents and behavior",
+            "configuration outside explicitly supplied documents"
+          ]
+        },
+        "execution": {
+          "backend": {
+            "backend": "docker",
+            "cgroup_version": "2",
+            "client_version": "28.0.4",
+            "host_platform": "Linux",
+            "image_id": "sha256:ec7d6c95cd3692a2e2d228a8b1ca74e4025b54121fcc4c5da6f09cfa473315ad",
+            "image_repo_digests": [
+              "python@sha256:78387bc3881b8273120a12ebe6c1ab22b018ccc2c9adf565ae1ac9b536e184ea"
+            ],
+            "observation_scope": "prerequisites only; no workload launched",
+            "reason": null,
+            "security_options": [
+              "name=seccomp,profile=builtin"
+            ],
+            "server_version": "28.0.4",
+            "status": "available",
+            "supported_host": "Linux",
+            "transport": "local-unix"
+          },
+          "configuration_sha256": {
+            "baseline": "f8f771828b138c05eaec93a0576d425ae91056d9862e6543ac8b4f4290e2b4b6",
+            "candidate": "ac8273cbd3a49a6fdf8dfa4f1a9a1b267a276866bf8813ce9f47fa01a456f3c2"
+          },
+          "counts": {
+            "outcomes": {
+              "blocked": 0,
+              "failed": 0,
+              "not_run": 0,
+              "passed": 3,
+              "unknown": 0
+            },
+            "planned": 3,
+            "stages": {
+              "archive_validated": 3,
+              "container_started": 3,
+              "probe_protocol_completed": 3,
+              "probe_returned": 3,
+              "result_exported": 3,
+              "verification_completed": 3
+            }
+          },
+          "elapsed_seconds": 2.613,
+          "input_sha256": "e1a894022d1a082987b87adecb623438c9e386d86b2b621cff4a5fe7fdf7edc8",
+          "keeper_sha256": "0456ff414f1fababb31a048f24f4b3147d321562687809952341a576d4b5b9ff",
+          "limitations": [
+            "synthetic mount substitution; no actual host credentials or user workload executed",
+            "denial relies on bundled probe plus successful positive control, not arbitrary workload assertions",
+            "network, resource exhaustion, controller death and descendant stop are not exercised by this case",
+            "Docker/kernel/image/operator/evaluator are trusted; same-user hostile host code is out of scope",
+            "no model or cloud agent integration; no complete syscall or mutation trace"
+          ],
+          "observation_scope": "bundled probe protocol, HMAC challenge, exported task bytes, host fixture integrity and Docker control readback",
+          "pack": "AZT-FS-001",
+          "pack_version": 1,
+          "platform": {
+            "machine": "x86_64",
+            "release": "6.17.0-1022-azure",
+            "system": "Linux"
+          },
+          "policy_sha256": "760c6484d5a595143c8f055a1aabe348935c50778ebd8a0687c8d1e3dbc36701",
+          "probe_sha256": "0b6b974196dd3a7dd37e5a5858c3cdfd1de0a56b295647e3f4ebc6ff99094faa",
+          "repair_sha256": "f8f771828b138c05eaec93a0576d425ae91056d9862e6543ac8b4f4290e2b4b6",
+          "requested_policy": {
+            "approved_image_override": "sha256:ec7d6c95cd3692a2e2d228a8b1ca74e4025b54121fcc4c5da6f09cfa473315ad",
+            "archive_output_bytes": 16384,
+            "backend": "docker-native-linux-v1",
+            "cpu_cores": 0.5,
+            "file_bytes": 1048576,
+            "keeper_seconds": 20,
+            "memory_bytes": 100663296,
+            "memory_swap_bytes": 100663296,
+            "network": "none",
+            "pids": 32,
+            "probe_output_bytes": 8192,
+            "probe_seconds": 8,
+            "shm_bytes": 1048576,
+            "source_mapping": "test-owned synthetic substitution; no host input directories",
+            "tmp_bytes": 4194304,
+            "workspace_bytes": 4194304
+          },
+          "schema_version": 2,
+          "source": {
+            "module_sha256": {
+              "azt.py": "206e9fc96e2f23a90e22e668cc28770ca0023e164d42a9c3c932ef8ef7b6fec5",
+              "azt_config.py": "e6d133cd7a33438c57e2a98d8ce2d312b006d65c9bb6503a2dc5547b7820cca8",
+              "azt_docker.py": "d7cfb54b7cbeee428cda55900289af5e1e5f973b5fe30e1fc3c9110f54e14db5",
+              "azt_intake.py": "d6080aaa3bce5ede1c11ef0fdbf154a8519f1957086dcf628a2db1eae5c43565",
+              "azt_safety.py": "6e9d80c78a6085c4daf3b552a363548878f01d47f546a8ff09bb627df4bf982e",
+              "azt_safety_pack.py": "7d9c3f0a5d86d987e1d76a76d426db9d0b17e672456730ee7d11b2966a79a402"
+            },
+            "package_version": "0.1.9"
+          },
+          "started_at": "2026-09-15T00:54:02.545633+00:00",
+          "status": "passed",
+          "synthetic_inputs": {
+            "canary_bytes": 32,
+            "canary_value_exported": false,
+            "challenge": "35a25c2b91125439209f83b11c95888de9b0bddecdc256b16bad22eeea2ceec4",
+            "probe_target": "/review-material/nested-vault/canary.bin",
+            "project": "task.py"
+          },
+          "trials": [
+            {
+              "cleanup": "removed",
+              "controls": {
+                "all_capabilities_dropped": true,
+                "configured_and_read_back": {
+                  "CgroupnsMode": "private",
+                  "Init": true,
+                  "IpcMode": "private",
+                  "Memory": 100663296,
+                  "MemorySwap": 100663296,
+                  "NanoCpus": 500000000,
+                  "NetworkMode": "none",
+                  "PidsLimit": 32,
+                  "Privileged": false,
+                  "ReadonlyRootfs": true,
+                  "ShmSize": 1048576
+                },
+                "deadline_seconds": 20,
+                "host_mounts": "synthetic read-only inputs only",
+                "no_new_privileges": true,
+                "scope": "Docker configuration readback; only selected file read is exercised",
+                "writable_storage": {
+                  "shm_bytes": 1048576,
+                  "tmp_bytes": 4194304,
+                  "workspace_bytes": 4194304
+                }
+              },
+              "independent_checks": {
+                "access_expectation_met": true,
+                "challenge_response_verified": false,
+                "edited_file_matches": true,
+                "expected_access": false,
+                "legitimate_task_completed": true,
+                "original_project_unchanged": true,
+                "passed": true,
+                "positive_control_confirmed": true,
+                "probe_protocol_completed": true,
+                "protected_resource_exists_and_unchanged": true
+              },
+              "phase": "baseline",
+              "session_id": "azt-fs001-2cbf6fdca3bfb050097e8309",
+              "stages": {
+                "archive_validated": true,
+                "container_started": true,
+                "probe_protocol_completed": true,
+                "probe_returned": true,
+                "result_exported": true,
+                "verification_completed": true
+              },
+              "status": "passed",
+              "workload_claim": {
+                "challenge": "35a25c2b91125439209f83b11c95888de9b0bddecdc256b16bad22eeea2ceec4",
+                "errno": 2,
+                "probe_executed": true,
+                "read": "unavailable",
+                "task_exit": 0,
+                "task_stdout": "5 0\n",
+                "uid": 65532
+              }
+            },
+            {
+              "cleanup": "removed",
+              "controls": {
+                "all_capabilities_dropped": true,
+                "configured_and_read_back": {
+                  "CgroupnsMode": "private",
+                  "Init": true,
+                  "IpcMode": "private",
+                  "Memory": 100663296,
+                  "MemorySwap": 100663296,
+                  "NanoCpus": 500000000,
+                  "NetworkMode": "none",
+                  "PidsLimit": 32,
+                  "Privileged": false,
+                  "ReadonlyRootfs": true,
+                  "ShmSize": 1048576
+                },
+                "deadline_seconds": 20,
+                "host_mounts": "synthetic read-only inputs only",
+                "no_new_privileges": true,
+                "scope": "Docker configuration readback; only selected file read is exercised",
+                "writable_storage": {
+                  "shm_bytes": 1048576,
+                  "tmp_bytes": 4194304,
+                  "workspace_bytes": 4194304
+                }
+              },
+              "independent_checks": {
+                "access_expectation_met": true,
+                "challenge_response_verified": true,
+                "edited_file_matches": true,
+                "expected_access": true,
+                "legitimate_task_completed": true,
+                "original_project_unchanged": true,
+                "passed": true,
+                "positive_control_confirmed": true,
+                "probe_protocol_completed": true,
+                "protected_resource_exists_and_unchanged": true
+              },
+              "phase": "misconfigured",
+              "session_id": "azt-fs001-976e67b3d2a95e21b8740f93",
+              "stages": {
+                "archive_validated": true,
+                "container_started": true,
+                "probe_protocol_completed": true,
+                "probe_returned": true,
+                "result_exported": true,
+                "verification_completed": true
+              },
+              "status": "passed",
+              "workload_claim": {
+                "challenge": "35a25c2b91125439209f83b11c95888de9b0bddecdc256b16bad22eeea2ceec4",
+                "probe_executed": true,
+                "read": "obtained",
+                "response": "f4f2448e4d51ad89a0c0f211f15f26f40abf0d197ba27d89ec88e079ece76ee4",
+                "task_exit": 0,
+                "task_stdout": "5 0\n",
+                "uid": 65532
+              }
+            },
+            {
+              "cleanup": "removed",
+              "controls": {
+                "all_capabilities_dropped": true,
+                "configured_and_read_back": {
+                  "CgroupnsMode": "private",
+                  "Init": true,
+                  "IpcMode": "private",
+                  "Memory": 100663296,
+                  "MemorySwap": 100663296,
+                  "NanoCpus": 500000000,
+                  "NetworkMode": "none",
+                  "PidsLimit": 32,
+                  "Privileged": false,
+                  "ReadonlyRootfs": true,
+                  "ShmSize": 1048576
+                },
+                "deadline_seconds": 20,
+                "host_mounts": "synthetic read-only inputs only",
+                "no_new_privileges": true,
+                "scope": "Docker configuration readback; only selected file read is exercised",
+                "writable_storage": {
+                  "shm_bytes": 1048576,
+                  "tmp_bytes": 4194304,
+                  "workspace_bytes": 4194304
+                }
+              },
+              "independent_checks": {
+                "access_expectation_met": true,
+                "challenge_response_verified": false,
+                "edited_file_matches": true,
+                "expected_access": false,
+                "legitimate_task_completed": true,
+                "original_project_unchanged": true,
+                "passed": true,
+                "positive_control_confirmed": true,
+                "probe_protocol_completed": true,
+                "protected_resource_exists_and_unchanged": true
+              },
+              "phase": "repaired",
+              "session_id": "azt-fs001-ba27cfd7864dd01544b65e7b",
+              "stages": {
+                "archive_validated": true,
+                "container_started": true,
+                "probe_protocol_completed": true,
+                "probe_returned": true,
+                "result_exported": true,
+                "verification_completed": true
+              },
+              "status": "passed",
+              "workload_claim": {
+                "challenge": "35a25c2b91125439209f83b11c95888de9b0bddecdc256b16bad22eeea2ceec4",
+                "errno": 2,
+                "probe_executed": true,
+                "read": "unavailable",
+                "task_exit": 0,
+                "task_stdout": "5 0\n",
+                "uid": 65532
+              }
+            }
+          ]
+        },
+        "operation": "check",
+        "repair": {
+          "affected_indices": [
+            2
+          ],
+          "original_sha256": "ac8273cbd3a49a6fdf8dfa4f1a9a1b267a276866bf8813ce9f47fa01a456f3c2",
+          "repaired_sha256": "f8f771828b138c05eaec93a0576d425ae91056d9862e6543ac8b4f4290e2b4b6",
+          "status": "proposed"
+        },
+        "schema_version": 2,
+        "status": "passed"
+      }
+    },
+    "schema": "azt.fs001-ci-export.v2"
+  }
+}

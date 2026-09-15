@@ -1,0 +1,50 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "AZT safety comparison and synthetic regression evidence v1",
+  "type": "object",
+  "required": ["schema_version", "operation", "status", "comparison", "repair", "execution"],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {"const": 1},
+    "operation": {"enum": ["compare", "check"]},
+    "status": {"enum": ["compared", "passed", "failed", "blocked"]},
+    "comparison": {
+      "type": "object",
+      "required": ["adapter", "baseline_sha256", "candidate_sha256", "access_exercised", "changes", "unknown"],
+      "properties": {
+        "adapter": {"const": "compose-json-bind-v1"},
+        "access_exercised": {"const": false},
+        "baseline_sha256": {"$ref": "#/$defs/sha256"},
+        "candidate_sha256": {"$ref": "#/$defs/sha256"},
+        "changes": {"type": "array", "maxItems": 64},
+        "unknown": {"type": "array", "items": {"type": "string"}}
+      }
+    },
+    "repair": {"type": "object", "required": ["status", "original_sha256", "repaired_sha256", "affected_indices"]},
+    "execution": {
+      "oneOf": [
+        {"type": "null"},
+        {
+          "type": "object",
+          "required": ["schema_version", "pack", "pack_version", "status", "source", "backend", "platform", "trials", "counts", "requested_policy", "policy_sha256", "limitations"],
+          "properties": {
+            "schema_version": {"const": 1},
+            "pack": {"const": "AZT-FS-001"},
+            "pack_version": {"const": 1},
+            "status": {"enum": ["passed", "failed", "blocked"]},
+            "policy_sha256": {"$ref": "#/$defs/sha256"},
+            "trials": {"type": "array", "maxItems": 3, "items": {
+              "type": "object", "required": ["phase", "status"],
+              "properties": {"phase": {"enum": ["baseline", "misconfigured", "repaired"]},
+                             "status": {"enum": ["executed", "failed", "blocked"]}}
+            }},
+            "counts": {"type": "object", "required": ["planned", "executed", "passed", "blocked", "not_run"],
+                       "properties": {"planned": {"const": 3}},
+                       "additionalProperties": {"type": "integer", "minimum": 0, "maximum": 3}}
+          }
+        }
+      ]
+    }
+  },
+  "$defs": {"sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}}
+}

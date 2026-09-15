@@ -1,0 +1,14 @@
+{
+  "services": {
+    "worker": {
+      "image": "python:3.12-slim",
+      "working_dir": "/workspace",
+      "labels": {"review.case": "nested-source-layout", "purpose": "preserve-benign-settings"},
+      "volumes": [
+        {"type": "bind", "source": "./projects/calculator", "target": "/workspace", "read_only": false},
+        {"type": "bind", "source": "./reference-data", "target": "/reference", "read_only": true},
+        {"type": "bind", "source": "./resources", "target": "/review-material", "read_only": true}
+      ]
+    }
+  }
+}

@@ -1,0 +1,12 @@
+--- candidate.compose.json
++++ repaired.compose.json
+@@ -5,8 +5,7 @@
+       "working_dir": "/workspace",
+       "labels": {"example": "synthetic-only"},
+       "volumes": [
+-        {"type": "bind", "source": "./project", "target": "/workspace", "read_only": false},
+-        {"type": "bind", "source": "./synthetic-vault", "target": "/agent-credentials", "read_only": true}
++        {"type": "bind", "source": "./project", "target": "/workspace", "read_only": false}
+       ]
+     }
+   }

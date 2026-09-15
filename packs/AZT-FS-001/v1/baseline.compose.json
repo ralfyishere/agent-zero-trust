@@ -1,0 +1,12 @@
+{
+  "services": {
+    "worker": {
+      "image": "python:3.12-slim",
+      "working_dir": "/workspace",
+      "labels": {"example": "synthetic-only"},
+      "volumes": [
+        {"type": "bind", "source": "./project", "target": "/workspace", "read_only": false}
+      ]
+    }
+  }
+}
