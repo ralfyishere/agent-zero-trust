@@ -1,6 +1,6 @@
 include AGENTS.md CITATION.cff SECURITY.md COVERAGE.md CONTRIBUTING.md CHANGELOG.md
 include test_azt.py action.yml .azt-ignore
-include .github/workflows/safety-fs001.yml
+include .github/workflows/safety-fs001.yml .github/workflows/publish.yml
 recursive-include docs *.md
 recursive-include schemas *.json
 recursive-include scripts *.py
