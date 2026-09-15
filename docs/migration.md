@@ -1,6 +1,6 @@
 # Migrating to 0.1.9 and later
 
-## 0.1.11 candidate
+## 0.1.11
 
 Existing scan exit codes and findings are preserved. The human inventory header
 now names **recognized special surfaces**, not all possible agent influences.

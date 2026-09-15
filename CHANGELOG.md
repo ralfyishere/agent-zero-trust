@@ -1,6 +1,6 @@
 # Release notes
 
-## 0.1.11: unreleased change-review candidate
+## 0.1.11: offline change-aware repository review
 
 - Compare saved scans with `azt changes`: content and recognized surface changes,
   finding multiplicity, visible exceptions, target requests and provenance/scope

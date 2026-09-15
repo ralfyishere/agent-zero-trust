@@ -10,15 +10,18 @@ is executed. The `example.invalid` destination is never contacted.
 Animation highlights actual captured output with editorial pacing, not measured
 command latency. No live agent or target execution is depicted.
 
-## Install the unreleased candidate
+## Install and reproduce version 0.1.11
 
 Python 3.9+ on Linux or macOS, Git and a normal Python virtual environment are
 required. Installation/build tools may download packages; subsequent AZT
 operations are offline. No Docker, account, model, hook or API key is needed.
-The released 0.1.10 package does not yet include change review.
+Earlier packages do not include change review. Check the
+[release listing](https://github.com/ralfyishere/agent-zero-trust/releases/tag/v0.1.11)
+for tag availability; a GitHub Release can precede the owner-approved PyPI upload.
+This source-build path does not require the PyPI upload to have completed.
 
 ```sh
-git clone --branch feat/public-change-review https://github.com/ralfyishere/agent-zero-trust.git
+git clone --branch v0.1.11 https://github.com/ralfyishere/agent-zero-trust.git
 cd agent-zero-trust
 python3 -m venv .venv
 .venv/bin/python -m pip install build
