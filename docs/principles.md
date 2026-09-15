@@ -1,5 +1,14 @@
 # A useful local project first
 
+**Mission:** Make useful AI delegation possible without blind trust.
+
+**Ethos:** Information should not silently become authority.
+
+**Delegate work. Retain control.** Repository intake is the current primary
+use case. The filesystem repair/retest pack is an optional experimental
+extension, not general agent authorization or containment. Authority must come
+from a trusted operator or enforcement component, not from the text being read.
+
 Agent Zero Trust is MIT-licensed software created by Rafael (Ralph) Peña, with
 credit to contributors and upstream maintainers. Local intake, local policy,
 essential future execution controls and stop mechanisms, inspection, evidence

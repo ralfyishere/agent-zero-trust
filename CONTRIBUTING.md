@@ -1,5 +1,10 @@
 # Contributing
 
+Start with repository intake: a minimal missed-detection fixture, a benign
+false-positive example or a confusing first-run result is useful. See the
+[published-package demo](docs/demo.md) and [known misses](COVERAGE.md).
+The optional safety pack below has separate execution prerequisites.
+
 ## Safety regression packs
 
 The first reviewed case is [AZT-FS-001 v1](packs/AZT-FS-001/v1/README.md).
@@ -89,7 +94,8 @@ exercises it.
    and actual output. Runtime isolation work has separate prerequisites and
    acceptance tests in [docs/runtime.md](docs/runtime.md).
 
-Use the bypass, false-positive, backend or documentation issue templates.
+Use the bypass or false-positive issue template, or a blank issue for backend
+and documentation reports. Include the command, version and synthetic reproduction.
 Sensitive reports follow [SECURITY.md](SECURITY.md). No CLA or DCO obligation
 is introduced; the existing MIT license and attribution remain in place.
 

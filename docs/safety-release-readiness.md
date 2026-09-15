@@ -1,5 +1,9 @@
 # Experimental candidate review and owner release decision
 
+Historical pre-publication review, preserved September 15, 2026. The candidate
+below subsequently shipped as 0.1.9. See [current release notes](../CHANGELOG.md)
+and [publication instructions](publication.md); the original evidence is unchanged.
+
 Version 0.1.9 remains unreleased on `fix/trusted-intake-evidence`.
 Recommendation: **ready for a public experimental release**, subject to owner
 review and publication checks, with no claim of general agent containment.

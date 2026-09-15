@@ -1,5 +1,9 @@
 # Scanner-hardening release review
 
+Status clarification, September 15, 2026: this historical 0.1.8 work was
+incorporated into published 0.1.9, not released independently. Statements below
+describe the earlier handoff, not today's publication state.
+
 Historical 0.1.8 handoff: this preserves the prior scanner milestone, not current
 0.1.9 artifact results. See [safety release readiness](safety-release-readiness.md).
 

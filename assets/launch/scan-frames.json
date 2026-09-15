@@ -1,0 +1,46 @@
+{
+  "scope": "Selected real output lines; 24 seconds editorial pacing, not measured latency. Synthetic fixture, public PyPI 0.1.9. Full transcript in scan-transcript.txt.",
+  "wheel_sha256": "33400899c2b08a159e0d70d30b543b76cae894e5460e23a06a117dbbef748b27",
+  "frames": [
+    {
+      "title": "01 / INSPECT BEFORE ENTRY",
+      "command": "$ azt scan suspicious",
+      "lines": [
+        "FINDINGS: 1 HIGH, 1 MEDIUM",
+        "  [HIGH  ] net.pipe_shell  README.md:1",
+        "INSPECTION: complete within declared scope; 1 inspected, 0 skipped, 0 errors",
+        "DECISION: deny"
+      ],
+      "footer": "Inert README fixture. Nothing fetched or executed."
+    },
+    {
+      "title": "02 / THE TARGET REQUESTS AN EXCEPTION",
+      "command": ".azt-ignore now contains: *",
+      "lines": [
+        "Target-owned request, not operator authorization."
+      ],
+      "footer": "Same synthetic README. Scanner behavior unchanged."
+    },
+    {
+      "title": "03 / SCAN AGAIN",
+      "command": "$ azt scan suspicious",
+      "lines": [
+        "FINDINGS: 1 HIGH, 1 MEDIUM",
+        "  [HIGH  ] net.pipe_shell  README.md:1",
+        "EXCEPTIONS: 1 target requests (not applied); 0 trusted suppressed findings",
+        "DECISION: deny"
+      ],
+      "footer": "Exit 1 again. The target did not suppress its finding."
+    },
+    {
+      "title": "04 / REVIEW THE RESULT",
+      "command": "Observed: detection + ignore-policy handling",
+      "lines": [
+        "Two scans. Same HIGH finding. Both exit 1.",
+        "No runtime denial or model behavior tested.",
+        "A clean scan would not prove safety."
+      ],
+      "footer": "Delegate work. Retain control."
+    }
+  ]
+}

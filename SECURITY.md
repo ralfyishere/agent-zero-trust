@@ -37,7 +37,8 @@ tested, but complete behavior inside a coding-agent application has
 not been tested. User-level configuration, disabled hooks, uncovered tools and
 already-running processes remain outside this workflow gate.
 
-There is no AZT runtime isolation boundary in this release candidate.
+The scanner and hook do not supply a runtime isolation boundary. The optional
+FS-001 synthetic profile uses Docker isolation within its documented scope.
 See [threat model](docs/threat-model.md), [runtime status](docs/runtime.md)
 and [coverage](COVERAGE.md).
 
@@ -57,7 +58,7 @@ Confirmed limitations should become either a failing regression with a fix or
 a clearly labeled entry in the known-miss ledger. Reporters and contributors
 are credited with their consent; do not disclose private identities by default.
 
-## Security correction in 0.1.8 (unreleased)
+## Scanner correction developed as 0.1.8, shipped in 0.1.9
 
 Earlier documentation described the legacy pass marker as signed or content-bound.
 That description was incorrect: the implementation accepted plain JSON with
@@ -65,7 +66,7 @@ That description was incorrect: the implementation accepted plain JSON with
 not authenticate the marker. Do not rely on the old disclosure entries as proof
 that hostile-process forgery was fixed.
 
-This candidate replaces that mechanism with authenticated snapshot receipts,
+Version 0.1.9 replaces that mechanism with authenticated snapshot receipts,
 removes target-controlled suppression, and makes relevant incomplete inspection
 a non-success result. It does not claim to contain an already-running hostile
 program. [Migration instructions](docs/migration.md) describe the breaking changes.

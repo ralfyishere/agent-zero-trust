@@ -1,4 +1,9 @@
-# Migrating to the unreleased 0.1.9 candidate
+# Migrating to 0.1.9 and later
+
+Version 0.1.9 was published September 15, 2026. Version 0.1.10 is a
+presentation/metadata maintenance update with no runtime behavior change.
+Its version identity still changes the engine-bound receipt: re-admit explicitly
+if you use the optional strict snapshot gate. Ordinary scanning needs no hook.
 
 The 0.1.8 scanner-hardening changes below remain applicable. Safety comparison
 and check reports now use [schema version 2](safety-reporting-v2.md): overlapping

@@ -97,7 +97,12 @@ a hostile concurrent writer. Keep the tree quiescent during intake.
 
 ## Runtime evidence
 
-No runtime boundary trials have completed. Doctor tests validate prerequisite
-reporting, including mocked Linux branches. The local ContainmentBench separates
-intake assertions from skipped runtime scenarios and does not report a universal
-safety percentage. See [runtime status](docs/runtime.md).
+FS-001 has a recorded synthetic Docker/Linux result for two configuration inputs
+with three phases each, including legitimate-task and cleanup checks. See the
+[exact accepted record](evidence/fs001-0.1.9/README.md). This is one selected
+filesystem case, not six attack classes or a live-agent evaluation.
+
+The separate intake ContainmentBench still has eight runtime scenarios not run.
+Doctor tests validate prerequisite reporting for a deferred general runtime
+proposal, including mocked Linux branches; they do not add execution evidence.
+There is no universal safety percentage. See [runtime status](docs/runtime.md).
