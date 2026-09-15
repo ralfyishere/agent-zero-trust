@@ -1,6 +1,17 @@
 # Release notes
 
-## 0.1.9 — unreleased safety-regression candidate
+## 0.1.10: presentation and metadata maintenance
+
+- Refresh installation, migration, coverage and release-status documentation.
+- Add a source-linked founder article and rendered assets based on captured
+  public 0.1.9 scanner output and the existing FS-001 record.
+- Correct stale unreleased text and relative README links in the next PyPI
+  description. Updating GitHub alone cannot change the uploaded 0.1.9 metadata.
+- No runtime behavior, probe, evaluator, policy, dependency or license changes.
+  The version-only module edit changes engine identity; strict receipts require
+  re-admission. Historical runtime evidence remains tied to its original artifact.
+
+## 0.1.9: released September 15, 2026
 
 - Add `azt safety compare` for an explicit single-service Compose JSON bind
   subset, with change provenance, declared-access limits and review-only repair.
@@ -22,7 +33,7 @@
 
 See the evidence index and release review for the exact verified candidate and
 remaining limitations. Static comparison needs no gate or execution backend.
-No release has been published.
+The GitHub Release and PyPI package were published September 15, 2026.
 
 Final experimental verification: code `94a802bbe8b54e86b730203051b9abc162cf0da8`,
 [run 34915008373](https://github.com/ralfyishere/agent-zero-trust/actions/runs/34915008373).
@@ -30,7 +41,9 @@ Canonical and frozen variant each passed all three phases, including legitimate
 task, original integrity and cleanup. The later evidence/documentation commit
 does not identify a newly tested artifact. See [exact records](evidence/fs001-0.1.9/README.md).
 
-## 0.1.8 — unreleased scanner-hardening candidate
+## 0.1.8: historical unreleased scanner-hardening candidate
+
+The work below was incorporated into 0.1.9, not published independently as 0.1.8.
 
 - Target `.azt-ignore` no longer suppresses findings. External operator
   exceptions require an exact rule, path, file SHA-256 and reason, and remain

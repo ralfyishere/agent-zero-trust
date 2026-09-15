@@ -1,8 +1,19 @@
 # Reproduce the experimental filesystem regression
 
-Use a trusted checkout at the verified code SHA linked in [the evidence index](../evidence/README.md).
-Do not build the unfamiliar repository you intend to scan. AZT0.1.9 is an
-unreleased candidate; PyPI may contain an older version.
+Version 0.1.9 is published on PyPI. For ordinary scanning, use the
+[published-package quickstart](../README.md#install-and-scan), not a source build.
+The commands below reproduce the original 0.1.9 case from its trusted release
+checkout. They need repository fixtures, which the wheel does not include.
+Do not build the unfamiliar repository you intend to scan.
+
+```sh
+git clone https://github.com/ralfyishere/agent-zero-trust.git
+cd agent-zero-trust
+git checkout --detach 6f102f2c5d24e3d3428dadeea49574403bc63bee
+```
+
+For historical identity and scope, see [the evidence index](../evidence/README.md).
+No new Docker trial is claimed for presentation-only maintenance releases.
 
 ## First offline result (Python3.9+, Linux/macOS)
 
