@@ -1,0 +1,197 @@
+CASE: unchanged
+AZT CHANGE REVIEW
+Meaningful delta: false
+Comparability: comparable
+Special surfaces added: 0
+Special surfaces removed: 0
+Special surfaces modified: 0
+Special surfaces unavailable: 0
+Findings new: 0
+Findings persisting: 0
+Findings no_longer_observed: 0
+Findings unresolved: 0
+Before input: 35d81753a5b3d2236512200e9a0efb1df5378359535dd8a57ea8fe9c32d142da
+Before inspection: 3 files; complete=true
+After input: 35d81753a5b3d2236512200e9a0efb1df5378359535dd8a57ea8fe9c32d142da
+After inspection: 3 files; complete=true
+Next step: review changed content and scope; use azt explain RULE_ID.
+Informational review only. Reports are untrusted assertions; hashes and schema validation do not authenticate them. No longer observed does not mean proven fixed. No receipt, authorization, upload or target execution occurs.
+
+CASE: benign
+AZT CHANGE REVIEW
+Meaningful delta: true
+Comparability: comparable
+Special surfaces added: 0
+Special surfaces removed: 0
+Special surfaces modified: 0
+Special surfaces unavailable: 0
+Findings new: 0
+Findings persisting: 0
+Findings no_longer_observed: 0
+Findings unresolved: 0
+Before input: 35d81753a5b3d2236512200e9a0efb1df5378359535dd8a57ea8fe9c32d142da
+Before inspection: 3 files; complete=true
+After input: b59bd139f2fe7aaf0ba109bff06c85d7b9e6f606ff8495b484055a7b19d8ab20
+After inspection: 3 files; complete=true
+content / modified: [
+  "README.md"
+]
+Next step: review changed content and scope; use azt explain RULE_ID.
+Informational review only. Reports are untrusted assertions; hashes and schema validation do not authenticate them. No longer observed does not mean proven fixed. No receipt, authorization, upload or target execution occurs.
+
+CASE: concerning
+AZT CHANGE REVIEW
+Meaningful delta: true
+Comparability: comparable
+Special surfaces added: 0
+Special surfaces removed: 0
+Special surfaces modified: 1
+Special surfaces unavailable: 0
+Findings new: 2
+Findings persisting: 0
+Findings no_longer_observed: 0
+Findings unresolved: 0
+Before input: 35d81753a5b3d2236512200e9a0efb1df5378359535dd8a57ea8fe9c32d142da
+Before inspection: 3 files; complete=true
+After input: da941aa1e79ec4bd5bae4e6c26299fb436efb2d9eacf635b654377fe6957f165
+After inspection: 3 files; complete=true
+surfaces / modified: [
+  "AGENTS.md"
+]
+content / modified: [
+  "AGENTS.md"
+]
+findings / new: [
+  {
+    "description": "Network fetch to a non-allowlisted host in an instruction/setup context",
+    "excerpt": "[omitted in review export]",
+    "line": 1,
+    "path": "AGENTS.md",
+    "rule": "net.fetch_unknown",
+    "severity": "MEDIUM"
+  },
+  {
+    "description": "Pipe-to-shell: downloads and executes remote code in one step",
+    "excerpt": "[omitted in review export]",
+    "line": 1,
+    "path": "AGENTS.md",
+    "rule": "net.pipe_shell",
+    "severity": "HIGH"
+  }
+]
+Next step: review changed content and scope; use azt explain RULE_ID.
+Informational review only. Reports are untrusted assertions; hashes and schema validation do not authenticate them. No longer observed does not mean proven fixed. No receipt, authorization, upload or target execution occurs.
+
+CASE: incomplete
+AZT CHANGE REVIEW
+Meaningful delta: true
+Comparability: reduced
+Special surfaces added: 0
+Special surfaces removed: 0
+Special surfaces modified: 2
+Special surfaces unavailable: 0
+Findings new: 0
+Findings persisting: 0
+Findings no_longer_observed: 0
+Findings unresolved: 2
+Before input: da941aa1e79ec4bd5bae4e6c26299fb436efb2d9eacf635b654377fe6957f165
+Before inspection: 3 files; complete=true
+After input: 3be433cb278f2ae745b7cd0ea3b7fd3b6e328aac6682e8a8f5db61dd83483b5a
+After inspection: 3 files; complete=false
+surfaces / modified: [
+  ".claude/settings.json",
+  "AGENTS.md"
+]
+content / modified: [
+  ".claude/settings.json",
+  "AGENTS.md"
+]
+findings / unresolved: [
+  {
+    "description": "Network fetch to a non-allowlisted host in an instruction/setup context",
+    "excerpt": "[omitted in review export]",
+    "line": 1,
+    "path": "AGENTS.md",
+    "rule": "net.fetch_unknown",
+    "severity": "MEDIUM"
+  },
+  {
+    "description": "Pipe-to-shell: downloads and executes remote code in one step",
+    "excerpt": "[omitted in review export]",
+    "line": 1,
+    "path": "AGENTS.md",
+    "rule": "net.pipe_shell",
+    "severity": "HIGH"
+  }
+]
+Provenance/scope differences: {
+  "scope.complete": {
+    "after": false,
+    "before": true
+  },
+  "scope.errors": {
+    "after": [
+      {
+        "path": ".claude/settings.json",
+        "reason": "malformed supported configuration or structural analysis failure"
+      }
+    ],
+    "before": []
+  },
+  "scope.inspected": {
+    "after": [
+      {
+        "analyses": [
+          "text-patterns"
+        ],
+        "path": ".claude/settings.json"
+      },
+      {
+        "analyses": [
+          "text-patterns"
+        ],
+        "path": "AGENTS.md"
+      },
+      {
+        "analyses": [
+          "text-patterns"
+        ],
+        "path": "README.md"
+      }
+    ],
+    "before": [
+      {
+        "analyses": [
+          "text-patterns",
+          "scan_claude_settings"
+        ],
+        "path": ".claude/settings.json"
+      },
+      {
+        "analyses": [
+          "text-patterns"
+        ],
+        "path": "AGENTS.md"
+      },
+      {
+        "analyses": [
+          "text-patterns"
+        ],
+        "path": "README.md"
+      }
+    ]
+  }
+}
+Cautions: [
+  "after inspection incomplete",
+  "previously inspected content has reduced analysis"
+]
+Next step: review changed content and scope; use azt explain RULE_ID.
+Informational review only. Reports are untrusted assertions; hashes and schema validation do not authenticate them. No longer observed does not mean proven fixed. No receipt, authorization, upload or target execution occurs.
+
+AZT RULE GUIDANCE: net.pipe_shell
+Meaning: "Pipe-to-shell: downloads and executes remote code in one step"
+Why review: "Downloading directly into an interpreter removes a review step."
+Context example: "A documented installer may legitimately fetch code."
+Limits: "Text patterns do not inspect the fetched bytes."
+Next step: "Inspect the source and publisher; prefer a reviewed, pinned local artifact."

@@ -1,0 +1,353 @@
+{
+  "after": {
+    "guidance": {
+      "net.fetch_unknown": {
+        "context_example": "A project may download public build inputs.",
+        "limits": "An allowlisted hostname is not a trust guarantee; redirects are not followed.",
+        "meaning": "Network fetch to a non-allowlisted host in an instruction/setup context",
+        "next_step": "Verify the destination, data sent and whether network access is necessary.",
+        "why_review": "The destination is outside the scanner's small allowlist, not necessarily malicious."
+      },
+      "net.pipe_shell": {
+        "context_example": "A documented installer may legitimately fetch code.",
+        "limits": "Text patterns do not inspect the fetched bytes.",
+        "meaning": "Pipe-to-shell: downloads and executes remote code in one step",
+        "next_step": "Inspect the source and publisher; prefer a reviewed, pinned local artifact.",
+        "why_review": "Downloading directly into an interpreter removes a review step."
+      }
+    },
+    "notice": "Informational review only. Reports are untrusted assertions; hashes and schema validation do not authenticate them. No longer observed does not mean proven fixed. No receipt, authorization, upload or target execution occurs.",
+    "redaction": "Derivative: excerpts and source descriptions omitted; admission discarded. Paths, reasons and labels may still be sensitive.",
+    "scan": {
+      "decision": "deny",
+      "engine": {
+        "implementation_sha256": "5192601f72a39328e3a14c96562a09b478a2fb2c23a858553d19691e42a9598c",
+        "text_rules_sha256": "c9477e5d0094be211cd9dbde8ab0880ace0f7b167e4466c4d70e46eec5405120",
+        "version": "0.1.11"
+      },
+      "findings": [
+        {
+          "description": "Pipe-to-shell: downloads and executes remote code in one step",
+          "excerpt": "[omitted in review export]",
+          "line": 1,
+          "path": "AGENTS.md",
+          "rule": "net.pipe_shell",
+          "severity": "HIGH"
+        },
+        {
+          "description": "Network fetch to a non-allowlisted host in an instruction/setup context",
+          "excerpt": "[omitted in review export]",
+          "line": 1,
+          "path": "AGENTS.md",
+          "rule": "net.fetch_unknown",
+          "severity": "MEDIUM"
+        }
+      ],
+      "input_digest": "da941aa1e79ec4bd5bae4e6c26299fb436efb2d9eacf635b654377fe6957f165",
+      "inventory": [
+        {
+          "class": "instructions",
+          "path": "AGENTS.md",
+          "severity": "INFO",
+          "why": "read as standing instructions by coding agents"
+        },
+        {
+          "class": "agent_settings",
+          "path": ".claude/settings.json",
+          "severity": "MEDIUM",
+          "why": "can define hooks that execute shell commands on agent events"
+        }
+      ],
+      "manifest": [
+        {
+          "kind": "directory",
+          "path": ".claude"
+        },
+        {
+          "executable": false,
+          "kind": "file",
+          "path": ".claude/settings.json",
+          "sha256": "ca3d163bab055381827226140568f3bef7eaac187cebd76878e0b63e9e442356"
+        },
+        {
+          "executable": false,
+          "kind": "file",
+          "path": "AGENTS.md",
+          "sha256": "eefc78f2fc3bfc70fcfc11d1f1b3beb0702c207196d9d39e5cf1aa0e7c6690b7"
+        },
+        {
+          "executable": false,
+          "kind": "file",
+          "path": "README.md",
+          "sha256": "913f56a30172b5d77e4a162a4ac614b69640f2ac1281ffa7c39766a0cb4e46cf"
+        }
+      ],
+      "policy": {
+        "digest": "5daa23de347bbd6b6c82a8382b5604820b4e0eed4b7e3ee73d11ccd2a5967318",
+        "source": "built-in"
+      },
+      "schema_version": 1,
+      "scope": {
+        "builtin_excluded_directories": [
+          ".git",
+          ".mypy_cache",
+          ".next",
+          ".tox",
+          ".venv",
+          "__pycache__",
+          "build",
+          "dist",
+          "node_modules",
+          "target",
+          "venv"
+        ],
+        "bytes_read": 79,
+        "complete": true,
+        "errors": [],
+        "inspected": [
+          {
+            "analyses": [
+              "text-patterns",
+              "scan_claude_settings"
+            ],
+            "path": ".claude/settings.json"
+          },
+          {
+            "analyses": [
+              "text-patterns"
+            ],
+            "path": "AGENTS.md"
+          },
+          {
+            "analyses": [
+              "text-patterns"
+            ],
+            "path": "README.md"
+          }
+        ],
+        "limits": {
+          "depth": 64,
+          "entries": 10000,
+          "file_bytes": 1000000,
+          "findings": 10000,
+          "line_characters": 4096,
+          "total_bytes": 32000000
+        },
+        "skipped": [],
+        "text_extensions": [
+          "",
+          ".bash",
+          ".cfg",
+          ".envrc",
+          ".ini",
+          ".js",
+          ".json",
+          ".md",
+          ".mdc",
+          ".py",
+          ".sh",
+          ".toml",
+          ".ts",
+          ".txt",
+          ".yaml",
+          ".yml",
+          ".zsh"
+        ]
+      },
+      "suppressed_findings": [],
+      "target_requests": [],
+      "threshold": "high",
+      "version": "0.1.11"
+    },
+    "schema": "azt.review.v1",
+    "source_report_sha256": "dc7f7104700b1773b2f0635a9617278e023ac7dd40d07f863501a53011f5465b"
+  },
+  "before": {
+    "guidance": {},
+    "notice": "Informational review only. Reports are untrusted assertions; hashes and schema validation do not authenticate them. No longer observed does not mean proven fixed. No receipt, authorization, upload or target execution occurs.",
+    "redaction": "Derivative: excerpts and source descriptions omitted; admission discarded. Paths, reasons and labels may still be sensitive.",
+    "scan": {
+      "decision": "pass",
+      "engine": {
+        "implementation_sha256": "5192601f72a39328e3a14c96562a09b478a2fb2c23a858553d19691e42a9598c",
+        "text_rules_sha256": "c9477e5d0094be211cd9dbde8ab0880ace0f7b167e4466c4d70e46eec5405120",
+        "version": "0.1.11"
+      },
+      "findings": [],
+      "input_digest": "35d81753a5b3d2236512200e9a0efb1df5378359535dd8a57ea8fe9c32d142da",
+      "inventory": [
+        {
+          "class": "instructions",
+          "path": "AGENTS.md",
+          "severity": "INFO",
+          "why": "read as standing instructions by coding agents"
+        },
+        {
+          "class": "agent_settings",
+          "path": ".claude/settings.json",
+          "severity": "MEDIUM",
+          "why": "can define hooks that execute shell commands on agent events"
+        }
+      ],
+      "manifest": [
+        {
+          "kind": "directory",
+          "path": ".claude"
+        },
+        {
+          "executable": false,
+          "kind": "file",
+          "path": ".claude/settings.json",
+          "sha256": "ca3d163bab055381827226140568f3bef7eaac187cebd76878e0b63e9e442356"
+        },
+        {
+          "executable": false,
+          "kind": "file",
+          "path": "AGENTS.md",
+          "sha256": "8a4e3b7c72b4e70594c9723e78351db84c2a86149f80784b25ff3e8833f3f424"
+        },
+        {
+          "executable": false,
+          "kind": "file",
+          "path": "README.md",
+          "sha256": "913f56a30172b5d77e4a162a4ac614b69640f2ac1281ffa7c39766a0cb4e46cf"
+        }
+      ],
+      "policy": {
+        "digest": "5daa23de347bbd6b6c82a8382b5604820b4e0eed4b7e3ee73d11ccd2a5967318",
+        "source": "built-in"
+      },
+      "schema_version": 1,
+      "scope": {
+        "builtin_excluded_directories": [
+          ".git",
+          ".mypy_cache",
+          ".next",
+          ".tox",
+          ".venv",
+          "__pycache__",
+          "build",
+          "dist",
+          "node_modules",
+          "target",
+          "venv"
+        ],
+        "bytes_read": 70,
+        "complete": true,
+        "errors": [],
+        "inspected": [
+          {
+            "analyses": [
+              "text-patterns",
+              "scan_claude_settings"
+            ],
+            "path": ".claude/settings.json"
+          },
+          {
+            "analyses": [
+              "text-patterns"
+            ],
+            "path": "AGENTS.md"
+          },
+          {
+            "analyses": [
+              "text-patterns"
+            ],
+            "path": "README.md"
+          }
+        ],
+        "limits": {
+          "depth": 64,
+          "entries": 10000,
+          "file_bytes": 1000000,
+          "findings": 10000,
+          "line_characters": 4096,
+          "total_bytes": 32000000
+        },
+        "skipped": [],
+        "text_extensions": [
+          "",
+          ".bash",
+          ".cfg",
+          ".envrc",
+          ".ini",
+          ".js",
+          ".json",
+          ".md",
+          ".mdc",
+          ".py",
+          ".sh",
+          ".toml",
+          ".ts",
+          ".txt",
+          ".yaml",
+          ".yml",
+          ".zsh"
+        ]
+      },
+      "suppressed_findings": [],
+      "target_requests": [],
+      "threshold": "high",
+      "version": "0.1.11"
+    },
+    "schema": "azt.review.v1",
+    "source_report_sha256": "e1d0d8c43546364f436da22acec02d5f7cb8875790822905ba52512b03e4c7bd"
+  },
+  "comparability": {
+    "reasons": [],
+    "status": "comparable"
+  },
+  "content": {
+    "added": [],
+    "modified": [
+      "AGENTS.md"
+    ],
+    "removed": [],
+    "unavailable": []
+  },
+  "differences": {},
+  "exceptions": {
+    "added": [],
+    "removed": []
+  },
+  "findings": {
+    "new": [
+      {
+        "description": "Network fetch to a non-allowlisted host in an instruction/setup context",
+        "excerpt": "[omitted in review export]",
+        "line": 1,
+        "path": "AGENTS.md",
+        "rule": "net.fetch_unknown",
+        "severity": "MEDIUM"
+      },
+      {
+        "description": "Pipe-to-shell: downloads and executes remote code in one step",
+        "excerpt": "[omitted in review export]",
+        "line": 1,
+        "path": "AGENTS.md",
+        "rule": "net.pipe_shell",
+        "severity": "HIGH"
+      }
+    ],
+    "no_longer_observed": [],
+    "persisting": [],
+    "unresolved": []
+  },
+  "matching_method": "Exact case-sensitive relative path; findings grouped by rule/path/severity with multiplicity. No content excerpt identity, rename merge, exception inheritance or fix inference.",
+  "meaningful_delta": true,
+  "notice": "Informational review only. Reports are untrusted assertions; hashes and schema validation do not authenticate them. No longer observed does not mean proven fixed. No receipt, authorization, upload or target execution occurs.",
+  "rename_candidates": [],
+  "schema": "azt.changes.v1",
+  "surfaces": {
+    "added": [],
+    "modified": [
+      "AGENTS.md"
+    ],
+    "removed": [],
+    "unavailable": []
+  },
+  "target_requests": {
+    "added": [],
+    "removed": []
+  }
+}

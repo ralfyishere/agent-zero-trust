@@ -1,0 +1,192 @@
+{
+  "benign_context_cases": 10,
+  "cases": [
+    {
+      "category": "benign/context",
+      "name": "test_benign_complete_catalog",
+      "outcome": "ok"
+    },
+    {
+      "category": "benign/context",
+      "name": "test_benign_deterministic",
+      "outcome": "ok"
+    },
+    {
+      "category": "benign/context",
+      "name": "test_benign_findings_reordered",
+      "outcome": "ok"
+    },
+    {
+      "category": "benign/context",
+      "name": "test_benign_guidance_context",
+      "outcome": "ok"
+    },
+    {
+      "category": "benign/context",
+      "name": "test_benign_identical",
+      "outcome": "ok"
+    },
+    {
+      "category": "benign/context",
+      "name": "test_benign_inventory_order",
+      "outcome": "ok"
+    },
+    {
+      "category": "benign/context",
+      "name": "test_benign_json_roundtrip",
+      "outcome": "ok"
+    },
+    {
+      "category": "benign/context",
+      "name": "test_benign_optional_admission_not_authority",
+      "outcome": "ok"
+    },
+    {
+      "category": "benign/context",
+      "name": "test_benign_readme_edit",
+      "outcome": "ok"
+    },
+    {
+      "category": "benign/context",
+      "name": "test_benign_surface_edit",
+      "outcome": "ok"
+    },
+    {
+      "category": "adversarial/compatibility",
+      "name": "test_changed_engine",
+      "outcome": "ok"
+    },
+    {
+      "category": "adversarial/compatibility",
+      "name": "test_changed_exception_is_not_inherited",
+      "outcome": "ok"
+    },
+    {
+      "category": "adversarial/compatibility",
+      "name": "test_changed_policy_and_threshold",
+      "outcome": "ok"
+    },
+    {
+      "category": "adversarial/compatibility",
+      "name": "test_cli_errors_and_no_receipt",
+      "outcome": "ok"
+    },
+    {
+      "category": "adversarial/compatibility",
+      "name": "test_contradictory_unchanged_findings",
+      "outcome": "ok"
+    },
+    {
+      "category": "adversarial/compatibility",
+      "name": "test_deleted_finding_not_fixed",
+      "outcome": "ok"
+    },
+    {
+      "category": "adversarial/compatibility",
+      "name": "test_duplicate_findings_not_lost",
+      "outcome": "ok"
+    },
+    {
+      "category": "adversarial/compatibility",
+      "name": "test_html_terminal_and_secrets",
+      "outcome": "ok"
+    },
+    {
+      "category": "adversarial/compatibility",
+      "name": "test_inventory_label",
+      "outcome": "ok"
+    },
+    {
+      "category": "adversarial/compatibility",
+      "name": "test_legacy_missing_provenance",
+      "outcome": "ok"
+    },
+    {
+      "category": "adversarial/compatibility",
+      "name": "test_line_shift_uncertain",
+      "outcome": "ok"
+    },
+    {
+      "category": "adversarial/compatibility",
+      "name": "test_long_path_visible_or_rejected",
+      "outcome": "ok"
+    },
+    {
+      "category": "adversarial/compatibility",
+      "name": "test_manifest_and_path_integrity",
+      "outcome": "ok"
+    },
+    {
+      "category": "adversarial/compatibility",
+      "name": "test_new_instruction_and_hook",
+      "outcome": "ok"
+    },
+    {
+      "category": "adversarial/compatibility",
+      "name": "test_reduced_scope",
+      "outcome": "ok"
+    },
+    {
+      "category": "adversarial/compatibility",
+      "name": "test_rename_candidate_not_identity",
+      "outcome": "ok"
+    },
+    {
+      "category": "adversarial/compatibility",
+      "name": "test_resource_bounds",
+      "outcome": "ok"
+    },
+    {
+      "category": "adversarial/compatibility",
+      "name": "test_safe_create_only_output",
+      "outcome": "ok"
+    },
+    {
+      "category": "adversarial/compatibility",
+      "name": "test_self_suppression",
+      "outcome": "ok"
+    },
+    {
+      "category": "adversarial/compatibility",
+      "name": "test_special_and_linked_input",
+      "outcome": "ok"
+    },
+    {
+      "category": "adversarial/compatibility",
+      "name": "test_stale_report_exception_rejected",
+      "outcome": "ok"
+    },
+    {
+      "category": "adversarial/compatibility",
+      "name": "test_unaccounted_scope_rejected",
+      "outcome": "ok"
+    },
+    {
+      "category": "adversarial/compatibility",
+      "name": "test_unreadable_absence_not_deletion",
+      "outcome": "ok"
+    },
+    {
+      "category": "adversarial/compatibility",
+      "name": "test_unreadable_not_resolved",
+      "outcome": "ok"
+    },
+    {
+      "category": "adversarial/compatibility",
+      "name": "test_unsupported_and_malformed",
+      "outcome": "ok"
+    }
+  ],
+  "cases_sha256": "f87e3a96642d904160d6c80a60def9113eb79d182aaffc2a8b791a2a19b26217",
+  "failed": 0,
+  "installed_version": "0.1.11; Python 3.11.15",
+  "passed": 35,
+  "platform": "Darwin 25.6.0",
+  "runtime_trials": 0,
+  "schema": "azt.review-evaluation.v1",
+  "scope": "Assertion-based synthetic comparison/report regressions, not real-world detection accuracy. See lab for benign finding counts.",
+  "seconds": 0.118,
+  "skipped": 0,
+  "test_source_sha256": "97d4ea5608cfa093e8f05d0d7f6a06427e375fc2163766d321a9acd403506661",
+  "total": 35
+}

@@ -12,7 +12,7 @@ AZT is a deterministic, offline scanner. It flags known suspicious patterns,
 reports inspection gaps, and keeps the target from silently choosing its own
 exceptions. No model, account, telemetry or runtime dependency is required.
 
-[Released package](https://pypi.org/project/agent-zero-trust/) · [CI](https://github.com/ralfyishere/agent-zero-trust/actions/workflows/ci.yml) · [MIT](LICENSE)
+[Released package](https://pypi.org/project/agent-zero-trust/) · [CI](https://github.com/ralfyishere/agent-zero-trust/actions/workflows/ci.yml) · [MIT](https://github.com/ralfyishere/agent-zero-trust/blob/main/LICENSE)
 
 Released: **0.1.10**. This branch prepares **0.1.11**, not yet published.
 
@@ -54,7 +54,7 @@ those reports, too. Comparison exits 0 when it completes, even if it finds chang
 or reduced comparability; 2 means invalid input/output. It never approves changes.
 “No longer observed” is not “proven fixed.” There is no automatic repair or watcher.
 
-[Try the four-case offline lab](examples/change-review/README.md), including a
+[Try the four-case offline lab](https://github.com/ralfyishere/agent-zero-trust/blob/feat/public-change-review/examples/change-review/README.md), including a
 benign edit and an incomplete comparison. Use the candidate installation there;
 the released 0.1.10 package does not have these commands. No Docker or hook needed.
 

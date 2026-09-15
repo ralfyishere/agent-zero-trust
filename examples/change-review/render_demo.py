@@ -44,8 +44,8 @@ def main():
             browser=p.chromium.launch(chromium_sandbox=True)
             page=browser.new_page(viewport={'width':440,'height':820})
             for i in range(4):
-                page.set_content(frame(i));page.screenshot(path=str(args.output/f'frame-{i}.png'))
-            page.set_content(frame());page.screenshot(path=str(args.output/'demo.png'))
+                page.set_content('<style>body{margin:0}</style>'+frame(i));page.screenshot(path=str(args.output/f'frame-{i}.png'))
+            page.set_content('<style>body{margin:0}</style>'+frame());page.screenshot(path=str(args.output/'demo.png'))
             browser.close()
         images=[Image.open(args.output/f'frame-{i}.png').convert('P',palette=Image.Palette.ADAPTIVE,colors=96) for i in range(4)]
         images[0].save(args.output/'demo.gif',save_all=True,append_images=images[1:],duration=3500,loop=0,optimize=True)

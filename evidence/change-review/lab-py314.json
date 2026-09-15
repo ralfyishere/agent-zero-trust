@@ -1,0 +1,45 @@
+{
+  "cases": [
+    {
+      "case": "unchanged",
+      "comparability": "comparable",
+      "meaningful_delta": false,
+      "new": 0,
+      "status": "passed",
+      "unresolved": 0
+    },
+    {
+      "case": "benign",
+      "comparability": "comparable",
+      "meaningful_delta": true,
+      "new": 0,
+      "status": "passed",
+      "unresolved": 0
+    },
+    {
+      "case": "concerning",
+      "comparability": "comparable",
+      "meaningful_delta": true,
+      "new": 2,
+      "status": "passed",
+      "unresolved": 0
+    },
+    {
+      "case": "incomplete",
+      "comparability": "reduced",
+      "meaningful_delta": true,
+      "new": 0,
+      "status": "passed",
+      "unresolved": 2
+    }
+  ],
+  "failed": 0,
+  "fixture_sha256": "262853e88d390eb648fd13877f6f54bf77d8be59cb6947ff5e0d502a1e72308a",
+  "limits": "Synthetic offline scan/review; no target execution, model or runtime-containment trial.",
+  "passed": 4,
+  "planned": 4,
+  "platform": "Darwin 25.6.0",
+  "schema": "azt.change-review-lab-results.v1",
+  "seconds": 1.741,
+  "version": "agent-zero-trust 0.1.11"
+}
