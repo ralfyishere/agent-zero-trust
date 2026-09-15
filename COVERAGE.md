@@ -1,5 +1,20 @@
 # Coverage and known limitations
 
+## Saved-report review (0.1.11 candidate)
+
+`azt changes` compares observations, not live repository state or authenticity.
+It supports complete scan-v1 report shapes, including incomplete inspections;
+old reports without engine/approval digests get explicit reduced-comparability
+cautions. Unknown versions fail. It does not ingest arbitrary tool output.
+`azt explain` covers all 23 currently emitted rules; that is guidance coverage,
+not detection completeness. See [semantics and bounds](docs/change-review.md).
+
+The [four-case lab](examples/change-review/README.md) and frozen report regression
+pack are separate from the legacy detection corpus and FS-001 runtime evidence.
+Their passing assertions are not a real-world accuracy or safety percentage.
+Recognized special-surface inventory and inspected content counts have different
+meanings. README content can produce findings with an empty special inventory.
+
 `azt safety` is separate from the corpus score. It parses the explicit
 [AZT-FS-001 Compose JSON subset](packs/AZT-FS-001/v1/README.md) and compares
 selected bind access. Inventoried agent formats do not thereby become supported

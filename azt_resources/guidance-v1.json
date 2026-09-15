@@ -1,0 +1,166 @@
+{
+  "schema": "azt.guidance-catalog.v1",
+  "rules": {
+    "net.pipe_shell": {
+      "meaning": "Pipe-to-shell: downloads and executes remote code in one step",
+      "why_review": "Downloading directly into an interpreter removes a review step.",
+      "context_example": "A documented installer may legitimately fetch code.",
+      "limits": "Text patterns do not inspect the fetched bytes.",
+      "next_step": "Inspect the source and publisher; prefer a reviewed, pinned local artifact."
+    },
+    "net.fetch_unknown": {
+      "meaning": "Network fetch to a non-allowlisted host in an instruction/setup context",
+      "why_review": "The destination is outside the scanner's small allowlist, not necessarily malicious.",
+      "context_example": "A project may download public build inputs.",
+      "limits": "An allowlisted hostname is not a trust guarantee; redirects are not followed.",
+      "next_step": "Verify the destination, data sent and whether network access is necessary."
+    },
+    "net.reverse_shell": {
+      "meaning": "Reverse-shell shape (nc -e, /dev/tcp, socket-to-shell)",
+      "why_review": "An interactive shell can delegate broad process authority to another endpoint.",
+      "context_example": "A security training fixture may illustrate remote shells.",
+      "limits": "Pattern matching does not establish that a connection happened.",
+      "next_step": "Determine whether this is inert documentation; do not run it to investigate."
+    },
+    "net.dns_exec": {
+      "meaning": "Command material retrieved via DNS TXT records",
+      "why_review": "DNS-returned text may be used as executable input.",
+      "context_example": "DNS examples may document a diagnostic or security exercise.",
+      "limits": "The known-miss ledger includes table-wrapped forms this rule misses.",
+      "next_step": "Read the complete pipeline and establish who controls the returned material."
+    },
+    "exec.encoded": {
+      "meaning": "Encoded-then-executed content (base64/hex decoded into a shell or eval)",
+      "why_review": "Encoding can hide executable content from ordinary review.",
+      "context_example": "A test may intentionally decode a fixture.",
+      "limits": "This scanner does not decode or prove malicious intent.",
+      "next_step": "Inspect inert decoded content with a safe viewer; never evaluate it to decode."
+    },
+    "exec.always_run": {
+      "meaning": "Always-run directive: pressures the agent to execute on every session / without asking",
+      "why_review": "The wording pressures execution without considering current authority.",
+      "context_example": "A build guide may request a repeated local setup step.",
+      "limits": "Natural-language matching can flag harmless prose and miss paraphrases.",
+      "next_step": "Check whether the step is needed and who authorizes it."
+    },
+    "exec.destructive": {
+      "meaning": "Destructive command: irreversible deletion or force operations",
+      "why_review": "The command shape may irreversibly remove data or overwrite history.",
+      "context_example": "A migration guide may describe deleting an obsolete test database.",
+      "limits": "Presence is not evidence the operation was executed.",
+      "next_step": "Verify exact targets, backups and authorization before any execution."
+    },
+    "cred.env_source": {
+      "meaning": "Credential access: sources or reads secret/env/key files",
+      "why_review": "An agent could gain access to secrets beyond the task's needs.",
+      "context_example": "An application may load credentials from an approved environment.",
+      "limits": "No real credential validity or downstream use is checked.",
+      "next_step": "Review which values are needed; prefer narrowly scoped brokered access."
+    },
+    "exfil.pipe_out": {
+      "meaning": "Exfiltration shape: reads local data then sends it to a network endpoint",
+      "why_review": "Local data appears connected to an outbound command.",
+      "context_example": "An upload example may send a synthetic support bundle.",
+      "limits": "Static shape matching cannot establish actual data transfer.",
+      "next_step": "Inspect the exact data and authorized recipient without running the pipeline."
+    },
+    "secret.token_shape": {
+      "meaning": "Token-shaped string present in the tree (verify it is a placeholder)",
+      "why_review": "A credential-shaped string could be sensitive even in a public example.",
+      "context_example": "Documentation may include synthetic placeholders.",
+      "limits": "No validation call is made; this is not a comprehensive secrets scanner.",
+      "next_step": "Determine privately whether it is real; if exposed, use the provider's revocation process."
+    },
+    "secret.private_key": {
+      "meaning": "Private key material in the tree",
+      "why_review": "Private key material can grant access or signing authority.",
+      "context_example": "Cryptographic test suites may store explicitly public test keys.",
+      "limits": "A header match does not establish key validity or actual use.",
+      "next_step": "Confirm it is test-only and not trusted anywhere; handle real exposure privately."
+    },
+    "inject.instruction_override": {
+      "meaning": "Instruction-override language aimed at the agent",
+      "why_review": "The text asks an agent to replace higher-trust instructions.",
+      "context_example": "A security document may quote an attack.",
+      "limits": "Intent and cross-file context are not resolved.",
+      "next_step": "Separate quoted examples from intended policy; do not adopt target text as authority."
+    },
+    "inject.concealment": {
+      "meaning": "Tells the agent to hide activity from the human",
+      "why_review": "The wording may discourage informing the operator about actions.",
+      "context_example": "A privacy guide may describe not displaying sensitive information.",
+      "limits": "The same words can express legitimate privacy guidance.",
+      "next_step": "Check whose information is protected and whether operator review is being bypassed."
+    },
+    "inject.agent_directed": {
+      "meaning": "Agent-directed imperative in a general doc (docs are for humans; direct agent address is a smell)",
+      "why_review": "Agent-addressed prose can influence decisions outside a recognized instruction file.",
+      "context_example": "A repository may intentionally document instructions for assistants.",
+      "limits": "An address to an agent alone does not establish maliciousness.",
+      "next_step": "Review its provenance and intended scope rather than blindly deleting it."
+    },
+    "stealth.html_comment_imperative": {
+      "meaning": "Imperative instruction hidden in an HTML comment (invisible when rendered, visible to the model)",
+      "why_review": "Instructions can be visible to an agent but hidden in rendered Markdown.",
+      "context_example": "A documentation generator may use maintenance comments.",
+      "limits": "The scanner does not interpret every rendering context.",
+      "next_step": "Compare rendered and raw text and decide whether the instruction belongs there."
+    },
+    "stealth.hidden_unicode": {
+      "meaning": "Zero-width or bidirectional-override characters (can hide text from human review)",
+      "why_review": "Invisible or directional characters may obscure the text a reviewer sees.",
+      "context_example": "Some languages and typography legitimately need format characters.",
+      "limits": "Not every Unicode character is suspicious; visual intent is not inferred.",
+      "next_step": "Inspect escaped code points and language context before changing the file."
+    },
+    "mcp.server": {
+      "meaning": "MCP server declaration",
+      "why_review": "Tool-server declarations can introduce executable commands or remote services.",
+      "context_example": "A project may configure an approved local tool server.",
+      "limits": "A declaration is not proof the server started or its tools are safe.",
+      "next_step": "Review executable provenance, arguments, endpoint and granted data access."
+    },
+    "hooks.claude": {
+      "meaning": "Claude hook declaration",
+      "why_review": "Hooks can execute commands at lifecycle events.",
+      "context_example": "A formatting hook may be part of a reviewed workflow.",
+      "limits": "Only selected supported fields are structurally analyzed; no live editor test.",
+      "next_step": "Review event timing and exact commands before enabling them."
+    },
+    "perm.auto_approve": {
+      "meaning": "Dangerous or unrestricted command pre-approval",
+      "why_review": "Broad or dangerous allow entries can remove confirmation from important actions.",
+      "context_example": "A developer may intentionally approve a narrow local operation.",
+      "limits": "Matching selected entries is not complete vendor permission resolution.",
+      "next_step": "Check the effective permission scope and narrow it only after reviewing task needs."
+    },
+    "pkg.lifecycle": {
+      "meaning": "Package installation lifecycle command",
+      "why_review": "Lifecycle scripts can execute automatically during dependency setup.",
+      "context_example": "A package may compile native components during installation.",
+      "limits": "Dependency downloads and transitive scripts are not analyzed.",
+      "next_step": "Review scripts and dependencies before installation; do not install to inspect."
+    },
+    "ci.prt_checkout": {
+      "meaning": "Privileged PR event combined with candidate checkout",
+      "why_review": "A privileged PR event combined with candidate checkout can cross a trust boundary.",
+      "context_example": "A maintainer may intend to inspect a PR's source from a trusted workflow.",
+      "limits": "Textual workflow detection is not a full YAML or Actions semantic analysis.",
+      "next_step": "Check credential exposure and whether untrusted code can execute in that job."
+    },
+    "auto.vscode_folderopen": {
+      "meaning": "Folder-open task declaration",
+      "why_review": "Folder-open tasks may execute when the workspace is opened.",
+      "context_example": "A workspace may offer a reviewed background build task.",
+      "limits": "No claim about actual editor prompts or effective execution is made.",
+      "next_step": "Inspect the task and editor trust settings before opening with automation."
+    },
+    "fs.symlink_escape": {
+      "meaning": "Symlink resolving outside the repository",
+      "why_review": "The link points outside the declared repository boundary.",
+      "context_example": "A local development tree may link to shared dependencies.",
+      "limits": "AZT does not follow links; link presence makes the scan incomplete.",
+      "next_step": "Review the link separately; do not follow it merely to silence the finding."
+    }
+  }
+}

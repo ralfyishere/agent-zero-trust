@@ -304,7 +304,8 @@ def inspect(root, engine, policy_path=None):
         match = next((e for e in policy["exceptions"] if e["rule"] == finding["rule"]
                       and e["path"] == finding["path"] and e["sha256"] == hashes.get(finding["path"])), None)
         if match:
-            suppressed.append(dict(finding, exception={"reason": match["reason"], "policy": provenance}))
+            suppressed.append(dict(finding, exception={"reason": match["reason"], "policy": provenance,
+                                                       "file_sha256": match["sha256"]}))
         else:
             active.append(finding)
     key = lambda f: (engine.SEV_ORDER.get(f["severity"], 9), f["path"], f["line"], f["rule"])

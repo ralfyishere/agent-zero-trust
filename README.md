@@ -12,6 +12,11 @@ AZT is a deterministic, offline scanner. It flags known suspicious patterns,
 reports inspection gaps, and keeps the target from silently choosing its own
 exceptions. No model, account, telemetry or runtime dependency is required.
 
+[Released package](https://pypi.org/project/agent-zero-trust/) · [CI](https://github.com/ralfyishere/agent-zero-trust/actions/workflows/ci.yml) · [MIT](https://github.com/ralfyishere/agent-zero-trust/blob/main/LICENSE)
+
+Source version: **0.1.11**. See [releases](https://github.com/ralfyishere/agent-zero-trust/releases)
+and the package listing above for publication status.
+
 ## Install and scan
 
 Python 3.9+ on Linux or macOS. Installation downloads the package; scanning runs
@@ -28,6 +33,38 @@ Use a repository you are authorized to inspect. Add `--json` for scope, findings
 manifest and policy provenance. Exit codes: **0** passes the selected threshold;
 **1** has findings that meet it; **2** means incomplete inspection or an error.
 A clean scan is not proof of safety. You do not need to install a hook.
+
+## New in 0.1.11: what changed?
+
+For a developer returning to an unfamiliar repository, AZT compares two saved
+scans so changes to instructions, configuration, findings and inspection scope
+are visible together. Review the finding's offline guidance and export a local
+report instead of manually comparing two long scan outputs.
+
+```sh
+azt scan /path/to/project --json > before.json
+# Make your authorized project change; keep reports outside the project.
+azt scan /path/to/project --json > after.json
+azt changes --before before.json --after after.json
+azt explain net.pipe_shell
+azt changes --before before.json --after after.json --format html --output review.html
+```
+
+Scan exits 1 and 2 still mean findings and incomplete inspection. Save and review
+those reports, too. Comparison exits 0 when it completes, even if it finds changes
+or reduced comparability; 2 means invalid input/output. It never approves changes.
+“No longer observed” is not “proven fixed.” There is no automatic repair or watcher.
+
+[Try the four-case offline lab](https://github.com/ralfyishere/agent-zero-trust/blob/main/examples/change-review/README.md), including a
+benign edit and an incomplete comparison. These commands were added in 0.1.11;
+earlier packages do not have them. No Docker or hook needed.
+
+| Capability | Support |
+| --- | --- |
+| Repository intake, visible exceptions and inspection gaps | Existing deterministic scanner; Python 3.9+, Linux/macOS |
+| Saved scan comparison, rule guidance, static JSON/text/HTML export | Added in 0.1.11; bounded scan-v1 inputs; offline |
+| Optional FS-001 configuration check/repair/retest | Existing experimental synthetic Docker/Linux case; historical evidence only |
+| General agent containment, continuous authorization, live model integration | Not provided |
 
 ## See a real scan
 

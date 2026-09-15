@@ -3,9 +3,9 @@
 Version 0.1.9 was published September 15, 2026 from source
 `6f102f2c5d24e3d3428dadeea49574403bc63bee` in
 [run 34957294921](https://github.com/ralfyishere/agent-zero-trust/actions/runs/34957294921).
-The next scoped release, 0.1.10, corrects presentation and PyPI metadata only.
-It must receive its own build, artifact identities and owner approval. The
-original runtime evidence does not become a new runtime trial for that build.
+Historical clarification: 0.1.10 subsequently shipped as a presentation-only
+maintenance release. Each future release needs its own build, artifact identities
+and explicit owner approval. Old runtime evidence is not a new artifact trial.
 
 Repository intake remains primary. The optional FS-001 pack and its accepted
 Docker/Linux evidence are unchanged by publication plumbing. This workflow does
@@ -42,13 +42,13 @@ A failure emits no verified release manifest and prevents transfer/publication.
 
 ## Actual release checkpoint — owner action, not part of PR validation
 
-1. Review and merge the separate safeguards PR. Confirm the intended source SHA
+1. Review and merge the intended candidate PR. Confirm the intended source SHA
    and that relevant runtime/probe/evaluator bytes still match accepted evidence.
    Do not reuse the old runtime wheel's hash for a new build.
 2. Confirm the *current PyPI account configuration* identifies Trusted Publisher
    owner `ralfyishere`, repository `agent-zero-trust`, workflow `publish.yml`,
    environment `pypi`. GitHub workflow comments cannot verify PyPI settings.
-3. Separately authorize and create the release tag (next: `v0.1.10`) at the chosen source,
+3. Separately authorize and create `v<package-version>` at the chosen source,
    then publish the GitHub Release only when ready to initiate the gated workflow.
    No tag or publication is created by the helper or PR validation.
 4. The build explicitly checks out the event SHA; the helper requires a clean

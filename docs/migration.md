@@ -1,5 +1,28 @@
 # Migrating to 0.1.9 and later
 
+## 0.1.11
+
+Existing scan exit codes and findings are preserved. The human inventory header
+now names **recognized special surfaces**, not all possible agent influences.
+Historical demo output retains its original version and wording.
+
+Scan-v1 gains optional `engine` provenance and `suppressed_findings[].exception.file_sha256`.
+Consumers should accept these additive fields. New `azt.review.v1` and
+`azt.changes.v1` contracts are separate from scan-v1 and admission receipts.
+Supported older scan-v1 reports load, but missing provenance reduces comparison
+confidence; pre-schema reports and unknown versions require a fresh scan.
+
+`changes`, `report` and `explain` return 0 for a completed informational operation
+and 2 for invalid input/output. A zero comparison exit is not a clean scan or
+approval. Exports create new files only; archive an old output yourself or choose
+a new filename. Use canonical paths without symlink components.
+
+No gate is needed for ordinary edits and repeated comparisons. If you opted into
+strict admission, this engine change invalidates old receipts: explicitly review
+and re-admit through the existing operator workflow, never silently refresh.
+
+## Earlier versions
+
 Version 0.1.9 was published September 15, 2026. Version 0.1.10 is a
 presentation/metadata maintenance update with no runtime behavior change.
 Its version identity still changes the engine-bound receipt: re-admit explicitly

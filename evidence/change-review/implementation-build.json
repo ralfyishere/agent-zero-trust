@@ -1,0 +1,63 @@
+{
+  "build": {
+    "exit_code": 0,
+    "name": "build-once",
+    "output_bytes": 21900,
+    "output_sha256": "50a6eedaf396237bba941aabf4c005013a8527f13bff8fa032d1f06025b0981e",
+    "seconds": 0.387
+  },
+  "dependencies": {
+    "packaging": "26.0",
+    "setuptools": "83.0.0",
+    "wheel": "0.47.0"
+  },
+  "distributions": {
+    "agent_zero_trust-0.1.11-py3-none-any.whl": {
+      "bytes": 58795,
+      "sha256": "43cfa131a8ff36b75994ee19c0cac3a238b1181a366a52203a967276e096f0ec"
+    },
+    "agent_zero_trust-0.1.11.tar.gz": {
+      "bytes": 778151,
+      "sha256": "dd842022ee58feebc9f0c0fdfe05cb5f862759885fce02ab0bd1b83cfc608f17"
+    }
+  },
+  "event": "local",
+  "pip": "26.1.2",
+  "python": "3.11.15",
+  "repository": "local",
+  "run_attempt": "1",
+  "run_id": "local",
+  "schema": "azt.release-manifest.v1",
+  "scope": "offline scanner/unit/installed wheel/extracted sdist tests; no new runtime trial",
+  "source": {
+    "sha": "0296facec2565668386c3c0d5dbacb734e6241e3",
+    "tag": "",
+    "tree": "8530120c23544e84f4e48b20bfe083ae9673d50d",
+    "version": "0.1.11"
+  },
+  "status": "verified",
+  "tests": [
+    {
+      "exit_code": 0,
+      "name": "scanner",
+      "output_bytes": 3040,
+      "output_sha256": "71119e1b64a16bbd9d47a796f964330ed3e2bb2f3c567315bb95436c731fa929",
+      "seconds": 0.281
+    },
+    {
+      "exit_code": 0,
+      "name": "unit",
+      "output_bytes": 17522,
+      "output_sha256": "4906fb827083a479790d3d938eb7149995f71c59c698dfb822de68958e9ee591",
+      "reported_unit_tests": 137,
+      "seconds": 7.604
+    },
+    {
+      "exit_code": 0,
+      "name": "installed-artifacts",
+      "output_bytes": 563,
+      "output_sha256": "daf6abe956621134da61c35cdc281e4981909e3e3401c88799d29577cb166d7f",
+      "seconds": 12.747
+    }
+  ]
+}

@@ -83,7 +83,9 @@ def main():
         source = unpack / ("agent_zero_trust-" + version)
         for needed in ("action.yml", "schemas/policy-v1.schema.json", "corpus/hook-trap/.claude/settings.json",
                        "packs/AZT-FS-001/v1/candidate.compose.json", "packs/AZT-FS-001/v1/variant/candidate.compose.json",
-                       "schemas/safety-evidence-v2.schema.json", "scripts/test_safety_integration.py"):
+                       "schemas/safety-evidence-v2.schema.json", "scripts/test_safety_integration.py",
+                       "examples/change-review/fixtures.json", "azt_resources/guidance-v1.json",
+                       "azt_resources/changes-v1.schema.json"):
             assert (source / needed).is_file(), "sdist missing " + needed
         assert not (source / ".azt-local").exists(), "private continuity state must not ship"
         result = subprocess.run([sys.executable, "test_azt.py"], cwd=source,
@@ -141,6 +143,11 @@ def main():
         for test in ("test_config.py", "test_safety.py", "test_safety_reporting.py"):
             run([python, "-I", "-m", "unittest", "discover", "-s", root / "tests", "-p", test, "-q"])
         print("SAFETY ARTIFACT PASS: installed adapter/evaluator tests; repeatable CLI comparison; no Docker trials")
+        run([python, "-I", "-m", "unittest", "discover", "-s", root / "tests", "-p", "test_review.py", "-q"])
+        for resource in ("review-v1", "changes-v1", "guidance-v1"):
+            run([python, "-I", "-c", "from importlib.resources import files; import json; json.loads(files('azt_resources').joinpath('"+resource+".schema.json').read_text())"])
+        run([python, "-I", root / "scripts/change_review_lab.py", "--cli", cli, "--output", work / "lab"])
+        print("REVIEW ARTIFACT PASS: installed review regressions, catalog/schemas, four-case scan/compare/explain/HTML/JSON lab")
         print("ARTIFACT PASS: clean offline wheel install; installed import; help/version; "
               "deterministic JSON; benign=0; malicious=1 with net.pipe_shell; invalid target=2")
     return 0
