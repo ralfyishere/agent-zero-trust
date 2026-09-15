@@ -1,42 +1,158 @@
-name: Publish to PyPI
+name: Release candidate validation and publication
 
-# Trusted Publishing: no API token anywhere. PyPI trusts this exact
-# repo + workflow + environment via OIDC. Triggered by publishing a
-# GitHub Release (or manually for a dry-run build check).
+# PRs/manual checks only build and verify. Only release.published can request
+# the pypi environment. Never approve a deployment as part of validation.
 on:
+  pull_request:
+    paths:
+      - ".github/workflows/publish.yml"
+      - "scripts/release_candidate.py"
+      - "tests/test_release.py"
+      - "docs/publication.md"
+      - "MANIFEST.in"
   release:
     types: [published]
   workflow_dispatch:
 
-# Least privilege for every job; the publish job re-grants id-token: write
-# for OIDC trusted publishing (job-level permissions replace this block).
 permissions:
   contents: read
 
+# Resolve full commits against official upstream tags when reviewing updates.
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+          fetch-depth: 0
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
         with:
           python-version: "3.11"
-      - run: python -m pip install build && python -m build
-      - uses: actions/upload-artifact@v4
+      - name: Explicit build-tool download from PyPI
+        run: |
+          python -m pip --isolated --disable-pip-version-check --no-cache-dir install --only-binary=:all: --no-deps setuptools==83.0.0 wheel==0.47.0 packaging==26.0
+      - name: Build once, test exact distributions, record approval identities
+        env:
+          AZT_RELEASE_TAG: ${{ github.event_name == 'release' && github.event.release.tag_name || '' }}
+        run: python scripts/release_candidate.py --output "$RUNNER_TEMP/azt-release"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
-          name: dist
-          path: dist/
+          name: release-candidate
+          path: ${{ runner.temp }}/azt-release/
+          if-no-files-found: error
+          retention-days: 7
+
+  verify-transfer:
+    needs: build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 3
+    # No environment, credentials or source checkout in this job.
+    steps:
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: release-candidate
+          path: release-candidate
+      - name: Verify transferred bytes without executing package code
+        env:
+          AZT_RELEASE_TAG: ${{ github.event_name == 'release' && github.event.release.tag_name || '' }}
+        run: |
+          # BEGIN FIXED TRANSFER VERIFIER
+          python3 - <<'PY'
+          import hashlib, json, os, pathlib, re, stat
+          root = pathlib.Path(os.environ["GITHUB_WORKSPACE"]) / "release-candidate"
+          def require(ok, message):
+              if not ok:
+                  raise SystemExit(message)
+          def regular(path, limit):
+              info = path.lstat()
+              require(stat.S_ISREG(info.st_mode) and 0 < info.st_size <= limit, "unsafe or oversized transferred file")
+              return path.read_bytes()
+          require(not root.is_symlink() and root.is_dir(), "invalid transfer root")
+          require({p.name for p in root.iterdir()} == {"dist", "release-manifest.json"}, "unexpected transfer contents")
+          manifest = json.loads(regular(root / "release-manifest.json", 65536))
+          require(manifest["schema"] == "azt.release-manifest.v1" and manifest["status"] == "verified", "unverified manifest")
+          require(manifest["source"]["sha"] == os.environ["GITHUB_SHA"], "source mismatch")
+          require(manifest["run_id"] == os.environ["GITHUB_RUN_ID"] and manifest["run_attempt"] == os.environ["GITHUB_RUN_ATTEMPT"], "run mismatch")
+          require(manifest["repository"] == os.environ["GITHUB_REPOSITORY"] and manifest["event"] == os.environ["GITHUB_EVENT_NAME"], "event/repository mismatch")
+          require(manifest["source"]["tag"] == os.environ.get("AZT_RELEASE_TAG", ""), "tag mismatch")
+          version = manifest["source"]["version"]
+          require(isinstance(version, str) and re.fullmatch(r"[0-9]+\.[0-9]+\.[0-9]+", version), "invalid version")
+          if os.environ["GITHUB_EVENT_NAME"] == "release":
+              require(manifest["source"]["tag"] == "v" + version, "release version mismatch")
+          require(manifest["build"]["exit_code"] == 0, "build failed")
+          require([t["name"] for t in manifest["tests"]] == ["scanner", "unit", "installed-artifacts"] and all(t["exit_code"] == 0 for t in manifest["tests"]), "test groups did not pass")
+          names = {"agent_zero_trust-" + version + "-py3-none-any.whl", "agent_zero_trust-" + version + ".tar.gz"}
+          dist = root / "dist"
+          require(not dist.is_symlink() and dist.is_dir(), "invalid distribution directory")
+          require(set(manifest["distributions"]) == names and {p.name for p in dist.iterdir()} == names, "unexpected distributions")
+          for name in sorted(names):
+              data = regular(dist / name, 16 * 1024 * 1024)
+              expected = manifest["distributions"][name]
+              require(len(data) == expected["bytes"] and hashlib.sha256(data).hexdigest() == expected["sha256"], "transferred distribution mismatch")
+          print("TRANSFER VERIFIED: exact source/run, passing test record, wheel and sdist hashes; no package code executed")
+          PY
+          # END FIXED TRANSFER VERIFIER
 
   publish:
-    if: github.event_name == 'release'
-    needs: build
-    runs-on: ubuntu-latest
-    environment: pypi
+    if: github.event_name == 'release' && github.event.action == 'published' && startsWith(github.ref, 'refs/tags/v')
+    needs: [build, verify-transfer]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    environment:
+      name: pypi
+      url: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
     permissions:
       id-token: write
+    # No checkout, package tests, helper invocation or rebuild with credentials.
+    # Fixed verifier duplication is intentional; regression tests require parity.
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
         with:
-          name: dist
-          path: dist/
-      - uses: pypa/gh-action-pypi-publish@release/v1
+          name: release-candidate
+          path: release-candidate
+      - name: Verify transferred bytes without executing package code
+        env:
+          AZT_RELEASE_TAG: ${{ github.event_name == 'release' && github.event.release.tag_name || '' }}
+        run: |
+          # BEGIN FIXED TRANSFER VERIFIER
+          python3 - <<'PY'
+          import hashlib, json, os, pathlib, re, stat
+          root = pathlib.Path(os.environ["GITHUB_WORKSPACE"]) / "release-candidate"
+          def require(ok, message):
+              if not ok:
+                  raise SystemExit(message)
+          def regular(path, limit):
+              info = path.lstat()
+              require(stat.S_ISREG(info.st_mode) and 0 < info.st_size <= limit, "unsafe or oversized transferred file")
+              return path.read_bytes()
+          require(not root.is_symlink() and root.is_dir(), "invalid transfer root")
+          require({p.name for p in root.iterdir()} == {"dist", "release-manifest.json"}, "unexpected transfer contents")
+          manifest = json.loads(regular(root / "release-manifest.json", 65536))
+          require(manifest["schema"] == "azt.release-manifest.v1" and manifest["status"] == "verified", "unverified manifest")
+          require(manifest["source"]["sha"] == os.environ["GITHUB_SHA"], "source mismatch")
+          require(manifest["run_id"] == os.environ["GITHUB_RUN_ID"] and manifest["run_attempt"] == os.environ["GITHUB_RUN_ATTEMPT"], "run mismatch")
+          require(manifest["repository"] == os.environ["GITHUB_REPOSITORY"] and manifest["event"] == os.environ["GITHUB_EVENT_NAME"], "event/repository mismatch")
+          require(manifest["source"]["tag"] == os.environ.get("AZT_RELEASE_TAG", ""), "tag mismatch")
+          version = manifest["source"]["version"]
+          require(isinstance(version, str) and re.fullmatch(r"[0-9]+\.[0-9]+\.[0-9]+", version), "invalid version")
+          if os.environ["GITHUB_EVENT_NAME"] == "release":
+              require(manifest["source"]["tag"] == "v" + version, "release version mismatch")
+          require(manifest["build"]["exit_code"] == 0, "build failed")
+          require([t["name"] for t in manifest["tests"]] == ["scanner", "unit", "installed-artifacts"] and all(t["exit_code"] == 0 for t in manifest["tests"]), "test groups did not pass")
+          names = {"agent_zero_trust-" + version + "-py3-none-any.whl", "agent_zero_trust-" + version + ".tar.gz"}
+          dist = root / "dist"
+          require(not dist.is_symlink() and dist.is_dir(), "invalid distribution directory")
+          require(set(manifest["distributions"]) == names and {p.name for p in dist.iterdir()} == names, "unexpected distributions")
+          for name in sorted(names):
+              data = regular(dist / name, 16 * 1024 * 1024)
+              expected = manifest["distributions"][name]
+              require(len(data) == expected["bytes"] and hashlib.sha256(data).hexdigest() == expected["sha256"], "transferred distribution mismatch")
+          print("TRANSFER VERIFIED: exact source/run, passing test record, wheel and sdist hashes; no package code executed")
+          PY
+          # END FIXED TRANSFER VERIFIER
+      - uses: pypa/gh-action-pypi-publish@76f52bc884231f62b9a034ebfe128415bbaabdfc # v1.12.4
+        with:
+          packages-dir: release-candidate/dist/
