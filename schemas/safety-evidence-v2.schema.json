@@ -1,0 +1,324 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "AZT safety evidence v2",
+  "oneOf": [
+    {
+      "type": "object",
+      "required": [
+        "schema_version",
+        "operation",
+        "status",
+        "comparison",
+        "repair",
+        "execution"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": 2
+        },
+        "operation": {
+          "enum": [
+            "compare",
+            "check"
+          ]
+        },
+        "status": {
+          "enum": [
+            "compared",
+            "passed",
+            "failed",
+            "blocked"
+          ]
+        },
+        "comparison": {
+          "type": "object"
+        },
+        "repair": {
+          "type": "object"
+        },
+        "execution": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/$defs/execution"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "schema_version",
+        "status",
+        "error",
+        "execution_outcome",
+        "runtime_denial_credited"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": 2
+        },
+        "status": {
+          "enum": [
+            "blocked",
+            "error"
+          ]
+        },
+        "error": {
+          "type": "string"
+        },
+        "execution_outcome": {
+          "const": "unknown; no complete execution record available"
+        },
+        "runtime_denial_credited": {
+          "const": false
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "stages": {
+      "type": "object",
+      "required": [
+        "container_started",
+        "probe_returned",
+        "probe_protocol_completed",
+        "result_exported",
+        "archive_validated",
+        "verification_completed"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "container_started": {
+          "type": "boolean"
+        },
+        "probe_returned": {
+          "type": "boolean"
+        },
+        "probe_protocol_completed": {
+          "type": "boolean"
+        },
+        "result_exported": {
+          "type": "boolean"
+        },
+        "archive_validated": {
+          "type": "boolean"
+        },
+        "verification_completed": {
+          "type": "boolean"
+        }
+      }
+    },
+    "counts": {
+      "type": "object",
+      "required": [
+        "planned",
+        "stages",
+        "outcomes"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "planned": {
+          "const": 3
+        },
+        "stages": {
+          "type": "object",
+          "required": [
+            "container_started",
+            "probe_returned",
+            "probe_protocol_completed",
+            "result_exported",
+            "archive_validated",
+            "verification_completed"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "container_started": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 3
+            },
+            "probe_returned": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 3
+            },
+            "probe_protocol_completed": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 3
+            },
+            "result_exported": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 3
+            },
+            "archive_validated": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 3
+            },
+            "verification_completed": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 3
+            }
+          }
+        },
+        "outcomes": {
+          "type": "object",
+          "required": [
+            "passed",
+            "failed",
+            "blocked",
+            "not_run",
+            "unknown"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "passed": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 3
+            },
+            "failed": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 3
+            },
+            "blocked": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 3
+            },
+            "not_run": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 3
+            },
+            "unknown": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 3
+            }
+          }
+        }
+      }
+    },
+    "trial": {
+      "type": "object",
+      "required": [
+        "phase",
+        "status",
+        "stages"
+      ],
+      "properties": {
+        "phase": {
+          "enum": [
+            "baseline",
+            "misconfigured",
+            "repaired"
+          ]
+        },
+        "status": {
+          "enum": [
+            "passed",
+            "failed",
+            "blocked",
+            "not_run",
+            "unknown"
+          ]
+        },
+        "stages": {
+          "$ref": "#/$defs/stages"
+        },
+        "error_stage": {
+          "enum": [
+            "create",
+            "control_readback",
+            "start",
+            "probe_exec",
+            "probe_decode",
+            "result_export",
+            "result_archive_validation"
+          ]
+        },
+        "independent_checks": {
+          "type": "object",
+          "required": [
+            "challenge_response_verified",
+            "probe_protocol_completed",
+            "edited_file_matches",
+            "legitimate_task_completed",
+            "positive_control_confirmed",
+            "passed"
+          ]
+        }
+      }
+    },
+    "execution": {
+      "type": "object",
+      "required": [
+        "schema_version",
+        "pack",
+        "pack_version",
+        "status",
+        "source",
+        "backend",
+        "platform",
+        "trials",
+        "counts",
+        "requested_policy",
+        "policy_sha256",
+        "limitations"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": 2
+        },
+        "pack": {
+          "const": "AZT-FS-001"
+        },
+        "pack_version": {
+          "const": 1
+        },
+        "status": {
+          "enum": [
+            "passed",
+            "failed",
+            "blocked"
+          ]
+        },
+        "trials": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 3,
+          "items": {
+            "$ref": "#/$defs/trial"
+          }
+        },
+        "counts": {
+          "$ref": "#/$defs/counts"
+        },
+        "backend": {
+          "type": "object",
+          "not": {
+            "required": [
+              "runtime_trials"
+            ]
+          },
+          "properties": {
+            "observation_scope": {
+              "const": "prerequisites only; no workload launched"
+            }
+          }
+        }
+      }
+    }
+  }
+}

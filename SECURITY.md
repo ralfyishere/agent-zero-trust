@@ -3,7 +3,7 @@
 ## Experimental safety pack
 
 AZT-FS-001's static adapter and repair logic are offline-tested. Its Docker
-orchestration is implemented but real container integration remains unverified.
+orchestration has a real synthetic three-phase result in the [evidence index](evidence/README.md).
 Do not use it as proof of protection for real credentials or agents. Only
 synthetic resources and bundled reviewed code execute. See the
 [pack boundaries and TCB](packs/AZT-FS-001/v1/README.md). Configuration readback

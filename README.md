@@ -18,7 +18,9 @@ deterministic, offline scanner with no model or runtime dependencies.
 Linux and macOS with Python 3.9+ are supported; Windows is currently unsupported.
 The optional admission hook is a workflow aid. A new experimental safety pack
 compares explicit mount configurations and proposes repairs. Its Docker execution
-path is implemented but **runtime integration remains unverified**.
+path has a real, bounded three-phase Docker/Linux result. It does not run your
+repository's commands or a live coding agent: it substitutes synthetic resources
+and executes a bundled trusted probe. See the [evidence index](evidence/README.md).
 
 ## Try it without installing
 
@@ -156,9 +158,18 @@ layers fail rather than producing an all-clear.
 baseline/misconfigured/repaired execution check with a canary challenge and
 legitimate coding-task control. It requires an approved native Linux Docker
 environment. Docker supplies isolation; AZT adds configuration interpretation,
-synthetic orchestration, repair and evidence. **Zero container trials have run
-in this development environment.** A missing backend is blocked, not a passed
-denial. There is no verified cloud coding-agent integration.
+synthetic orchestration, repair and evidence. The canonical case has demonstrated
+unavailable / exposed / unavailable selected access with legitimate work passing
+in all three phases; see exact source/run identifiers in the evidence index.
+A misconfigured phase passing means **intentional exposure was demonstrated**,
+not that its configuration is safe to deploy. A missing backend is blocked, not
+a passed denial. There is no verified cloud coding-agent integration.
+
+For account-free reproduction on an already authorized native Linux Docker host,
+follow [the setup and installed-wheel commands](docs/reproduce-fs001.md).
+The same helper accepts `--case variant` for the frozen nested-source input.
+The protected source is a selected directory/canary, not a recursive audit of
+all possible secrets in its descendants. No real credentials are read.
 
 ## Runtime status
 
@@ -166,7 +177,7 @@ denial. There is no verified cloud coding-agent integration.
 on every platform. It reports the historical bubblewrap proposal, not Docker
 pack availability. The pack performs its own real prerequisites check when
 explicitly invoked with `safety check`. There is no general `azt run`,
-`inspect` or `kill`, and no completed runtime isolation trial. Current support is in
+`inspect` or `kill`. Current supported and untested capabilities are in
 [runtime status](docs/runtime.md). An offline fixture is not a cloud coding-agent integration.
 
 ## Contribute

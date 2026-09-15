@@ -28,6 +28,21 @@ class ExecutionFailed(IntakeError):
     pass
 
 
+STAGES = ("container_started", "probe_returned", "probe_protocol_completed",
+          "result_exported", "archive_validated", "verification_completed")
+
+
+def empty_stages():
+    return dict.fromkeys(STAGES, False)
+
+
+def probe_protocol_complete(claim, challenge):
+    # The fixed read-only bundled probe is trusted instrumentation. A successful
+    # Docker exec plus this envelope check is not a syscall trace or read proof.
+    return (isinstance(claim, dict) and claim.get("probe_executed") is True
+            and claim.get("challenge") == challenge and claim.get("uid") == 65532)
+
+
 def bounded_command(argv, timeout=10, limit=65536):
     """Cap combined pipes in memory; no stdin or sensitive inherited env."""
     env = {"PATH": "/usr/local/bin:/usr/bin:/bin", "LC_ALL": "C"}
@@ -104,7 +119,7 @@ class Docker:
         result = {"backend": "docker", "client_version": None, "server_version": None,
                   "host_platform": platform.system(), "supported_host": "Linux",
                   "transport": "local-unix", "status": "blocked", "reason": None,
-                  "image_id": None, "runtime_trials": 0}
+                  "image_id": None, "observation_scope": "prerequisites only; no workload launched"}
         if not self.binary:
             result["reason"] = "missing_client"
             return result
@@ -220,7 +235,8 @@ class Docker:
 
     def trial(self, name, image_id, pack_dir, project_dir, mounts, challenge, probe_path):
         created = False
-        record = {"session_id": name, "status": "failed", "workload_claim": None, "cleanup": "not_started"}
+        record = {"session_id": name, "status": "failed", "stages": empty_stages(),
+                  "workload_claim": None, "cleanup": "not_started"}
         stage = "create"
         try:
             # Name is evaluator-generated, so removal after a timed-out create is
@@ -232,13 +248,16 @@ class Docker:
                                                        + [(s, t) for s, t, _ in mounts])
             stage = "start"
             self.command("start", name)
+            record["stages"]["container_started"] = True
             stage = "probe_exec"
             _, stdout, _ = self.command("exec", "--user", "65532:65532", name,
                                        "/usr/bin/env", "-i", "PATH=/usr/local/bin:/usr/bin:/bin",
                                        "/usr/local/bin/python3", "-I", "/azt-pack/workload.py",
                                        challenge, probe_path, timeout=8, limit=8192)
             stage = "probe_decode"
+            record["stages"]["probe_returned"] = True
             record["workload_claim"] = json.loads(stdout)
+            record["stages"]["probe_protocol_completed"] = probe_protocol_complete(record["workload_claim"], challenge)
             # Docker cp cannot reliably read tmpfs. Use the documented exec/tar
             # route with fixed arguments, the same unprivileged UID, no shell,
             # and the existing strict archive validator/output/deadline limits.
@@ -249,8 +268,10 @@ class Docker:
                 "/usr/bin/tar", "--format=ustar", "-C", "/workspace", "-cf", "-", "--", "task.py",
                 timeout=4, limit=16384)
             stage = "result_archive_validation"
+            record["stages"]["result_exported"] = True
             record["result_bytes"] = result_from_tar(archived)
-            record["status"] = "executed"
+            record["stages"]["archive_validated"] = True
+            record["status"] = "collected"  # Internal: evaluator assigns terminal phase outcome.
         except (OSError, ValueError, KeyError, subprocess.SubprocessError, IntakeError, tarfile.TarError):
             record["error"] = "trial failed before independent verification; no denial credited"
             record["error_stage"] = stage  # Fixed category only; never raw paths, output or secrets.

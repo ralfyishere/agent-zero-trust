@@ -8,15 +8,21 @@
   reject stale input, unsupported layers and unsafe output paths.
 - Implement bundled AZT-FS-001 v1 Docker synthetic check/repair/retest, bounded
   canary protocol and legitimate executed coding-task control. Container
-  integration remains unverified: zero runtime trials on this development host.
+  integration has a real canonical three-phase result: selected access
+  unavailable/exposed/unavailable, with legitimate task and cleanup verified.
+- Safety evidence v2 separates overlapping controller stages from terminal
+  passed/failed/blocked/not-run/unknown outcomes. Removes the stale preflight
+  runtime-trial count. Historical v1 evidence is preserved unchanged.
+- Add a frozen nested-source configuration input for the same FS-001 pack,
+  tested through the installed interface; see the evidence index for actual runs.
 - Keep the previous 0.1.8 scanner evidence historical and separate. New source
   version invalidates old snapshot receipts; operator re-admission is explicit.
 - Add optional project-local Piénsalo capsule documentation, not a dependency,
   host hook, authority store or global memory system.
 
-Recommendation: do not promote runtime protection until the installed candidate
-passes its actual supported-host integration. Static comparison is useful without
-installing a gate or execution backend. No release has been published.
+See the evidence index and release review for the exact verified candidate and
+remaining limitations. Static comparison needs no gate or execution backend.
+No release has been published.
 
 ## 0.1.8 — unreleased scanner-hardening candidate
 

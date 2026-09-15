@@ -59,7 +59,7 @@ class SafetyCITests(unittest.TestCase):
     def test_export_setup_failure_not_success_and_no_unselected_files(self):
         (self.root / "proposal.json").write_text('"synthetic-secret-not-for-export"')
         with contextlib.redirect_stdout(io.StringIO()) as stream:
-            self.assertEqual(0, ci.finish(self.root))
+            self.assertEqual(1, ci.finish(self.root))
         text = stream.getvalue()
         value = json.loads(text.splitlines()[1])
         self.assertIn("outcome unknown", value["setup"])
@@ -82,8 +82,20 @@ class SafetyCITests(unittest.TestCase):
         with self.assertRaises(ValueError):
             ci.read_json(self.root / "alias.json")
 
+    def test_export_preserves_other_records_after_interrupted_evidence_write(self):
+        ci.write_json(self.root / "ci-run.json", {"status": "case_failed_or_blocked"})
+        (self.root / "canonical").mkdir()
+        (self.root / "canonical/evidence.json").write_text('{"incomplete":')
+        with contextlib.redirect_stdout(io.StringIO()) as stream:
+            self.assertEqual(1, ci.finish(self.root))
+        value = json.loads(stream.getvalue().splitlines()[1])
+        self.assertEqual("case_failed_or_blocked", value["records"]["ci-run.json"]["status"])
+        self.assertIn("outcome unknown", value["record_errors"]["canonical/evidence.json"])
+        self.assertEqual("not_acquired", value["cleanup"]["status"])
+
     def test_mocked_prerequisite_blocked_never_starts_runtime(self):
         wheel = self.root / "test.whl"
+        (self.root / "agent_zero_trust-test.tar.gz").write_bytes(b"synthetic archive identity only")
         with zipfile.ZipFile(wheel, "w") as archive:
             for name in ci.MODULES:
                 archive.writestr(name, b"reviewed")
@@ -102,7 +114,7 @@ class SafetyCITests(unittest.TestCase):
             self.assertEqual(2, ci.run(wheel, self.root))
             command.assert_not_called()
         report = ci.read_json(self.root / "ci-run.json")
-        self.assertFalse(report["runtime_started"])
+        self.assertFalse(report["integration_invoked"])
         self.assertEqual("prerequisite_blocked", report["status"])
         self.assertFalse((self.root / "cleanup-scope.json").exists())
 

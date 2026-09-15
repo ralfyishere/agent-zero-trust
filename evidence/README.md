@@ -1,5 +1,29 @@
 # Reproduction evidence
 
+## Experimental filesystem regression
+
+Canonical AZT-FS-001 passed baseline / deliberate exposure / repaired checks
+at source `6d1bc83e99856cab3fcfb3ee1578ddf0ee1e97bc` in
+[run 34912218459](https://github.com/ralfyishere/agent-zero-trust/actions/runs/34912218459).
+All three completed probe, strict result export, exact edited-file and coding
+task verification, original-fixture integrity and cleanup. The unsafe phase
+PASS means intentional exposure was demonstrated, not that its configuration
+is safe. This is one trusted-probe synthetic Docker/Linux case, not an audit or
+live-agent integration. Later source changes need their own verification.
+
+Historical failures remain: [34910385576](https://github.com/ralfyishere/agent-zero-trust/actions/runs/34910385576)
+failed workflow validation before jobs; [34911273066](https://github.com/ralfyishere/agent-zero-trust/actions/runs/34911273066)
+completed three probes, including verified exposure, but failed result collection
+and had no fully passed phases. Its old `executed=0` meant no completed result
+collections, not no probes. Raw historical records are not rewritten.
+
+See [reproduction](../docs/reproduce-fs001.md), [reporting semantics](../docs/safety-reporting-v2.md)
+and the frozen [variant](../packs/AZT-FS-001/v1/variant/README.md). A final
+candidate record will identify its own code/artifact/run, separate from these
+historical results. No intake count below is runtime evidence.
+
+## Historical scanner-hardening record
+
 The following 0.1.8 record is historical and preserved unchanged as the scanner
 milestone's evidence. It does not identify the later 0.1.9 source/artifact.
 New safety-pack outputs are separate; a blocked runtime record is not containment

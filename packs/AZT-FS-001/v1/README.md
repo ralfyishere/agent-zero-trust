@@ -3,8 +3,9 @@
 For a developer reviewing an unfamiliar agent workspace configuration, AZT
 identifies a newly declared read path and proposes a narrow, reviewable repair.
 The optional synthetic test checks that the selected repair removes access
-while a small coding task still runs. **Runtime integration is implemented but
-not yet exercised on a supported host. Do not advertise confirmed containment.**
+while a small coding task still runs. **The canonical three-phase check has real
+Docker/Linux evidence. See the [source/run index](../../../evidence/README.md);
+this is not universal containment or a live coding-agent integration.**
 
 ## Applicability and authority
 
@@ -53,16 +54,16 @@ operational error or blocked prerequisites. JSON stdout is one document.
 
 Requires an already authorized local Docker Engine 25+ Unix daemon, cgroup v2
 with CPU quota, memory+swap and process limits, builtin seccomp, and a trusted
-preloaded Linux Python 3.12 image with `/usr/local/bin/python3`. No image is
+preloaded Linux Python 3.12 image with `/usr/local/bin/python3` and `/usr/bin/tar`. No image is
 pulled or built by AZT. Docker access is powerful host authority: do not grant
 it to an untrusted agent or weaken permissions to make this test run. Docker
 Desktop/macOS, remote engines and other backends are unsupported by this profile.
 
-Build the candidate, then run:
+Follow the exact clean-build and pinned-image setup in
+[the reproduction guide](../../../docs/reproduce-fs001.md), then run:
 
 ```sh
-python3 -m build
-python3 scripts/test_safety_integration.py --wheel dist/agent_zero_trust-0.1.9-py3-none-any.whl --output runtime-review-01 --image python:3.12-slim
+python3 scripts/test_safety_integration.py --case canonical --wheel dist/agent_zero_trust-0.1.9-py3-none-any.whl --output runtime-review-01 --image docker.io/library/python@sha256:78387bc3881b8273120a12ebe6c1ab22b018ccc2c9adf565ae1ac9b536e184ea
 ```
 
 Alternatively use `azt safety check` with the same explicit configuration flags
@@ -75,7 +76,7 @@ and reproduction-script hashes when using the integration script.
 The three desired outcomes are baseline inaccessible / deliberately expanded
 read mount accessible / repaired inaccessible, with legitimate work completing
 in **each**. They are expectations, not canned results. A blocked prerequisite
-returns three blocked phases, zero executed, and non-success. Static results
+returns three blocked phases, no acknowledged execution stages, and non-success. Static results
 and old admission benchmark counts are never added to runtime counts.
 
 ## What actually executes and what is measured
@@ -141,6 +142,10 @@ Upstream references: [Compose service configuration](https://docs.docker.com/ref
 `evidence.json` separates declarations, workload claims, Docker observations and
 external evaluator checks. No canary value is exported. `proposal.json` may
 contain operator-selected configuration paths/settings: review before sharing.
+Safety evidence v2 distinguishes overlapping [controller stages and terminal
+outcomes](../../../docs/safety-reporting-v2.md); historical v1 is preserved.
+The [frozen variant](variant/README.md) changes source/target layout, not the
+probe or expected three-phase outcomes.
 Reports remain local until explicitly shared; no automatic retention/deletion,
 telemetry, accounts or hosted dependency. Delete your selected output directory
 when no longer needed. Outputs are bounded and never overwrite an existing run.

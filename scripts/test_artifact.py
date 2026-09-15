@@ -82,12 +82,16 @@ def main():
             archive.extractall(unpack)
         source = unpack / ("agent_zero_trust-" + version)
         for needed in ("action.yml", "schemas/policy-v1.schema.json", "corpus/hook-trap/.claude/settings.json",
-                       "packs/AZT-FS-001/v1/candidate.compose.json", "scripts/test_safety_integration.py"):
+                       "packs/AZT-FS-001/v1/candidate.compose.json", "packs/AZT-FS-001/v1/variant/candidate.compose.json",
+                       "schemas/safety-evidence-v2.schema.json", "scripts/test_safety_integration.py"):
             assert (source / needed).is_file(), "sdist missing " + needed
         assert not (source / ".azt-local").exists(), "private continuity state must not ship"
         result = subprocess.run([sys.executable, "test_azt.py"], cwd=source,
                                 capture_output=True, text=True, timeout=90)
         assert result.returncode == 0, "sdist corpus tests failed: " + result.stdout + result.stderr
+        result = subprocess.run([sys.executable, "-m", "unittest", "discover", "-s", "tests", "-q"],
+                                cwd=source, capture_output=True, text=True, timeout=90)
+        assert result.returncode == 0, "sdist unit tests failed: " + result.stdout + result.stderr
         print("SDIST PASS: extracted source runs corpus tests; hidden fixtures and schema included")
     with tempfile.TemporaryDirectory(prefix="azt-artifact-") as temp:
         work = Path(temp).resolve()
@@ -134,7 +138,7 @@ def main():
         safety_first = run(compare + ["--output", work / "review-one"])
         assert safety_first == run(compare + ["--output", work / "review-two"])
         assert json.loads(safety_first)["comparison"]["candidate_declares_protected_access"] is True
-        for test in ("test_config.py", "test_safety.py"):
+        for test in ("test_config.py", "test_safety.py", "test_safety_reporting.py"):
             run([python, "-I", "-m", "unittest", "discover", "-s", root / "tests", "-p", test, "-q"])
         print("SAFETY ARTIFACT PASS: installed adapter/evaluator tests; repeatable CLI comparison; no Docker trials")
         print("ARTIFACT PASS: clean offline wheel install; installed import; help/version; "

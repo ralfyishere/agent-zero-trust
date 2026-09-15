@@ -12,6 +12,13 @@ with a legitimate-task control; code/expectations cannot be chosen by target
 repository metadata. Optional [continuity notes](docs/optional-continuity.md)
 use Piénsalo without making it a dependency or security authority.
 
+Use the [clean wheel/sdist and runtime reproduction](docs/reproduce-fs001.md).
+The integration helper accepts `--case canonical` or `--case variant`; each
+uses fresh synthetic resources. The variant's reviewed inputs are frozen by
+digest in `tests/test_safety_reporting.py`. Preserve the assertions when fixing
+defects. Report stage counts separately from terminal outcomes according to
+[safety evidence v2](docs/safety-reporting-v2.md), including partial failures.
+
 Help make unfamiliar-repository intake understandable and reproducible.
 A useful contribution can be a small failing test, a false-positive fixture,
 a clearer explanation of scope or an independently reproduced result.

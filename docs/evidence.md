@@ -1,5 +1,11 @@
 # Evidence and the local reproduction
 
+This page describes the historical **intake-only** benchmark, not FS-001 runtime
+results. Current synthetic Docker results are indexed [separately](../evidence/README.md)
+with [safety v2 semantics](safety-reporting-v2.md). Neither study inherits credit
+from the other. The historical development-host block below is not a claim
+that the later supported Linux execution did not occur.
+
 The milestone measures static intake and snapshot admission. Its evaluator is
 project-owned code outside the synthetic workspace, not an independent audit.
 It never executes attack text and never uses a model. Runtime boundary scenarios

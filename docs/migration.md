@@ -1,4 +1,15 @@
-# Migrating to the unreleased 0.1.8 candidate
+# Migrating to the unreleased 0.1.9 candidate
+
+The 0.1.8 scanner-hardening changes below remain applicable. Safety comparison
+and check reports now use [schema version 2](safety-reporting-v2.md): overlapping
+controller-stage counts replace ambiguous `executed` counts; terminal outcomes
+partition every planned phase. Preflight no longer reports a runtime trial
+count. Readers must dispatch on schema version, not reinterpret historical v1
+exports as v2. Scanner, policy and admission formats are unchanged.
+
+Strict snapshot matching remains an optional workflow gate. Source edits can
+invalidate it and require explicit operator re-admission; it is never silently
+refreshed. Scanning and repeated safety comparisons/checks need no hook.
 
 This is a security-sensitive scanner update, not a 2.0 runtime release. Python
 3.9+ remains supported. Safe traversal requires POSIX descriptor-relative opens

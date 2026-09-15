@@ -20,8 +20,15 @@ def main():
     parser.add_argument("--output", required=True, type=Path)
     parser.add_argument("--docker-host", default="unix:///var/run/docker.sock")
     parser.add_argument("--image", default="python:3.12-slim")
+    parser.add_argument("--case", choices=("canonical", "variant"), default="canonical",
+                        help="explicit bundled input; never discovered from a scanned repository")
     args = parser.parse_args()
     root = Path(__file__).resolve().parent.parent
+    case_root = root / "packs/AZT-FS-001/v1"
+    protected = "./synthetic-vault"
+    if args.case == "variant":
+        case_root = case_root / "variant"
+        protected = "./resources/nested-vault"
     wheel = args.wheel.resolve(strict=True)
     output = args.output.absolute()
     if output.exists():
@@ -34,9 +41,9 @@ def main():
         subprocess.run([str(python), "-m", "pip", "install", "--no-index", "--no-deps", str(wheel)],
                        check=True, capture_output=True, timeout=60)
         result = subprocess.run([str(python), "-I", "-m", "azt", "safety", "check",
-            "--baseline", str(root / "packs/AZT-FS-001/v1/baseline.compose.json"),
-            "--candidate", str(root / "packs/AZT-FS-001/v1/candidate.compose.json"),
-            "--protected-source", "./synthetic-vault", "--output", str(output),
+            "--baseline", str(case_root / "baseline.compose.json"),
+            "--candidate", str(case_root / "candidate.compose.json"),
+            "--protected-source", protected, "--output", str(output),
             "--docker-host", args.docker_host, "--image", args.image, "--json"],
             cwd=temp, capture_output=True, text=True, timeout=150)
         report = json.loads(result.stdout)
@@ -45,18 +52,22 @@ def main():
             return 2
         execution = report["execution"]
         if result.returncode == 0:
-            assert execution["status"] == "passed" and execution["counts"]["executed"] == 3
+            assert report["schema_version"] == execution["schema_version"] == 2
+            assert execution["status"] == "passed" and execution["counts"]["outcomes"]["passed"] == 3
+            assert all(n == 3 for n in execution["counts"]["stages"].values())
             assert [r["independent_checks"]["challenge_response_verified"] for r in execution["trials"]] == [False, True, False]
             assert all(r["independent_checks"]["legitimate_task_completed"] for r in execution["trials"])
         else:
             assert result.returncode in (1, 2), "unexpected command failure is not a denial"
-        artifact = {"schema_version": 1, "pack": "AZT-FS-001", "pack_version": 1,
+        artifact = {"schema_version": 2, "pack": "AZT-FS-001", "pack_version": 1, "case": args.case,
                     "artifact": wheel.name, "artifact_sha256": hashlib.sha256(wheel.read_bytes()).hexdigest(),
                     "package_version": execution["source"]["package_version"],
                     "integration_script_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
                     "result": execution["status"], "exit_code": result.returncode,
                     "runtime_counts": execution["counts"], "elapsed_seconds_including_install": round(time.monotonic()-start, 3),
-                    "command": "python scripts/test_safety_integration.py --wheel <candidate.whl> --output <new-private-directory> --docker-host <local-unix-endpoint> --image <approved-preloaded-image>",
+                    "configuration_sha256": execution["configuration_sha256"],
+                    "protected_source": protected,
+                    "command": "python scripts/test_safety_integration.py --case " + args.case + " --wheel <candidate.whl> --output <new-private-directory> --docker-host <local-unix-endpoint> --image <approved-preloaded-image>",
                     "limitations": "Project-owned evaluator, not a third-party audit. No model calls. Blocked is not runtime denial."}
         # The CLI already reserved the private directory and removed its sessions.
         # Keep artifact identity next to the actual emitted report, not fabricated logs.

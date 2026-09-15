@@ -14,7 +14,7 @@ import tempfile
 import time
 
 import azt_config as adapter
-from azt_docker import Docker, BackendBlocked
+from azt_docker import Docker, BackendBlocked, STAGES, empty_stages, probe_protocol_complete
 from azt_intake import IntakeError, open_absolute
 from azt_safety_pack import PACK_ID, PACK_VERSION, BEFORE, AFTER, KEEPER, WORKLOAD
 
@@ -82,22 +82,53 @@ def evaluate(record, challenge, canary, expected_access, original_ok, protected_
     response = claim.get("response", "")
     obtained = (isinstance(response, str) and re.fullmatch(r"[0-9a-f]{64}", response) is not None
                 and hmac.compare_digest(response, expected))
-    probe = (claim.get("probe_executed") is True and claim.get("challenge") == challenge
-             and claim.get("uid") == 65532)
+    stages = record.get("stages", empty_stages())
+    probe = stages["probe_protocol_completed"] and probe_protocol_complete(claim, challenge)
     read_matches = (obtained and claim.get("read") == "obtained") if expected_access else (
         not obtained and claim.get("read") == "unavailable" and claim.get("errno") in (1, 2, 13)
         and "response" not in claim)
     # Bytes are copied back independently through the trusted daemon, not merely
     # a statement that a file was edited. Executed output is still observed stdout,
     # not a syscall audit: the mounted bundled probe is part of the TCB.
-    task = (record.pop("result_bytes", None) == AFTER.encode() and claim.get("task_exit") == 0
+    edited = record.pop("result_bytes", None) == AFTER.encode() and stages["archive_validated"]
+    task = (edited and claim.get("task_exit") == 0
             and claim.get("task_stdout") == "5 0\n")
-    complete = record.get("status") == "executed" and record.get("cleanup") == "removed"
+    stages["verification_completed"] = bool(probe and stages["archive_validated"])
+    complete = record.get("status") == "collected" and record.get("cleanup") == "removed"
     return {"challenge_response_verified": obtained, "probe_protocol_completed": probe,
             "expected_access": expected_access, "access_expectation_met": bool(read_matches and probe),
-            "legitimate_task_completed": task, "original_project_unchanged": original_ok,
+            "edited_file_matches": bool(edited), "legitimate_task_completed": bool(task), "original_project_unchanged": original_ok,
             "protected_resource_exists_and_unchanged": protected_ok,
             "passed": bool(complete and probe and read_matches and task and original_ok and protected_ok)}
+
+
+PHASES = ("baseline", "misconfigured", "repaired")
+OUTCOMES = ("passed", "failed", "blocked", "not_run", "unknown")
+
+
+def finalize_trials(trials):
+    """Overlap stages, partition outcomes; absence of a record is NOT success."""
+    if len({r["phase"] for r in trials}) != len(trials) or any(r["phase"] not in PHASES for r in trials):
+        raise IntakeError("invalid phase records")
+    for phase in PHASES:
+        if not any(r["phase"] == phase for r in trials):
+            trials.append({"phase": phase, "status": "unknown", "stages": empty_stages(),
+                           "reason": "controller record missing; execution unobserved"})
+    positive = any(r["phase"] == "misconfigured" and r.get("independent_checks", {}).get("passed") is True
+                   for r in trials)
+    for record in trials:
+        checks = record.get("independent_checks")
+        if checks is not None:
+            checks["positive_control_confirmed"] = positive
+            if not checks["expected_access"] and not positive:
+                checks["passed"] = False
+                checks["access_expectation_met"] = False
+            record["status"] = "passed" if checks["passed"] else "failed"
+        elif record.get("status") not in OUTCOMES:
+            record["status"] = "unknown"
+    return {"planned": 3,
+            "stages": {k: sum(r.get("stages", {}).get(k) is True for r in trials) for k in STAGES},
+            "outcomes": {k: sum(r.get("status", "unknown") == k for r in trials) for k in OUTCOMES}}
 
 
 def reserve_output(path):
@@ -143,7 +174,7 @@ def run_check(baseline, candidate, protected, proposal, endpoint, image):
     repaired = adapter.parse_config(repaired_bytes, candidate.path, candidate.service)
     plan = execution_plan(baseline, candidate, repaired, protected)
     started = time.monotonic()
-    report = {"schema_version": 1, "pack": PACK_ID, "pack_version": PACK_VERSION,
+    report = {"schema_version": 2, "pack": PACK_ID, "pack_version": PACK_VERSION,
               "source": source_identity(), "status": "blocked", "trials": [],
               "started_at": datetime.datetime.now(datetime.timezone.utc).isoformat(),
               "probe_sha256": sha(WORKLOAD.encode()), "keeper_sha256": sha(KEEPER.encode()),
@@ -170,7 +201,7 @@ def run_check(baseline, candidate, protected, proposal, endpoint, image):
         docker = Docker(endpoint, temp)
         report["backend"] = docker.preflight(image)
         if report["backend"]["status"] != "available":
-            report["trials"] = [{"phase": phase, "status": "blocked", "reason": report["backend"]["reason"],
+            report["trials"] = [{"phase": phase, "status": "blocked", "stages": empty_stages(), "reason": report["backend"]["reason"],
                                  "legitimate_task_completed": None} for phase in ("baseline", "misconfigured", "repaired")]
         else:
             resources, pack = temp / "resources", temp / "probe"
@@ -210,20 +241,13 @@ def run_check(baseline, candidate, protected, proposal, endpoint, image):
                 report["trials"].append(record)
                 if record["cleanup"] == "failed":
                     break  # Do not start more sessions after failed required cleanup.
-            positive = any(r["phase"] == "misconfigured" and r["independent_checks"]["passed"]
-                           for r in report["trials"])
-            for record in report["trials"]:
-                checks = record["independent_checks"]
-                checks["positive_control_confirmed"] = positive
-                if not checks["expected_access"] and not positive:
-                    checks["passed"] = False
-                    checks["access_expectation_met"] = False
-            report["status"] = "passed" if len(report["trials"]) == 3 and all(
-                r["independent_checks"]["passed"] for r in report["trials"]) else "failed"
-    report["counts"] = {"planned": 3, "executed": sum(r["status"] == "executed" for r in report["trials"]),
-                        "passed": sum(r.get("independent_checks", {}).get("passed", False) for r in report["trials"]),
-                        "blocked": sum(r["status"] == "blocked" for r in report["trials"]),
-                        "not_run": 3 - len(report["trials"])}
+            for phase in PHASES[len(report["trials"]):]:
+                report["trials"].append({"phase": phase, "status": "not_run", "stages": empty_stages(),
+                                         "reason": "stopped after cleanup failure"})
+            report["status"] = "failed"
+    report["counts"] = finalize_trials(report["trials"])
+    if report["counts"]["outcomes"]["passed"] == 3:
+        report["status"] = "passed"
     report["elapsed_seconds"] = round(time.monotonic() - started, 3)
     return report
 
@@ -253,7 +277,7 @@ def command(args):
         for name, raw in (("proposal.json", json.dumps(proposal, indent=2, sort_keys=True).encode()),
                           ("repair.diff", proposal["diff"].encode()), ("repaired.compose.json", proposal["repaired_content"].encode())):
             write_output(fd, name, raw)
-        report = {"schema_version": 1, "operation": args.operation, "status": "compared",
+        report = {"schema_version": 2, "operation": args.operation, "status": "compared",
                   "comparison": comparison, "repair": {k: proposal[k] for k in
                     ("status", "original_sha256", "repaired_sha256", "affected_indices")}, "execution": None}
         if args.operation == "check":
@@ -271,13 +295,15 @@ def command(args):
                 proposal["status"], len(proposal["affected_indices"])))
             print("Result: %s. Review repair.diff and evidence.json in the requested output directory." % report["status"])
             if report["execution"]:
-                print("Runtime: %s. Legitimate task and access checks are recorded per phase; blocked is not denied." % report["execution"]["counts"])
+                print("Controller stages (overlap): %s" % report["execution"]["counts"]["stages"])
+                print("Phase outcomes (partition): %s. Misconfigured PASS means intentional exposure demonstrated, not safe deployment." % report["execution"]["counts"]["outcomes"])
             else:
                 print("Static declarations only; no effective access or runtime repair verified.")
         return 0 if report["status"] in ("compared", "passed") else (2 if report["status"] == "blocked" else 1)
     except (OSError, ValueError, KeyError, TypeError, AttributeError, subprocess.SubprocessError) as exc:
-        report = {"schema_version": 1, "status": "blocked" if isinstance(exc, BackendBlocked) else "error",
+        report = {"schema_version": 2, "status": "blocked" if isinstance(exc, BackendBlocked) else "error",
                   "error": str(exc) if isinstance(exc, IntakeError) else "input, backend or export operation failed",
+                  "execution_outcome": "unknown; no complete execution record available",
                   "runtime_denial_credited": False}
         print(json.dumps(report, sort_keys=True) if args.json else report["error"])
         return 2

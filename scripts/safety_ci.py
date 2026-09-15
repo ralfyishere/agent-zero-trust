@@ -19,7 +19,7 @@ ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 from azt_docker import Docker, bounded_command
 
-IMAGE = "docker.io/library/python:3.12-slim"
+IMAGE = "docker.io/library/python@sha256:78387bc3881b8273120a12ebe6c1ab22b018ccc2c9adf565ae1ac9b536e184ea"
 ENDPOINT = "unix:///var/run/docker.sock"
 LABEL = "org.azt.pack=AZT-FS-001-v1"
 MODULES = ("azt.py", "azt_intake.py", "azt_gate.py", "azt_runtime.py",
@@ -70,7 +70,7 @@ def image_compatibility(data):
 
 
 def run(wheel, output):
-    record = {"schema_version": 1, "status": "setup_failed", "runtime_started": False}
+    record = {"schema_version": 2, "status": "setup_failed", "integration_invoked": False, "cases": {}}
     try:
         sha = git("rev-parse", "HEAD")
         if sha != os.environ.get("GITHUB_SHA") or git("status", "--porcelain", "--untracked-files=no"):
@@ -83,8 +83,12 @@ def run(wheel, output):
                 if archive.read(name) != raw:
                     raise ValueError("wheel module differs from reviewed checkout")
                 modules[name] = hashlib.sha256(raw).hexdigest()
+        sdists = list(wheel.parent.glob("agent_zero_trust-*.tar.gz"))
+        if len(sdists) != 1:
+            raise ValueError("expected the single tested source distribution")
         record.update(source_sha=sha, source_tree=git("rev-parse", "HEAD^{tree}"),
                       module_sha256=modules, wheel=wheel.name, wheel_sha256=hashlib.sha256(wheel.read_bytes()).hexdigest(),
+                      sdist=sdists[0].name, sdist_sha256=hashlib.sha256(sdists[0].read_bytes()).hexdigest(),
                       platform={"system": platform.system(), "release": platform.release(),
                                 "machine": platform.machine(), "controller_python": platform.python_version()},
                       runner_image=os.environ.get("ImageOS"), runner_image_version=os.environ.get("ImageVersion"),
@@ -107,14 +111,18 @@ def run(wheel, output):
         if existing.strip():
             raise ValueError("unexpected preexisting pack containers; no cleanup authority acquired")
         write_json(output / "cleanup-scope.json", {"empty_at_start": True, "label": LABEL})
-        record["runtime_started"] = True
-        code, stdout, _ = bounded_command([sys.executable, str(ROOT / "scripts/test_safety_integration.py"),
-            "--wheel", str(wheel), "--output", str(output / "trial"), "--image", preflight["image_id"],
-            "--docker-host", ENDPOINT], timeout=180, limit=65536)
-        record["integration_exit"] = code
-        record["integration_summary"] = json.loads(stdout)
-        record["status"] = {0: "passed", 1: "check_failed", 2: "blocked_or_setup_failed"}.get(code, "operational_failure")
-        return code if code in (0, 1, 2) else 2
+        record["integration_invoked"] = True
+        for case in ("canonical", "variant"):
+            code, stdout, _ = bounded_command([sys.executable, str(ROOT / "scripts/test_safety_integration.py"),
+                "--case", case, "--wheel", str(wheel), "--output", str(output / case), "--image", preflight["image_id"],
+                "--docker-host", ENDPOINT], timeout=90, limit=65536)
+            record["cases"][case] = {"exit": code, "summary": json.loads(stdout)}
+            if code:
+                # No subsequent case after an uncertain/failed first case.
+                record["status"] = "case_failed_or_blocked"
+                return code if code in (1, 2) else 2
+        record["status"] = "passed"
+        return 0
     except (OSError, ValueError, KeyError, subprocess.SubprocessError, zipfile.BadZipFile):
         record["status"] = "operational_failure"
         record["error"] = "setup/controller failed; no denial credited (see bounded workflow setup logs)"
@@ -137,7 +145,7 @@ def cleanup(docker):
 
 
 def finish(output):
-    envelope = {"schema": "azt.fs001-ci-export.v1", "records": {}, "cleanup": {"status": "not_acquired"}}
+    envelope = {"schema": "azt.fs001-ci-export.v2", "records": {}, "cleanup": {"status": "not_acquired"}}
     failed = False
     if (output / "cleanup-scope.json").is_file():
         try:
@@ -149,10 +157,18 @@ def finish(output):
         except (OSError, ValueError, subprocess.SubprocessError):
             envelope["cleanup"] = {"status": "failed", "note": "job VM disposal remains final cleanup; not a tested supervisor-death guarantee"}
             failed = True
-    for name in ("ci-run.json", "trial/evidence.json", "trial/artifact.json"):
+    for name in ("ci-run.json", "canonical/evidence.json", "canonical/artifact.json",
+                 "variant/evidence.json", "variant/artifact.json"):
         path = output / name
-        if path.is_file():
-            envelope["records"][name] = read_json(path)
+        try:
+            if path.is_file():
+                envelope["records"][name] = read_json(path)
+            else:
+                envelope.setdefault("record_errors", {})[name] = "missing; outcome unobserved"
+                failed = True
+        except (OSError, ValueError):
+            envelope.setdefault("record_errors", {})[name] = "unreadable_or_invalid; outcome unknown"
+            failed = True
     if "ci-run.json" not in envelope["records"]:
         envelope["setup"] = "controller record missing; outcome unknown; inspect partial evidence and workflow step status"
     # No raw proposals, stdout from the workload, env dumps, Docker auth files,

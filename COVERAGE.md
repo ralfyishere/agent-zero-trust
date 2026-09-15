@@ -4,7 +4,8 @@
 [AZT-FS-001 Compose JSON subset](packs/AZT-FS-001/v1/README.md) and compares
 selected bind access. Inventoried agent formats do not thereby become supported
 runtime configurations. Adapter/evaluator regressions are offline tests;
-container phases remain unexecuted on the recorded host. Existing benign
+container evidence is indexed separately in [evidence](evidence/README.md). It
+tests the selected directory/canary, not arbitrary child secrets or every channel. Existing benign
 fixtures and the known-miss ledger below are unchanged.
 
 This ledger describes what the current scanner tests, without claiming that

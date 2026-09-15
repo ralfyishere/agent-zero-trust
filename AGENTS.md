@@ -1,8 +1,8 @@
 # Development
 
 AZT is an offline deterministic intake scanner with an experimental bundled
-configuration safety pack. Docker integration is blocked pending actual native
-Linux boundary tests; diagnostic mocks are not containment evidence. Preserve
+configuration safety pack. One synthetic filesystem case has real Docker/Linux
+evidence; every claim must name its tested input/source/run. Diagnostic mocks are not containment evidence. Preserve
 the MIT license and creator/contributor attribution.
 
 From the checkout, using Python 3.9+ on Linux or macOS:

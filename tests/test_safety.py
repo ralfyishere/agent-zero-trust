@@ -101,7 +101,7 @@ class SafetyTests(unittest.TestCase):
             claim["response"] = hmac.new(canary, challenge.encode(), hashlib.sha256).hexdigest()
         else:
             claim["errno"] = 2
-        return {"status": "executed", "cleanup": "removed", "workload_claim": claim,
+        return {"status": "collected", "stages": dict.fromkeys(azt_docker.STAGES, True), "cleanup": "removed", "workload_claim": claim,
                 "result_bytes": AFTER.encode()}, challenge, canary
 
     def test_evaluator_checks_positive_control_and_denial_separately(self):
@@ -218,7 +218,9 @@ class SafetyTests(unittest.TestCase):
                                           "unix:///definitely-absent-azt-test.sock", "python:3.12-slim")
         self.assertEqual("blocked", result["status"])
         self.assertEqual("missing_client", result["backend"]["reason"])
-        self.assertEqual({"planned": 3, "executed": 0, "passed": 0, "blocked": 3, "not_run": 0}, result["counts"])
+        self.assertEqual({"passed": 0, "failed": 0, "blocked": 3, "not_run": 0, "unknown": 0}, result["counts"]["outcomes"])
+        self.assertTrue(all(n == 0 for n in result["counts"]["stages"].values()))
+        self.assertNotIn("runtime_trials", result["backend"])
         self.assertTrue(all(trial["legitimate_task_completed"] is None for trial in result["trials"]))
 
     def test_mocked_construction_does_not_launch_or_pull(self):
@@ -283,7 +285,7 @@ class SafetyTests(unittest.TestCase):
             return 0, b"", b""
         with patch.object(docker, "command", side_effect=command), patch.object(docker, "inspect_controls", return_value={}):
             result = docker.trial("test-owned", "image", self.root, self.root, [], challenge, "/selected/canary.bin")
-        self.assertEqual("executed", result["status"])
+        self.assertEqual("collected", result["status"])
         self.assertEqual(AFTER.encode(), result["result_bytes"])
         self.assertEqual("removed", result["cleanup"])
         self.assertEqual(2, sum(args[0] == "exec" for args, _ in calls))
@@ -346,7 +348,7 @@ class SafetyTests(unittest.TestCase):
         self.assertEqual(2, process.returncode, process.stderr)
         report = json.loads(process.stdout)
         self.assertEqual("blocked", report["status"])
-        self.assertEqual(0, report["execution"]["counts"]["executed"])
+        self.assertEqual(0, report["execution"]["counts"]["stages"]["container_started"])
         self.assertEqual(candidate.raw, candidate.path.read_bytes())
 
 

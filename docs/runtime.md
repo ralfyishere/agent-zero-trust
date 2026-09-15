@@ -1,37 +1,38 @@
-# Runtime status: bounded pack implemented, execution verification blocked
+# Experimental runtime status
 
-`azt safety compare` works offline on Linux/macOS. `azt safety check` implements
-one bundled, synthetic Docker test; **zero container trials are recorded here**.
-The installed Docker 29.2.0 client was inspected and an actual local server
-connection attempted. Its configured local Docker Desktop socket was absent:
-unavailable service, not proof every possible execution route is unavailable.
-No daemon was started, remote engine accessed or privileged component installed.
-The selected profile supports native Linux only, not Docker Desktop/macOS.
+AZT-FS-001 has a completed canonical three-phase Docker/Linux run. The
+[evidence index](../evidence/README.md) identifies the exact source, artifact,
+observations and limitations. A later candidate is not verified merely because
+it shares version 0.1.9. Follow the [clean reproduction](reproduce-fs001.md).
 
-The concrete owner action is to run the command in
-[AZT-FS-001 v1](../packs/AZT-FS-001/v1/README.md) on an already authorized
-native Linux Docker 25+ host with cgroup v2 and a preloaded approved Python
-image. A blocked prerequisite returns non-success. A runtime release requires
-all three actual phases and legitimate tasks to pass, with published raw evidence.
-
-| Capability | State | Evidence |
+| Capability | State | Evidence / limit |
 | --- | --- | --- |
-| Strict mount comparison and narrow digest-bound repair | Implemented, offline-tested | `tests/test_config.py`, `tests/test_safety.py` |
-| Bounded process I/O and archive validation | Implemented, unit-tested | Real finite Python children and synthetic archives, not container trials |
-| Three-phase Docker orchestration and external evaluator | Implemented, runtime unverified | `scripts/test_safety_integration.py`; local prerequisites blocked |
-| Filesystem denial plus legitimate task after repair | Not yet demonstrated | Requires actual baseline/positive-control/repaired results |
-| Network, descendants, controller death, exhaustion, cross-session tests | Deferred, not exercised | No inherited credit from Docker configuration or mocks |
+| Strict Compose JSON mount comparison and narrow digest-bound repair | Implemented, offline-tested | Adapter, CLI and installed-artifact tests |
+| Canonical synthetic read / repair / legitimate coding task | Implemented, execution-tested | Baseline unavailable, intentional exposure verified, repaired unavailable; exact result bytes, original integrity and cleanup |
+| Frozen nested-source configuration variant | Implemented; consult exact run index for verification | Another input to FS-001, not another pack |
+| Bounded I/O, archive validation and failure reporting | Implemented, unit-tested and exercised by canonical export | Failure injection is not a kernel isolation trial |
+| Network, descendants, controller death, exhaustion, cross-session tests | Not tested | Control readback is not an exercised denial |
 | Real coding-agent/cloud integration | Unsupported | No model calls, broker or provider credentials |
-| General runner, session management platform | Not implemented | Deliberately outside this bounded milestone |
+| General runner/session-management platform | Not implemented | Outside this release |
 
-Docker supplies the maintained kernel isolation primitives. AZT contributes
-explicit interpretation, synthetic input mapping, repair/retest lifecycle and
-inspectable evidence; it does not invent an isolation engine. The pack lists
-required resource controls, observable outcomes and its trusted computing base.
-The [historical bubblewrap proposal](runtime-0.1.8.md) and its diagnostic-only
-`azt doctor` remain available but are not proof of Docker availability.
+Operator configurations are data, not arbitrary user workloads. Runtime
+orchestration substitutes synthetic resources and runs the fixed trusted probe.
+A misconfigured phase PASS means the test demonstrated intentional exposure;
+it does not approve the unsafe configuration. Denial is limited to the selected
+canary check with successful positive and legitimate-task controls.
 
-Local policy, tests, repair, evidence and essential control remain account-free.
-Future optional organization services may consume exported evidence or distribute
-reviewed policies; none grant privileges through model assertions or require a
-hosted service for local safety. Those services are not implemented.
+Docker supplies Linux isolation primitives. AZT contributes configuration
+interpretation, a review-only repair, synthetic orchestration, retesting and
+inspectable evidence. The operator, host/kernel, daemon, image, evaluator and
+probe are trusted. Same-user host compromise, kernel escape resistance and
+complete action observation are not established.
+
+Native Linux Docker 25+, cgroup v2 and an explicitly prepared compatible image
+are required. AZT never downloads images, starts a daemon or falls back to host
+execution. The earlier macOS service block remains in the historical evidence;
+it is not the current Linux result. The [earlier proposal](runtime-0.1.8.md) and
+diagnostic-only `azt doctor` do not establish Docker availability.
+
+Local scanning, policy, repair, checks and evidence remain account-free, without
+telemetry. Optional future organizational services could consume these public
+formats; none are needed to supply basic protection, and none ship here.
