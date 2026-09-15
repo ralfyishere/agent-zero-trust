@@ -5,6 +5,11 @@ This is local offline verification, not runtime-containment evidence or an
 independent-user study. Later presentation/evidence commits do not retroactively
 change the identity of the artifacts below. Final PR checks build their own bytes.
 
+Final local review additionally corrected argument-error JSON for `--format json`
+and `--format=json`, alongside the existing `--json` spelling. Its regression is
+in `test_cli_errors_and_no_receipt`. That later source is tested separately by
+the final PR build; the earlier measurements below are not relabeled.
+
 ## Build and tests
 
 [Implementation build manifest](implementation-build.json): clean tracked source,

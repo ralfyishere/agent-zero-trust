@@ -520,7 +520,10 @@ def cmd_gate_check(args):
 def main(argv=None):
     class Parser(argparse.ArgumentParser):
         def error(self, message):
-            if "--json" in (sys.argv[1:] if argv is None else argv):
+            arguments = sys.argv[1:] if argv is None else argv
+            wants_json = ("--json" in arguments or "--format=json" in arguments or
+                          any(arguments[i:i+2] == ["--format", "json"] for i in range(len(arguments))))
+            if wants_json:
                 print(json.dumps({"schema_version": 1, "version": __version__,
                                   "decision": "error", "error": "invalid command arguments"}, sort_keys=True))
             super().error(message)

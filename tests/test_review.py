@@ -278,6 +278,12 @@ class ReviewTests(unittest.TestCase):
             code=azt.main(['explain','not.a.rule','--json'])
         self.assertEqual(code,2);self.assertEqual(json.loads(stdout.getvalue())['status'],'error')
         self.assertEqual(list(self.root.iterdir()),[self.tree])
+        for formatting in [['--json'],['--format','json'],['--format=json']]:
+            stdout,stderr=io.StringIO(),io.StringIO()
+            with contextlib.redirect_stdout(stdout),contextlib.redirect_stderr(stderr):
+                with self.assertRaises(SystemExit) as caught:azt.main(['explain',*formatting])
+            self.assertEqual(caught.exception.code,2)
+            self.assertEqual(json.loads(stdout.getvalue())['decision'],'error')
 
 
 if __name__ == '__main__':
