@@ -1,0 +1,2029 @@
+{
+  "schema": "azt.precision-summary.v1",
+  "date": "2026-09-16",
+  "derivative_note": "Selected synthetic observations derived from private evaluation records. Not byte-identical raw evidence or authenticated issuance. No recipient values, source excerpts, private paths, or session transcripts included. All inputs were visible during development.",
+  "performance_note": "One sequential baseline/candidate run on the same macOS/Python environment, including subprocess startup and export; not a speed claim or statistical benchmark.",
+  "measurements": [
+    {
+      "schema": "azt.precision-evaluation.v1",
+      "version": "0.1.13",
+      "engine": {
+        "implementation_sha256": "6ba0e14ad6c0a697390f0b813d7f6b3b61f8fac3ea24852a826111dea7a8bb8b",
+        "text_rules_sha256": "0a9bd369132895ea221fd7716e1c6c914798b91064750b88a8c8b35d96bd779e",
+        "version": "0.1.13"
+      },
+      "module_sha256": {
+        "azt": "f503439d7950e4317c63610c225c8d4077baadfb356ad99382347f25fdea3f13",
+        "azt_review": "8a2ad1519fa4b908a000f36e767fc31e50271df56d34071c2924c7fa4854d3ea",
+        "azt_sensitive": "3e77780300efc9f514b3933dafbcc8710bca75241d9c8c96688c44e1365c8a02"
+      },
+      "pack_sha256": "5ad4db34c732a569b0a7bdf76914e006f655984e3c9cb6cd4dce390ce8922c15",
+      "runner_sha256": "dc202ec54289f8153656de863c128976faf144d490ed34ac0c49a352a9b3596f",
+      "counts": {
+        "cases": 16,
+        "comparisons": 3,
+        "comparisons_passed": 3,
+        "failed": 6,
+        "false_alert_cases": 3,
+        "missed_request_cases": 0,
+        "passed": 10
+      },
+      "families": {
+        "actual-cycle": {
+          "passed": 1,
+          "total": 1
+        },
+        "additional-hop": {
+          "passed": 0,
+          "total": 1
+        },
+        "changed-dependency": {
+          "passed": 1,
+          "total": 1
+        },
+        "credential-control": {
+          "passed": 1,
+          "total": 1
+        },
+        "dependency-baseline": {
+          "passed": 1,
+          "total": 1
+        },
+        "distinct-query-values": {
+          "passed": 1,
+          "total": 1
+        },
+        "distinct-recipients": {
+          "passed": 1,
+          "total": 1
+        },
+        "duplicate-reference": {
+          "passed": 0,
+          "total": 1
+        },
+        "missing-reference": {
+          "passed": 1,
+          "total": 1
+        },
+        "mixed-meaning": {
+          "passed": 1,
+          "total": 1
+        },
+        "parser-context": {
+          "passed": 0,
+          "total": 1
+        },
+        "reference-bound": {
+          "passed": 1,
+          "total": 1
+        },
+        "repeated-recipient": {
+          "passed": 0,
+          "total": 1
+        },
+        "token-measurement": {
+          "passed": 0,
+          "total": 2
+        },
+        "unrelated-edit": {
+          "passed": 1,
+          "total": 1
+        }
+      },
+      "operational_failures": [],
+      "seconds": 3.577697,
+      "peak_child_rss_bytes": 25952256,
+      "platform": "Darwin 25.6.0",
+      "python": "3.11.15",
+      "limitations": [
+        "Known development inputs, not held-out or independent-user validation",
+        "Selected English wording and one-hop observations only",
+        "No fixture instruction is executed, no actual diagnostic material is collected, and no target is contacted",
+        "Different contact blocks remain distinct; absence of ambiguity in one block does not establish a trusted recipient",
+        "Timing includes subprocess startup and report export; child RSS is a single high-water measurement",
+        "Reports are validated derivatives; their digest is not the original scan digest or authenticated issuance"
+      ],
+      "label": "baseline",
+      "source_sha": "4adfa0bebefabe0c9a85b88802f709249957c464",
+      "wheel_sha256": "5a39a4005d75579bb5df47da2578846047900da71dd05f7fb31e2e54cc955c8b",
+      "original_result_sha256": "92bf222577f181997bc1da41f78a382d4a1818d2c27523719be9f7973385b717",
+      "export_checks": {
+        "passed": 32,
+        "total": 32
+      },
+      "cases": [
+        {
+          "id": "P01",
+          "family": "token-measurement",
+          "role": "legitimate-control",
+          "expected": [],
+          "file_sha256": {
+            "README.md": "a3dff0231251823921d7fed9659fcaf8578725b12fead26811418646449c3b3c"
+          },
+          "component": {
+            "bound_identities": true,
+            "error_count": 0,
+            "observations": [
+              {
+                "classes": [
+                  "tokens"
+                ],
+                "destination": {
+                  "count": 0,
+                  "status": "not-stated"
+                },
+                "path": "README.md",
+                "references": [],
+                "support_paths": [
+                  "README.md"
+                ]
+              }
+            ],
+            "result_present_and_structured": true
+          },
+          "failures": [
+            "component observation or identity mismatch",
+            "high: observation or identity mismatch",
+            "medium: observation or identity mismatch"
+          ],
+          "passed": false
+        },
+        {
+          "id": "P02",
+          "family": "token-measurement",
+          "role": "legitimate-control",
+          "expected": [],
+          "file_sha256": {
+            "README.md": "e87ec3c94b661eb86205124a29a621fde926dee3b8bf8e7ea0c23f89fc7e5cf5"
+          },
+          "component": {
+            "bound_identities": true,
+            "error_count": 0,
+            "observations": [
+              {
+                "classes": [
+                  "tokens"
+                ],
+                "destination": {
+                  "count": 0,
+                  "status": "not-stated"
+                },
+                "path": "README.md",
+                "references": [],
+                "support_paths": [
+                  "README.md"
+                ]
+              }
+            ],
+            "result_present_and_structured": true
+          },
+          "failures": [
+            "component observation or identity mismatch",
+            "high: observation or identity mismatch",
+            "medium: observation or identity mismatch"
+          ],
+          "passed": false
+        },
+        {
+          "id": "P03",
+          "family": "parser-context",
+          "role": "legitimate-control",
+          "expected": [],
+          "file_sha256": {
+            "README.md": "cefe2ea2d1b0202c9703aa3d4688f25f00df5e7fa765705afc5906e281c937ef"
+          },
+          "component": {
+            "bound_identities": true,
+            "error_count": 0,
+            "observations": [
+              {
+                "classes": [
+                  "tokens"
+                ],
+                "destination": {
+                  "count": 0,
+                  "status": "not-stated"
+                },
+                "path": "README.md",
+                "references": [],
+                "support_paths": [
+                  "README.md"
+                ]
+              }
+            ],
+            "result_present_and_structured": true
+          },
+          "failures": [
+            "component observation or identity mismatch",
+            "high: observation or identity mismatch",
+            "medium: observation or identity mismatch"
+          ],
+          "passed": false
+        },
+        {
+          "id": "P04",
+          "family": "credential-control",
+          "role": "review-request",
+          "expected": [
+            {
+              "classes": [
+                "tokens"
+              ],
+              "destination": {
+                "count": 0,
+                "status": "not-stated"
+              },
+              "path": "README.md",
+              "references": [],
+              "support_paths": [
+                "README.md"
+              ]
+            }
+          ],
+          "file_sha256": {
+            "README.md": "7e2aa4bf382063e8c9800e29fadfd04f89131f1aeffc7f9ab96191232d8d9935"
+          },
+          "component": {
+            "bound_identities": true,
+            "error_count": 0,
+            "observations": [
+              {
+                "classes": [
+                  "tokens"
+                ],
+                "destination": {
+                  "count": 0,
+                  "status": "not-stated"
+                },
+                "path": "README.md",
+                "references": [],
+                "support_paths": [
+                  "README.md"
+                ]
+              }
+            ],
+            "result_present_and_structured": true
+          },
+          "failures": [],
+          "passed": true
+        },
+        {
+          "id": "P05",
+          "family": "mixed-meaning",
+          "role": "review-request",
+          "expected": [
+            {
+              "classes": [
+                "tokens"
+              ],
+              "destination": {
+                "count": 0,
+                "status": "not-stated"
+              },
+              "path": "README.md",
+              "references": [],
+              "support_paths": [
+                "README.md"
+              ]
+            }
+          ],
+          "file_sha256": {
+            "README.md": "b12a5306cb668f57d1ded0c75f9a098f3fbc6e1259bdd2eb565e5ca1d9a32ec5"
+          },
+          "component": {
+            "bound_identities": true,
+            "error_count": 0,
+            "observations": [
+              {
+                "classes": [
+                  "tokens"
+                ],
+                "destination": {
+                  "count": 0,
+                  "status": "not-stated"
+                },
+                "path": "README.md",
+                "references": [],
+                "support_paths": [
+                  "README.md"
+                ]
+              }
+            ],
+            "result_present_and_structured": true
+          },
+          "failures": [],
+          "passed": true
+        },
+        {
+          "id": "P06",
+          "family": "repeated-recipient",
+          "role": "review-request",
+          "expected": [
+            {
+              "classes": [
+                "tokens"
+              ],
+              "destination": {
+                "count": 1,
+                "status": "explicit"
+              },
+              "path": "README.md",
+              "references": [],
+              "support_paths": [
+                "README.md"
+              ]
+            }
+          ],
+          "file_sha256": {
+            "README.md": "543ff39d29e98055f0830485d1ecaac6995a480ad7fc378023ad59cfa533f6ba"
+          },
+          "component": {
+            "bound_identities": true,
+            "error_count": 0,
+            "observations": [
+              {
+                "classes": [
+                  "tokens"
+                ],
+                "destination": {
+                  "count": 2,
+                  "status": "ambiguous"
+                },
+                "path": "README.md",
+                "references": [],
+                "support_paths": [
+                  "README.md"
+                ]
+              }
+            ],
+            "result_present_and_structured": true
+          },
+          "failures": [
+            "component observation or identity mismatch",
+            "high: observation or identity mismatch",
+            "medium: observation or identity mismatch"
+          ],
+          "passed": false
+        },
+        {
+          "id": "P07",
+          "family": "distinct-recipients",
+          "role": "ambiguous-request",
+          "expected": [
+            {
+              "classes": [
+                "tokens"
+              ],
+              "destination": {
+                "count": 2,
+                "status": "ambiguous"
+              },
+              "path": "README.md",
+              "references": [],
+              "support_paths": [
+                "README.md"
+              ]
+            }
+          ],
+          "file_sha256": {
+            "README.md": "3a3a3ddcb00cf87f01eb2a722663eb198cf29e4beb10628260b6ba8fcdba5378"
+          },
+          "component": {
+            "bound_identities": true,
+            "error_count": 0,
+            "observations": [
+              {
+                "classes": [
+                  "tokens"
+                ],
+                "destination": {
+                  "count": 2,
+                  "status": "ambiguous"
+                },
+                "path": "README.md",
+                "references": [],
+                "support_paths": [
+                  "README.md"
+                ]
+              }
+            ],
+            "result_present_and_structured": true
+          },
+          "failures": [],
+          "passed": true
+        },
+        {
+          "id": "P08",
+          "family": "duplicate-reference",
+          "role": "review-request",
+          "expected": [
+            {
+              "classes": [
+                "tokens"
+              ],
+              "destination": {
+                "count": 1,
+                "status": "explicit"
+              },
+              "path": "README.md",
+              "references": [
+                {
+                  "path": "contact.txt",
+                  "status": "resolved"
+                }
+              ],
+              "support_paths": [
+                "README.md",
+                "contact.txt"
+              ]
+            }
+          ],
+          "file_sha256": {
+            "README.md": "768b9184ff2223b32b1f1cdd83f89270b59f4f2502b57c2d8383edc8048892d8",
+            "contact.txt": "5b724f253913dc20edeaaa7ad0e0435cc013eb29881685f2cad4e1bcc7af9095"
+          },
+          "component": {
+            "bound_identities": true,
+            "error_count": 0,
+            "observations": [
+              {
+                "classes": [
+                  "tokens"
+                ],
+                "destination": {
+                  "count": 0,
+                  "status": "unresolved"
+                },
+                "path": "README.md",
+                "references": [
+                  {
+                    "path": null,
+                    "status": "limit"
+                  }
+                ],
+                "support_paths": [
+                  "README.md"
+                ]
+              }
+            ],
+            "result_present_and_structured": true
+          },
+          "failures": [
+            "component observation or identity mismatch",
+            "high: observation or identity mismatch",
+            "medium: observation or identity mismatch"
+          ],
+          "passed": false
+        },
+        {
+          "id": "P09",
+          "family": "reference-bound",
+          "role": "unresolved-request",
+          "expected": [
+            {
+              "classes": [
+                "tokens"
+              ],
+              "destination": {
+                "count": 0,
+                "status": "unresolved"
+              },
+              "path": "README.md",
+              "references": [
+                {
+                  "path": null,
+                  "status": "limit"
+                }
+              ],
+              "support_paths": [
+                "README.md"
+              ]
+            }
+          ],
+          "file_sha256": {
+            "README.md": "3e74b725883121b6207bc64e1729b65d20373ccb1ed6d4051c3cb4756d5da8e5",
+            "first.txt": "5b724f253913dc20edeaaa7ad0e0435cc013eb29881685f2cad4e1bcc7af9095",
+            "second.txt": "a6393050bc5dcc17be7da9c9053bbbfd4acdd5edc662dad42738778053dc863c",
+            "third.txt": "a8def827b2c7b4c0c41611caeac8c6235ac04ebf4345918c1d1211f73bc811af"
+          },
+          "component": {
+            "bound_identities": true,
+            "error_count": 0,
+            "observations": [
+              {
+                "classes": [
+                  "tokens"
+                ],
+                "destination": {
+                  "count": 0,
+                  "status": "unresolved"
+                },
+                "path": "README.md",
+                "references": [
+                  {
+                    "path": null,
+                    "status": "limit"
+                  }
+                ],
+                "support_paths": [
+                  "README.md"
+                ]
+              }
+            ],
+            "result_present_and_structured": true
+          },
+          "failures": [],
+          "passed": true
+        },
+        {
+          "id": "P10",
+          "family": "additional-hop",
+          "role": "unresolved-request",
+          "expected": [
+            {
+              "classes": [
+                "tokens"
+              ],
+              "destination": {
+                "count": 0,
+                "status": "unresolved"
+              },
+              "path": "README.md",
+              "references": [
+                {
+                  "path": "guide.txt",
+                  "status": "additional-hop-not-followed"
+                }
+              ],
+              "support_paths": [
+                "README.md",
+                "guide.txt"
+              ]
+            }
+          ],
+          "file_sha256": {
+            "README.md": "8d314aa1d74e48e98981d09afa1278ef0fb4a4574f0e3ec52a5acb05e14d4b24",
+            "final.txt": "5b724f253913dc20edeaaa7ad0e0435cc013eb29881685f2cad4e1bcc7af9095",
+            "guide.txt": "5e7054e7c79b508c3e42e9a1fe730e64cba5449864bea12463ccaf1fa0b1488e"
+          },
+          "component": {
+            "bound_identities": true,
+            "error_count": 0,
+            "observations": [
+              {
+                "classes": [
+                  "tokens"
+                ],
+                "destination": {
+                  "count": 0,
+                  "status": "unresolved"
+                },
+                "path": "README.md",
+                "references": [
+                  {
+                    "path": "guide.txt",
+                    "status": "cycle"
+                  }
+                ],
+                "support_paths": [
+                  "README.md",
+                  "guide.txt"
+                ]
+              }
+            ],
+            "result_present_and_structured": true
+          },
+          "failures": [
+            "component observation or identity mismatch",
+            "high: observation or identity mismatch",
+            "medium: observation or identity mismatch"
+          ],
+          "passed": false
+        },
+        {
+          "id": "P11",
+          "family": "actual-cycle",
+          "role": "unresolved-request",
+          "expected": [
+            {
+              "classes": [
+                "tokens"
+              ],
+              "destination": {
+                "count": 0,
+                "status": "unresolved"
+              },
+              "path": "README.md",
+              "references": [
+                {
+                  "path": "guide.txt",
+                  "status": "cycle"
+                }
+              ],
+              "support_paths": [
+                "README.md",
+                "guide.txt"
+              ]
+            }
+          ],
+          "file_sha256": {
+            "README.md": "8d314aa1d74e48e98981d09afa1278ef0fb4a4574f0e3ec52a5acb05e14d4b24",
+            "guide.txt": "40273a0e758ce28b4b56e2040c3af6e2348924fa5e0961b96e81af77c3e240f3"
+          },
+          "component": {
+            "bound_identities": true,
+            "error_count": 0,
+            "observations": [
+              {
+                "classes": [
+                  "tokens"
+                ],
+                "destination": {
+                  "count": 0,
+                  "status": "unresolved"
+                },
+                "path": "README.md",
+                "references": [
+                  {
+                    "path": "guide.txt",
+                    "status": "cycle"
+                  }
+                ],
+                "support_paths": [
+                  "README.md",
+                  "guide.txt"
+                ]
+              }
+            ],
+            "result_present_and_structured": true
+          },
+          "failures": [],
+          "passed": true
+        },
+        {
+          "id": "P12",
+          "family": "missing-reference",
+          "role": "unresolved-request",
+          "expected": [
+            {
+              "classes": [
+                "tokens"
+              ],
+              "destination": {
+                "count": 0,
+                "status": "unresolved"
+              },
+              "path": "README.md",
+              "references": [
+                {
+                  "path": "missing.txt",
+                  "status": "missing"
+                }
+              ],
+              "support_paths": [
+                "README.md"
+              ]
+            }
+          ],
+          "file_sha256": {
+            "README.md": "275f445236b823fce5019f2bc463297c8c13f42a3c3ed4b79e768187724b56c8"
+          },
+          "component": {
+            "bound_identities": true,
+            "error_count": 0,
+            "observations": [
+              {
+                "classes": [
+                  "tokens"
+                ],
+                "destination": {
+                  "count": 0,
+                  "status": "unresolved"
+                },
+                "path": "README.md",
+                "references": [
+                  {
+                    "path": "missing.txt",
+                    "status": "missing"
+                  }
+                ],
+                "support_paths": [
+                  "README.md"
+                ]
+              }
+            ],
+            "result_present_and_structured": true
+          },
+          "failures": [],
+          "passed": true
+        },
+        {
+          "id": "P13",
+          "family": "dependency-baseline",
+          "role": "review-request",
+          "expected": [
+            {
+              "classes": [
+                "tokens"
+              ],
+              "destination": {
+                "count": 1,
+                "status": "explicit"
+              },
+              "path": "README.md",
+              "references": [
+                {
+                  "path": "contact.txt",
+                  "status": "resolved"
+                }
+              ],
+              "support_paths": [
+                "README.md",
+                "contact.txt"
+              ]
+            }
+          ],
+          "file_sha256": {
+            "README.md": "18be9f9743ec7e73f10dc6e6a93f9bf56a084b33454d0246e9a220a0cc70e577",
+            "contact.txt": "5b724f253913dc20edeaaa7ad0e0435cc013eb29881685f2cad4e1bcc7af9095",
+            "notes.txt": "7204b4df41f81b1f3e69831ee68788f04ec1e7f725100719367aefacb2004401"
+          },
+          "component": {
+            "bound_identities": true,
+            "error_count": 0,
+            "observations": [
+              {
+                "classes": [
+                  "tokens"
+                ],
+                "destination": {
+                  "count": 1,
+                  "status": "explicit"
+                },
+                "path": "README.md",
+                "references": [
+                  {
+                    "path": "contact.txt",
+                    "status": "resolved"
+                  }
+                ],
+                "support_paths": [
+                  "README.md",
+                  "contact.txt"
+                ]
+              }
+            ],
+            "result_present_and_structured": true
+          },
+          "failures": [],
+          "passed": true
+        },
+        {
+          "id": "P14",
+          "family": "changed-dependency",
+          "role": "review-request",
+          "expected": [
+            {
+              "classes": [
+                "tokens"
+              ],
+              "destination": {
+                "count": 1,
+                "status": "explicit"
+              },
+              "path": "README.md",
+              "references": [
+                {
+                  "path": "contact.txt",
+                  "status": "resolved"
+                }
+              ],
+              "support_paths": [
+                "README.md",
+                "contact.txt"
+              ]
+            }
+          ],
+          "file_sha256": {
+            "README.md": "18be9f9743ec7e73f10dc6e6a93f9bf56a084b33454d0246e9a220a0cc70e577",
+            "contact.txt": "a6393050bc5dcc17be7da9c9053bbbfd4acdd5edc662dad42738778053dc863c",
+            "notes.txt": "7204b4df41f81b1f3e69831ee68788f04ec1e7f725100719367aefacb2004401"
+          },
+          "component": {
+            "bound_identities": true,
+            "error_count": 0,
+            "observations": [
+              {
+                "classes": [
+                  "tokens"
+                ],
+                "destination": {
+                  "count": 1,
+                  "status": "explicit"
+                },
+                "path": "README.md",
+                "references": [
+                  {
+                    "path": "contact.txt",
+                    "status": "resolved"
+                  }
+                ],
+                "support_paths": [
+                  "README.md",
+                  "contact.txt"
+                ]
+              }
+            ],
+            "result_present_and_structured": true
+          },
+          "failures": [],
+          "passed": true
+        },
+        {
+          "id": "P15",
+          "family": "unrelated-edit",
+          "role": "review-request",
+          "expected": [
+            {
+              "classes": [
+                "tokens"
+              ],
+              "destination": {
+                "count": 1,
+                "status": "explicit"
+              },
+              "path": "README.md",
+              "references": [
+                {
+                  "path": "contact.txt",
+                  "status": "resolved"
+                }
+              ],
+              "support_paths": [
+                "README.md",
+                "contact.txt"
+              ]
+            }
+          ],
+          "file_sha256": {
+            "README.md": "18be9f9743ec7e73f10dc6e6a93f9bf56a084b33454d0246e9a220a0cc70e577",
+            "contact.txt": "5b724f253913dc20edeaaa7ad0e0435cc013eb29881685f2cad4e1bcc7af9095",
+            "notes.txt": "3ba952ac11278281b6b9067280f3532adbe79a6bf69534686bb58a133d151dc7"
+          },
+          "component": {
+            "bound_identities": true,
+            "error_count": 0,
+            "observations": [
+              {
+                "classes": [
+                  "tokens"
+                ],
+                "destination": {
+                  "count": 1,
+                  "status": "explicit"
+                },
+                "path": "README.md",
+                "references": [
+                  {
+                    "path": "contact.txt",
+                    "status": "resolved"
+                  }
+                ],
+                "support_paths": [
+                  "README.md",
+                  "contact.txt"
+                ]
+              }
+            ],
+            "result_present_and_structured": true
+          },
+          "failures": [],
+          "passed": true
+        },
+        {
+          "id": "P16",
+          "family": "distinct-query-values",
+          "role": "ambiguous-request",
+          "expected": [
+            {
+              "classes": [
+                "tokens"
+              ],
+              "destination": {
+                "count": 2,
+                "status": "ambiguous"
+              },
+              "path": "README.md",
+              "references": [],
+              "support_paths": [
+                "README.md"
+              ]
+            }
+          ],
+          "file_sha256": {
+            "README.md": "dcbd564d0a672aca6cbf65320c3b9028a98192aae0c111f7d40fdfef6a9ac696"
+          },
+          "component": {
+            "bound_identities": true,
+            "error_count": 0,
+            "observations": [
+              {
+                "classes": [
+                  "tokens"
+                ],
+                "destination": {
+                  "count": 2,
+                  "status": "ambiguous"
+                },
+                "path": "README.md",
+                "references": [],
+                "support_paths": [
+                  "README.md"
+                ]
+              }
+            ],
+            "result_present_and_structured": true
+          },
+          "failures": [],
+          "passed": true
+        }
+      ],
+      "comparisons": [
+        {
+          "id": "unchanged",
+          "expected": {
+            "comparability": "comparable",
+            "dependency_changed_sensitive": 0,
+            "meaningful_delta": false,
+            "new_sensitive": 0,
+            "no_longer_observed_sensitive": 0,
+            "persisting_sensitive": 1,
+            "unresolved_sensitive": 0
+          },
+          "observed": {
+            "comparability": "comparable",
+            "dependency_changed_sensitive": 0,
+            "meaningful_delta": false,
+            "new_sensitive": 0,
+            "no_longer_observed_sensitive": 0,
+            "persisting_sensitive": 1,
+            "unresolved_sensitive": 0
+          },
+          "passed": true
+        },
+        {
+          "id": "recipient-changed",
+          "expected": {
+            "comparability": "comparable",
+            "dependency_changed_sensitive": 1,
+            "meaningful_delta": true,
+            "new_sensitive": 0,
+            "no_longer_observed_sensitive": 0,
+            "persisting_sensitive": 1,
+            "unresolved_sensitive": 0
+          },
+          "observed": {
+            "comparability": "comparable",
+            "dependency_changed_sensitive": 1,
+            "meaningful_delta": true,
+            "new_sensitive": 0,
+            "no_longer_observed_sensitive": 0,
+            "persisting_sensitive": 1,
+            "unresolved_sensitive": 0
+          },
+          "passed": true
+        },
+        {
+          "id": "unrelated-edit",
+          "expected": {
+            "comparability": "comparable",
+            "dependency_changed_sensitive": 0,
+            "meaningful_delta": true,
+            "new_sensitive": 0,
+            "no_longer_observed_sensitive": 0,
+            "persisting_sensitive": 1,
+            "unresolved_sensitive": 0
+          },
+          "observed": {
+            "comparability": "comparable",
+            "dependency_changed_sensitive": 0,
+            "meaningful_delta": true,
+            "new_sensitive": 0,
+            "no_longer_observed_sensitive": 0,
+            "persisting_sensitive": 1,
+            "unresolved_sensitive": 0
+          },
+          "passed": true
+        }
+      ]
+    },
+    {
+      "schema": "azt.precision-evaluation.v1",
+      "version": "0.1.14",
+      "engine": {
+        "implementation_sha256": "fe63539ac4d3955e397471ebff0c987dafc3b50e883bba215339e9d1323f4b73",
+        "text_rules_sha256": "9ba6b8654c7f6fcb68f397d616d6a50284870b8fd335738404481a434beb9a25",
+        "version": "0.1.14"
+      },
+      "module_sha256": {
+        "azt": "37417fbadd9c9d22f82b21bd39343974c5f7152be80d75535f6fd0a652934e1e",
+        "azt_review": "476317d8144ce29651ec15ef9c19b83a453fddcc376e06198f9c2ef2623dcfe0",
+        "azt_sensitive": "0a27f0e95ac6086d49ea0abdf29368c3f2237f7f17a6c863dc90dd1a8aa9865e"
+      },
+      "pack_sha256": "5ad4db34c732a569b0a7bdf76914e006f655984e3c9cb6cd4dce390ce8922c15",
+      "runner_sha256": "dc202ec54289f8153656de863c128976faf144d490ed34ac0c49a352a9b3596f",
+      "counts": {
+        "cases": 16,
+        "comparisons": 3,
+        "comparisons_passed": 3,
+        "failed": 0,
+        "false_alert_cases": 0,
+        "missed_request_cases": 0,
+        "passed": 16
+      },
+      "families": {
+        "actual-cycle": {
+          "passed": 1,
+          "total": 1
+        },
+        "additional-hop": {
+          "passed": 1,
+          "total": 1
+        },
+        "changed-dependency": {
+          "passed": 1,
+          "total": 1
+        },
+        "credential-control": {
+          "passed": 1,
+          "total": 1
+        },
+        "dependency-baseline": {
+          "passed": 1,
+          "total": 1
+        },
+        "distinct-query-values": {
+          "passed": 1,
+          "total": 1
+        },
+        "distinct-recipients": {
+          "passed": 1,
+          "total": 1
+        },
+        "duplicate-reference": {
+          "passed": 1,
+          "total": 1
+        },
+        "missing-reference": {
+          "passed": 1,
+          "total": 1
+        },
+        "mixed-meaning": {
+          "passed": 1,
+          "total": 1
+        },
+        "parser-context": {
+          "passed": 1,
+          "total": 1
+        },
+        "reference-bound": {
+          "passed": 1,
+          "total": 1
+        },
+        "repeated-recipient": {
+          "passed": 1,
+          "total": 1
+        },
+        "token-measurement": {
+          "passed": 2,
+          "total": 2
+        },
+        "unrelated-edit": {
+          "passed": 1,
+          "total": 1
+        }
+      },
+      "operational_failures": [],
+      "seconds": 3.533486,
+      "peak_child_rss_bytes": 26001408,
+      "platform": "Darwin 25.6.0",
+      "python": "3.11.15",
+      "limitations": [
+        "Known development inputs, not held-out or independent-user validation",
+        "Selected English wording and one-hop observations only",
+        "No fixture instruction is executed, no actual diagnostic material is collected, and no target is contacted",
+        "Different contact blocks remain distinct; absence of ambiguity in one block does not establish a trusted recipient",
+        "Timing includes subprocess startup and report export; child RSS is a single high-water measurement",
+        "Reports are validated derivatives; their digest is not the original scan digest or authenticated issuance"
+      ],
+      "label": "candidate",
+      "source_sha": "6b944ab093d2ce7928702344b611348dd5fddb45",
+      "wheel_sha256": "e5edcefccbeb1662c0855c890c80ef4d9fdae23412273d73a6d925ca82e21afd",
+      "original_result_sha256": "42a299c92d6e2656c36635458b6b73c38824bbe4adf5d154bb7579ad5107a302",
+      "export_checks": {
+        "passed": 32,
+        "total": 32
+      },
+      "cases": [
+        {
+          "id": "P01",
+          "family": "token-measurement",
+          "role": "legitimate-control",
+          "expected": [],
+          "file_sha256": {
+            "README.md": "a3dff0231251823921d7fed9659fcaf8578725b12fead26811418646449c3b3c"
+          },
+          "component": {
+            "bound_identities": true,
+            "error_count": 0,
+            "observations": [],
+            "result_present_and_structured": true
+          },
+          "failures": [],
+          "passed": true
+        },
+        {
+          "id": "P02",
+          "family": "token-measurement",
+          "role": "legitimate-control",
+          "expected": [],
+          "file_sha256": {
+            "README.md": "e87ec3c94b661eb86205124a29a621fde926dee3b8bf8e7ea0c23f89fc7e5cf5"
+          },
+          "component": {
+            "bound_identities": true,
+            "error_count": 0,
+            "observations": [],
+            "result_present_and_structured": true
+          },
+          "failures": [],
+          "passed": true
+        },
+        {
+          "id": "P03",
+          "family": "parser-context",
+          "role": "legitimate-control",
+          "expected": [],
+          "file_sha256": {
+            "README.md": "cefe2ea2d1b0202c9703aa3d4688f25f00df5e7fa765705afc5906e281c937ef"
+          },
+          "component": {
+            "bound_identities": true,
+            "error_count": 0,
+            "observations": [],
+            "result_present_and_structured": true
+          },
+          "failures": [],
+          "passed": true
+        },
+        {
+          "id": "P04",
+          "family": "credential-control",
+          "role": "review-request",
+          "expected": [
+            {
+              "classes": [
+                "tokens"
+              ],
+              "destination": {
+                "count": 0,
+                "status": "not-stated"
+              },
+              "path": "README.md",
+              "references": [],
+              "support_paths": [
+                "README.md"
+              ]
+            }
+          ],
+          "file_sha256": {
+            "README.md": "7e2aa4bf382063e8c9800e29fadfd04f89131f1aeffc7f9ab96191232d8d9935"
+          },
+          "component": {
+            "bound_identities": true,
+            "error_count": 0,
+            "observations": [
+              {
+                "classes": [
+                  "tokens"
+                ],
+                "destination": {
+                  "count": 0,
+                  "status": "not-stated"
+                },
+                "path": "README.md",
+                "references": [],
+                "support_paths": [
+                  "README.md"
+                ]
+              }
+            ],
+            "result_present_and_structured": true
+          },
+          "failures": [],
+          "passed": true
+        },
+        {
+          "id": "P05",
+          "family": "mixed-meaning",
+          "role": "review-request",
+          "expected": [
+            {
+              "classes": [
+                "tokens"
+              ],
+              "destination": {
+                "count": 0,
+                "status": "not-stated"
+              },
+              "path": "README.md",
+              "references": [],
+              "support_paths": [
+                "README.md"
+              ]
+            }
+          ],
+          "file_sha256": {
+            "README.md": "b12a5306cb668f57d1ded0c75f9a098f3fbc6e1259bdd2eb565e5ca1d9a32ec5"
+          },
+          "component": {
+            "bound_identities": true,
+            "error_count": 0,
+            "observations": [
+              {
+                "classes": [
+                  "tokens"
+                ],
+                "destination": {
+                  "count": 0,
+                  "status": "not-stated"
+                },
+                "path": "README.md",
+                "references": [],
+                "support_paths": [
+                  "README.md"
+                ]
+              }
+            ],
+            "result_present_and_structured": true
+          },
+          "failures": [],
+          "passed": true
+        },
+        {
+          "id": "P06",
+          "family": "repeated-recipient",
+          "role": "review-request",
+          "expected": [
+            {
+              "classes": [
+                "tokens"
+              ],
+              "destination": {
+                "count": 1,
+                "status": "explicit"
+              },
+              "path": "README.md",
+              "references": [],
+              "support_paths": [
+                "README.md"
+              ]
+            }
+          ],
+          "file_sha256": {
+            "README.md": "543ff39d29e98055f0830485d1ecaac6995a480ad7fc378023ad59cfa533f6ba"
+          },
+          "component": {
+            "bound_identities": true,
+            "error_count": 0,
+            "observations": [
+              {
+                "classes": [
+                  "tokens"
+                ],
+                "destination": {
+                  "count": 1,
+                  "status": "explicit"
+                },
+                "path": "README.md",
+                "references": [],
+                "support_paths": [
+                  "README.md"
+                ]
+              }
+            ],
+            "result_present_and_structured": true
+          },
+          "failures": [],
+          "passed": true
+        },
+        {
+          "id": "P07",
+          "family": "distinct-recipients",
+          "role": "ambiguous-request",
+          "expected": [
+            {
+              "classes": [
+                "tokens"
+              ],
+              "destination": {
+                "count": 2,
+                "status": "ambiguous"
+              },
+              "path": "README.md",
+              "references": [],
+              "support_paths": [
+                "README.md"
+              ]
+            }
+          ],
+          "file_sha256": {
+            "README.md": "3a3a3ddcb00cf87f01eb2a722663eb198cf29e4beb10628260b6ba8fcdba5378"
+          },
+          "component": {
+            "bound_identities": true,
+            "error_count": 0,
+            "observations": [
+              {
+                "classes": [
+                  "tokens"
+                ],
+                "destination": {
+                  "count": 2,
+                  "status": "ambiguous"
+                },
+                "path": "README.md",
+                "references": [],
+                "support_paths": [
+                  "README.md"
+                ]
+              }
+            ],
+            "result_present_and_structured": true
+          },
+          "failures": [],
+          "passed": true
+        },
+        {
+          "id": "P08",
+          "family": "duplicate-reference",
+          "role": "review-request",
+          "expected": [
+            {
+              "classes": [
+                "tokens"
+              ],
+              "destination": {
+                "count": 1,
+                "status": "explicit"
+              },
+              "path": "README.md",
+              "references": [
+                {
+                  "path": "contact.txt",
+                  "status": "resolved"
+                }
+              ],
+              "support_paths": [
+                "README.md",
+                "contact.txt"
+              ]
+            }
+          ],
+          "file_sha256": {
+            "README.md": "768b9184ff2223b32b1f1cdd83f89270b59f4f2502b57c2d8383edc8048892d8",
+            "contact.txt": "5b724f253913dc20edeaaa7ad0e0435cc013eb29881685f2cad4e1bcc7af9095"
+          },
+          "component": {
+            "bound_identities": true,
+            "error_count": 0,
+            "observations": [
+              {
+                "classes": [
+                  "tokens"
+                ],
+                "destination": {
+                  "count": 1,
+                  "status": "explicit"
+                },
+                "path": "README.md",
+                "references": [
+                  {
+                    "path": "contact.txt",
+                    "status": "resolved"
+                  }
+                ],
+                "support_paths": [
+                  "README.md",
+                  "contact.txt"
+                ]
+              }
+            ],
+            "result_present_and_structured": true
+          },
+          "failures": [],
+          "passed": true
+        },
+        {
+          "id": "P09",
+          "family": "reference-bound",
+          "role": "unresolved-request",
+          "expected": [
+            {
+              "classes": [
+                "tokens"
+              ],
+              "destination": {
+                "count": 0,
+                "status": "unresolved"
+              },
+              "path": "README.md",
+              "references": [
+                {
+                  "path": null,
+                  "status": "limit"
+                }
+              ],
+              "support_paths": [
+                "README.md"
+              ]
+            }
+          ],
+          "file_sha256": {
+            "README.md": "3e74b725883121b6207bc64e1729b65d20373ccb1ed6d4051c3cb4756d5da8e5",
+            "first.txt": "5b724f253913dc20edeaaa7ad0e0435cc013eb29881685f2cad4e1bcc7af9095",
+            "second.txt": "a6393050bc5dcc17be7da9c9053bbbfd4acdd5edc662dad42738778053dc863c",
+            "third.txt": "a8def827b2c7b4c0c41611caeac8c6235ac04ebf4345918c1d1211f73bc811af"
+          },
+          "component": {
+            "bound_identities": true,
+            "error_count": 0,
+            "observations": [
+              {
+                "classes": [
+                  "tokens"
+                ],
+                "destination": {
+                  "count": 0,
+                  "status": "unresolved"
+                },
+                "path": "README.md",
+                "references": [
+                  {
+                    "path": null,
+                    "status": "limit"
+                  }
+                ],
+                "support_paths": [
+                  "README.md"
+                ]
+              }
+            ],
+            "result_present_and_structured": true
+          },
+          "failures": [],
+          "passed": true
+        },
+        {
+          "id": "P10",
+          "family": "additional-hop",
+          "role": "unresolved-request",
+          "expected": [
+            {
+              "classes": [
+                "tokens"
+              ],
+              "destination": {
+                "count": 0,
+                "status": "unresolved"
+              },
+              "path": "README.md",
+              "references": [
+                {
+                  "path": "guide.txt",
+                  "status": "additional-hop-not-followed"
+                }
+              ],
+              "support_paths": [
+                "README.md",
+                "guide.txt"
+              ]
+            }
+          ],
+          "file_sha256": {
+            "README.md": "8d314aa1d74e48e98981d09afa1278ef0fb4a4574f0e3ec52a5acb05e14d4b24",
+            "final.txt": "5b724f253913dc20edeaaa7ad0e0435cc013eb29881685f2cad4e1bcc7af9095",
+            "guide.txt": "5e7054e7c79b508c3e42e9a1fe730e64cba5449864bea12463ccaf1fa0b1488e"
+          },
+          "component": {
+            "bound_identities": true,
+            "error_count": 0,
+            "observations": [
+              {
+                "classes": [
+                  "tokens"
+                ],
+                "destination": {
+                  "count": 0,
+                  "status": "unresolved"
+                },
+                "path": "README.md",
+                "references": [
+                  {
+                    "path": "guide.txt",
+                    "status": "additional-hop-not-followed"
+                  }
+                ],
+                "support_paths": [
+                  "README.md",
+                  "guide.txt"
+                ]
+              }
+            ],
+            "result_present_and_structured": true
+          },
+          "failures": [],
+          "passed": true
+        },
+        {
+          "id": "P11",
+          "family": "actual-cycle",
+          "role": "unresolved-request",
+          "expected": [
+            {
+              "classes": [
+                "tokens"
+              ],
+              "destination": {
+                "count": 0,
+                "status": "unresolved"
+              },
+              "path": "README.md",
+              "references": [
+                {
+                  "path": "guide.txt",
+                  "status": "cycle"
+                }
+              ],
+              "support_paths": [
+                "README.md",
+                "guide.txt"
+              ]
+            }
+          ],
+          "file_sha256": {
+            "README.md": "8d314aa1d74e48e98981d09afa1278ef0fb4a4574f0e3ec52a5acb05e14d4b24",
+            "guide.txt": "40273a0e758ce28b4b56e2040c3af6e2348924fa5e0961b96e81af77c3e240f3"
+          },
+          "component": {
+            "bound_identities": true,
+            "error_count": 0,
+            "observations": [
+              {
+                "classes": [
+                  "tokens"
+                ],
+                "destination": {
+                  "count": 0,
+                  "status": "unresolved"
+                },
+                "path": "README.md",
+                "references": [
+                  {
+                    "path": "guide.txt",
+                    "status": "cycle"
+                  }
+                ],
+                "support_paths": [
+                  "README.md",
+                  "guide.txt"
+                ]
+              }
+            ],
+            "result_present_and_structured": true
+          },
+          "failures": [],
+          "passed": true
+        },
+        {
+          "id": "P12",
+          "family": "missing-reference",
+          "role": "unresolved-request",
+          "expected": [
+            {
+              "classes": [
+                "tokens"
+              ],
+              "destination": {
+                "count": 0,
+                "status": "unresolved"
+              },
+              "path": "README.md",
+              "references": [
+                {
+                  "path": "missing.txt",
+                  "status": "missing"
+                }
+              ],
+              "support_paths": [
+                "README.md"
+              ]
+            }
+          ],
+          "file_sha256": {
+            "README.md": "275f445236b823fce5019f2bc463297c8c13f42a3c3ed4b79e768187724b56c8"
+          },
+          "component": {
+            "bound_identities": true,
+            "error_count": 0,
+            "observations": [
+              {
+                "classes": [
+                  "tokens"
+                ],
+                "destination": {
+                  "count": 0,
+                  "status": "unresolved"
+                },
+                "path": "README.md",
+                "references": [
+                  {
+                    "path": "missing.txt",
+                    "status": "missing"
+                  }
+                ],
+                "support_paths": [
+                  "README.md"
+                ]
+              }
+            ],
+            "result_present_and_structured": true
+          },
+          "failures": [],
+          "passed": true
+        },
+        {
+          "id": "P13",
+          "family": "dependency-baseline",
+          "role": "review-request",
+          "expected": [
+            {
+              "classes": [
+                "tokens"
+              ],
+              "destination": {
+                "count": 1,
+                "status": "explicit"
+              },
+              "path": "README.md",
+              "references": [
+                {
+                  "path": "contact.txt",
+                  "status": "resolved"
+                }
+              ],
+              "support_paths": [
+                "README.md",
+                "contact.txt"
+              ]
+            }
+          ],
+          "file_sha256": {
+            "README.md": "18be9f9743ec7e73f10dc6e6a93f9bf56a084b33454d0246e9a220a0cc70e577",
+            "contact.txt": "5b724f253913dc20edeaaa7ad0e0435cc013eb29881685f2cad4e1bcc7af9095",
+            "notes.txt": "7204b4df41f81b1f3e69831ee68788f04ec1e7f725100719367aefacb2004401"
+          },
+          "component": {
+            "bound_identities": true,
+            "error_count": 0,
+            "observations": [
+              {
+                "classes": [
+                  "tokens"
+                ],
+                "destination": {
+                  "count": 1,
+                  "status": "explicit"
+                },
+                "path": "README.md",
+                "references": [
+                  {
+                    "path": "contact.txt",
+                    "status": "resolved"
+                  }
+                ],
+                "support_paths": [
+                  "README.md",
+                  "contact.txt"
+                ]
+              }
+            ],
+            "result_present_and_structured": true
+          },
+          "failures": [],
+          "passed": true
+        },
+        {
+          "id": "P14",
+          "family": "changed-dependency",
+          "role": "review-request",
+          "expected": [
+            {
+              "classes": [
+                "tokens"
+              ],
+              "destination": {
+                "count": 1,
+                "status": "explicit"
+              },
+              "path": "README.md",
+              "references": [
+                {
+                  "path": "contact.txt",
+                  "status": "resolved"
+                }
+              ],
+              "support_paths": [
+                "README.md",
+                "contact.txt"
+              ]
+            }
+          ],
+          "file_sha256": {
+            "README.md": "18be9f9743ec7e73f10dc6e6a93f9bf56a084b33454d0246e9a220a0cc70e577",
+            "contact.txt": "a6393050bc5dcc17be7da9c9053bbbfd4acdd5edc662dad42738778053dc863c",
+            "notes.txt": "7204b4df41f81b1f3e69831ee68788f04ec1e7f725100719367aefacb2004401"
+          },
+          "component": {
+            "bound_identities": true,
+            "error_count": 0,
+            "observations": [
+              {
+                "classes": [
+                  "tokens"
+                ],
+                "destination": {
+                  "count": 1,
+                  "status": "explicit"
+                },
+                "path": "README.md",
+                "references": [
+                  {
+                    "path": "contact.txt",
+                    "status": "resolved"
+                  }
+                ],
+                "support_paths": [
+                  "README.md",
+                  "contact.txt"
+                ]
+              }
+            ],
+            "result_present_and_structured": true
+          },
+          "failures": [],
+          "passed": true
+        },
+        {
+          "id": "P15",
+          "family": "unrelated-edit",
+          "role": "review-request",
+          "expected": [
+            {
+              "classes": [
+                "tokens"
+              ],
+              "destination": {
+                "count": 1,
+                "status": "explicit"
+              },
+              "path": "README.md",
+              "references": [
+                {
+                  "path": "contact.txt",
+                  "status": "resolved"
+                }
+              ],
+              "support_paths": [
+                "README.md",
+                "contact.txt"
+              ]
+            }
+          ],
+          "file_sha256": {
+            "README.md": "18be9f9743ec7e73f10dc6e6a93f9bf56a084b33454d0246e9a220a0cc70e577",
+            "contact.txt": "5b724f253913dc20edeaaa7ad0e0435cc013eb29881685f2cad4e1bcc7af9095",
+            "notes.txt": "3ba952ac11278281b6b9067280f3532adbe79a6bf69534686bb58a133d151dc7"
+          },
+          "component": {
+            "bound_identities": true,
+            "error_count": 0,
+            "observations": [
+              {
+                "classes": [
+                  "tokens"
+                ],
+                "destination": {
+                  "count": 1,
+                  "status": "explicit"
+                },
+                "path": "README.md",
+                "references": [
+                  {
+                    "path": "contact.txt",
+                    "status": "resolved"
+                  }
+                ],
+                "support_paths": [
+                  "README.md",
+                  "contact.txt"
+                ]
+              }
+            ],
+            "result_present_and_structured": true
+          },
+          "failures": [],
+          "passed": true
+        },
+        {
+          "id": "P16",
+          "family": "distinct-query-values",
+          "role": "ambiguous-request",
+          "expected": [
+            {
+              "classes": [
+                "tokens"
+              ],
+              "destination": {
+                "count": 2,
+                "status": "ambiguous"
+              },
+              "path": "README.md",
+              "references": [],
+              "support_paths": [
+                "README.md"
+              ]
+            }
+          ],
+          "file_sha256": {
+            "README.md": "dcbd564d0a672aca6cbf65320c3b9028a98192aae0c111f7d40fdfef6a9ac696"
+          },
+          "component": {
+            "bound_identities": true,
+            "error_count": 0,
+            "observations": [
+              {
+                "classes": [
+                  "tokens"
+                ],
+                "destination": {
+                  "count": 2,
+                  "status": "ambiguous"
+                },
+                "path": "README.md",
+                "references": [],
+                "support_paths": [
+                  "README.md"
+                ]
+              }
+            ],
+            "result_present_and_structured": true
+          },
+          "failures": [],
+          "passed": true
+        }
+      ],
+      "comparisons": [
+        {
+          "id": "unchanged",
+          "expected": {
+            "comparability": "comparable",
+            "dependency_changed_sensitive": 0,
+            "meaningful_delta": false,
+            "new_sensitive": 0,
+            "no_longer_observed_sensitive": 0,
+            "persisting_sensitive": 1,
+            "unresolved_sensitive": 0
+          },
+          "observed": {
+            "comparability": "comparable",
+            "dependency_changed_sensitive": 0,
+            "meaningful_delta": false,
+            "new_sensitive": 0,
+            "no_longer_observed_sensitive": 0,
+            "persisting_sensitive": 1,
+            "unresolved_sensitive": 0
+          },
+          "passed": true
+        },
+        {
+          "id": "recipient-changed",
+          "expected": {
+            "comparability": "comparable",
+            "dependency_changed_sensitive": 1,
+            "meaningful_delta": true,
+            "new_sensitive": 0,
+            "no_longer_observed_sensitive": 0,
+            "persisting_sensitive": 1,
+            "unresolved_sensitive": 0
+          },
+          "observed": {
+            "comparability": "comparable",
+            "dependency_changed_sensitive": 1,
+            "meaningful_delta": true,
+            "new_sensitive": 0,
+            "no_longer_observed_sensitive": 0,
+            "persisting_sensitive": 1,
+            "unresolved_sensitive": 0
+          },
+          "passed": true
+        },
+        {
+          "id": "unrelated-edit",
+          "expected": {
+            "comparability": "comparable",
+            "dependency_changed_sensitive": 0,
+            "meaningful_delta": true,
+            "new_sensitive": 0,
+            "no_longer_observed_sensitive": 0,
+            "persisting_sensitive": 1,
+            "unresolved_sensitive": 0
+          },
+          "observed": {
+            "comparability": "comparable",
+            "dependency_changed_sensitive": 0,
+            "meaningful_delta": true,
+            "new_sensitive": 0,
+            "no_longer_observed_sensitive": 0,
+            "persisting_sensitive": 1,
+            "unresolved_sensitive": 0
+          },
+          "passed": true
+        }
+      ]
+    }
+  ],
+  "candidate_build": {
+    "build": {
+      "exit_code": 0,
+      "name": "build-once",
+      "output_bytes": 26735,
+      "output_sha256": "49b8ae6225b10bca6478d1ec81e13a62193de47603480ddbfc230c0d4ffcd786",
+      "seconds": 0.502
+    },
+    "dependencies": {
+      "packaging": "26.0",
+      "setuptools": "83.0.0",
+      "wheel": "0.47.0"
+    },
+    "distributions": {
+      "agent_zero_trust-0.1.14-py3-none-any.whl": {
+        "bytes": 85953,
+        "sha256": "e5edcefccbeb1662c0855c890c80ef4d9fdae23412273d73a6d925ca82e21afd"
+      },
+      "agent_zero_trust-0.1.14.tar.gz": {
+        "bytes": 1048291,
+        "sha256": "647fb4c70068c94282d4a0298358f0c42bfd28330573b7f526e3f32cc6084d99"
+      }
+    },
+    "event": "local",
+    "pip": "26.1.2",
+    "python": "3.11.15",
+    "repository": "local",
+    "run_attempt": "1",
+    "run_id": "local",
+    "schema": "azt.release-manifest.v1",
+    "scope": "offline scanner/unit/installed wheel/extracted sdist tests; no new runtime trial",
+    "source": {
+      "sha": "6b944ab093d2ce7928702344b611348dd5fddb45",
+      "tag": "",
+      "tree": "d69f1085e18560b624fec2621ee6e18a69b5674c",
+      "version": "0.1.14"
+    },
+    "status": "verified",
+    "tests": [
+      {
+        "exit_code": 0,
+        "name": "scanner",
+        "output_bytes": 3107,
+        "output_sha256": "e3570bc7cfde9fcf2a3239e011194e98ff5ff5a6035f632aab244026d64fb6f7",
+        "seconds": 0.305
+      },
+      {
+        "exit_code": 0,
+        "name": "unit",
+        "output_bytes": 36555,
+        "output_sha256": "37190309e03471ac7f8981469d2e980329680c42869132bab6e27ee9fe706fd0",
+        "reported_unit_tests": 256,
+        "seconds": 11.18
+      },
+      {
+        "exit_code": 0,
+        "name": "installed-artifacts",
+        "output_bytes": 696,
+        "output_sha256": "e58341f1be7f8667faacca20ca366bbfd031c895e23db21051ea5fdfbc77fa96",
+        "seconds": 32.257
+      }
+    ]
+  }
+}

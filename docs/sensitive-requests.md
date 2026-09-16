@@ -10,6 +10,7 @@ was improved in the [published 0.1.13 release](https://github.com/ralfyishere/ag
 Try the [synthetic lab](../examples/sensitive-request/README.md). The unreleased
 0.1.14 candidate refines selected token meanings and reference observations as
 `sensitive-request-v1.2`; use a reviewed candidate build to test those changes.
+[Installed baseline/candidate measurements and reproduction](../evidence/sensitive-precision-0.1.14/README.md).
 
 ## Meaning and next step
 
@@ -42,8 +43,8 @@ Selected prohibitions and quoted warnings are handled; fences, quotations,
 “official,” “approved,” “example” and debugging pretexts are not blanket exemptions.
 Local configuration use or a version-only request is not equivalent to disclosure.
 
-Since 0.1.13, a selected action grammar handles an explicit contrast such as
-“instead” can end a prohibition, so a later affirmative request keeps its own
+Since 0.1.13, a selected action grammar allows an explicit contrast such as
+“instead” to end a prohibition, so a later affirmative request keeps its own
 object. A later “do not include” does not attach its excluded objects to an earlier
 version-only request. Selected coordinated actions can share an object, as in
 “collect and upload”; a prohibition can apply to both in “do not collect or upload”.
