@@ -6,9 +6,9 @@ CLI. MEDIUM findings are visible even when the default HIGH threshold leaves a
 job green. Green means the selected failure threshold was not reached within the
 reported scope—not safe, approved, no findings or attack blocked.
 
-This integration is available from the reviewed source revision below; 0.1.13
-is a source candidate, not an advertised PyPI release. Published 0.1.12 retains
-its earlier Action behavior. The standalone scanner remains account-free and
+This integration shipped with [0.1.13](https://github.com/ralfyishere/agent-zero-trust/releases/tag/v0.1.13).
+The example below still pins the exact reviewed Action implementation. Published
+0.1.12 retains its earlier Action behavior. The standalone scanner remains account-free and
 does not require GitHub, Docker or a model.
 
 ## Explicit current-base to PR-head comparison

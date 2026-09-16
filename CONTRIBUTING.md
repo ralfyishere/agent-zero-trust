@@ -1,5 +1,9 @@
 # Contributing
 
+New here? [Find a contribution that fits you](docs/community.md)—from making a
+warning clearer to reproducing a false alert. You do not need security expertise
+or a code change to submit useful, synthetic feedback.
+
 For sensitive-request corrections, start with [the inert lab](examples/sensitive-request/README.md)
 and [supported relationships](docs/sensitive-requests.md). Submit a minimal
 synthetic request plus a legitimate contrast, expected information classes and
