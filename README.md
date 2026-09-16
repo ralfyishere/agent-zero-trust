@@ -102,6 +102,10 @@ spot helpful-looking instructions asking for shell history, environment
 dumps or authentication material. Use the same scan → compare → explain → export
 workflow; AZT never collects the requested diagnostics or sends them.
 
+Using GitHub? The [source-candidate Action](docs/github-action.md) adds a concise
+review summary and optional explicit base/head comparison. A green HIGH-threshold
+job can still contain MEDIUM findings; it is not an approval.
+
 **This instruction asks your agent to download and run a remote script.**
 **Review the source before using it.** That is the reason for review—not a
 claim that the source is malicious.

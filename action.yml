@@ -16,30 +16,37 @@ inputs:
     description: "Optional PyPI override: exact numeric version or latest; empty uses the scanner in this action checkout"
     required: false
     default: ""
+  base-path:
+    description: "Optional separate checked-out baseline directory; never fetched by AZT"
+    required: false
+    default: ""
+  head-label:
+    description: "Optional full checkout commit SHA label, caller supplied (not authenticated)"
+    required: false
+    default: ""
+  base-label:
+    description: "Optional full baseline commit SHA label, caller supplied (not authenticated)"
+    required: false
+    default: ""
+  job-summary:
+    description: "Write a bounded GitHub summary (true or false); paths/labels may be sensitive"
+    required: false
+    default: "true"
 runs:
   using: "composite"
   steps:
-    - shell: bash
+    - shell: /usr/bin/env -u BASH_ENV -u ENV /bin/bash --noprofile --norc -euo pipefail {0}
       env:
         AZT_ACTION_VERSION: ${{ inputs.version }}
         AZT_SCAN_PATH: ${{ inputs.path }}
         AZT_FAIL_ON: ${{ inputs.fail-on }}
+        AZT_BASE_PATH: ${{ inputs.base-path }}
+        AZT_HEAD_LABEL: ${{ inputs.head-label }}
+        AZT_BASE_LABEL: ${{ inputs.base-label }}
+        AZT_JOB_SUMMARY: ${{ inputs.job-summary }}
       run: |
         set -euo pipefail
-        case "$AZT_FAIL_ON" in
-          high|medium|any) ;;
-          *) echo "azt: invalid fail-on input" >&2; exit 2 ;;
-        esac
-        if [ -z "$AZT_ACTION_VERSION" ]; then
-          SPEC="$GITHUB_ACTION_PATH"
-        elif [ "$AZT_ACTION_VERSION" = latest ]; then
-          SPEC=agent-zero-trust
-        elif [[ "$AZT_ACTION_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+([ab][0-9]+|rc[0-9]+)?$ ]]; then
-          SPEC="agent-zero-trust==$AZT_ACTION_VERSION"
-        else
-          echo "azt: version must be numeric, latest, or empty" >&2
-          exit 2
-        fi
-        # Inputs stay data, including shell metacharacters and leading dashes.
-        # Install only this trusted action checkout; target contents are never built.
-        pipx run --no-cache --spec "$SPEC" azt scan --json --fail-on "$AZT_FAIL_ON" -- "$AZT_SCAN_PATH"
+        # Standard Ubuntu host interpreter, not a target-supplied PATH entry.
+        # Python starts isolated and outside either supplied snapshot.
+        cd -- "$RUNNER_TEMP"
+        exec /usr/bin/python3 -I "$GITHUB_ACTION_PATH/scripts/action_review.py"

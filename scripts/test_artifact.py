@@ -9,6 +9,7 @@ import json
 import os
 from pathlib import Path
 import re
+import shlex
 import subprocess
 import sys
 import tempfile
@@ -17,39 +18,39 @@ import venv
 
 
 def test_action_inputs(root):
-    """Exercise the real action shell with a recording pipx function (no install)."""
+    """Real shell rejects invalid inputs before installation; no downloads."""
     action = (root / "action.yml").read_text(encoding="utf-8")
     block = action.split("      run: |\n", 1)[1]
     script = "\n".join(line[8:] for line in block.splitlines())
+    shell = shlex.split(action.split('    - shell: ',1)[1].splitlines()[0])
+    assert shell[-1]=='{0}'
+    shell[-1]='-'
     assert "${{" not in script, "action inputs must not be interpolated into shell code"
-    recorder = "pipx() { \"$AZT_TEST_PYTHON\" -c 'import json,sys; print(json.dumps(sys.argv[1:]))' \"$@\"; }\n"
     with tempfile.TemporaryDirectory(prefix="azt-action-test-") as temp:
         marker = Path(temp) / "executed"
         payload = '$(touch "%s")`touch "%s"`; echo injected' % (marker, marker)
-        env = dict(os.environ, AZT_TEST_PYTHON=sys.executable,
+        startup = Path(temp)/'startup.sh'
+        startup.write_text('touch '+shlex.quote(str(marker))+'\n')
+        env = dict(os.environ, GITHUB_WORKSPACE=temp, RUNNER_TEMP=temp,
+                   BASH_ENV=str(startup), ENV=str(startup),
                    GITHUB_ACTION_PATH=str(root), AZT_ACTION_VERSION="",
-                   AZT_FAIL_ON="high", AZT_SCAN_PATH=payload)
+                   AZT_FAIL_ON="invalid", AZT_SCAN_PATH=payload,
+                   AZT_BASE_PATH="", AZT_JOB_SUMMARY="false")
 
         def invoke(**changes):
-            return subprocess.run(["bash", "-s"], input=recorder + script,
+            return subprocess.run(shell, input=script,
                                   env=dict(env, **changes), capture_output=True,
                                   text=True, timeout=10)
 
         result = invoke()
-        assert result.returncode == 0, result.stderr
-        args = json.loads(result.stdout)
-        assert args[args.index("--spec") + 1] == str(root)
-        assert args[-2:] == ["--", payload]
+        assert result.returncode == 2, result.stderr
+        assert payload not in result.stdout+result.stderr
         assert not marker.exists(), "shell metacharacters in input executed"
-        assert json.loads(invoke(AZT_SCAN_PATH="--gate").stdout)[-2:] == ["--", "--gate"]
+        assert invoke(AZT_SCAN_PATH="--gate").returncode == 2
         assert invoke(AZT_ACTION_VERSION=payload).returncode == 2
         assert invoke(AZT_FAIL_ON=payload).returncode == 2
-        args = json.loads(invoke(AZT_ACTION_VERSION="0.1.7").stdout)
-        assert args[args.index("--spec") + 1] == "agent-zero-trust==0.1.7"
-        args = json.loads(invoke(AZT_ACTION_VERSION="latest").stdout)
-        assert args[args.index("--spec") + 1] == "agent-zero-trust"
         assert not marker.exists()
-    print("ACTION ARGUMENT PASS: 6 cases; shell metacharacters stay data; invalid inputs fail; local candidate default")
+    print("ACTION SHELL PASS: invalid inputs exit 2 without installation or reflecting/executing shell payloads")
 
 
 def main():
@@ -88,7 +89,7 @@ def main():
                        "azt_resources/changes-v1.schema.json", "azt_sensitive.py",
                        "azt_resources/scan-v2.schema.json", "azt_resources/review-v2.schema.json",
                        "azt_resources/changes-v2.schema.json", "examples/sensitive-request/challenge-v1.json",
-                       "scripts/sensitive_request_lab.py"):
+                       "scripts/sensitive_request_lab.py", "scripts/action_review.py"):
             assert (source / needed).is_file(), "sdist missing " + needed
         assert not (source / ".azt-local").exists(), "private continuity state must not ship"
         result = subprocess.run([sys.executable, "test_azt.py"], cwd=source,
@@ -147,6 +148,7 @@ def main():
             run([python, "-I", "-m", "unittest", "discover", "-s", root / "tests", "-p", test, "-q"])
         print("SAFETY ARTIFACT PASS: installed adapter/evaluator tests; repeatable CLI comparison; no Docker trials")
         run([python, "-I", "-m", "unittest", "discover", "-s", root / "tests", "-p", "test_review.py", "-q"])
+        run([python, "-I", "-m", "unittest", "discover", "-s", root / "tests", "-p", "test_action_review.py", "-q"])
         for test in ('test_sensitive.py', 'test_sensitive_review.py', 'test_sensitive_associations.py'):
             run([python, "-I", "-m", "unittest", "discover", "-s", root / "tests", "-p", test, "-q"])
         for resource in ("review-v1", "changes-v1", "guidance-v1", "scan-v2", "review-v2", "changes-v2"):

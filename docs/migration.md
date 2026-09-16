@@ -2,6 +2,14 @@
 
 ## 0.1.13 (unreleased candidate)
 
+The source Action replaces raw JSON log output with bounded sanitized summaries
+and controlled status lines. Set `job-summary: false` to omit hosted finding
+content. Existing `path`, `version`, and `fail-on` selection remains; supplied
+baseline paths must be separate. The Action requires the standard Ubuntu host
+Python/venv environment and installs only trusted Action/package code. Invalid
+legacy report contracts or presentation failures return 2. Use the local CLI
+for raw report files; the Action does not upload them. [Details](github-action.md).
+
 The analyzer method changes from `sensitive-request-v1` to
 `sensitive-request-v1.1`; scan/review/changes remain v2. Supported saved reports
 with the earlier method remain readable. Comparisons across changed method or

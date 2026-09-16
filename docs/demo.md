@@ -40,6 +40,10 @@ resolve the parent with `pwd -P` first; do not weaken those checks.
 
 ## GitHub Action
 
+The [new source-candidate summary/comparison guide](github-action.md) provides a
+reviewed explicit base/head example. The pinned released example below retains
+the earlier single-snapshot Action behavior.
+
 The existing Action scans the checked-out repository. This example pins the
 published 0.1.12 source; update the SHA only after reviewing the new source.
 The Action's local-candidate path and malicious exit/finding checks are covered
