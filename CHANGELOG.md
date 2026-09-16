@@ -1,6 +1,16 @@
 # Release notes
 
-## 0.1.13 — unreleased sensitive-request association candidate
+## 0.1.13 — unreleased sensitive-request and GitHub review candidate
+
+- Add a bounded GitHub job summary with an opt-out and optional explicitly
+  supplied base/head comparison using one trusted scanner installation. Preserve
+  candidate threshold exits, display below-threshold findings, and fail visibly
+  on incomplete baselines or presentation errors. No raw report upload, target
+  execution, remote cloning, comment bot, or additional permissions.
+- Harden Action startup against target Python/PATH/startup hooks and separate
+  package preparation from offline target inspection. Keep exact version
+  overrides; default to the trusted pinned Action checkout. See
+  [GitHub usage and limits](docs/github-action.md).
 
 - Revise the analyzer method to `sensitive-request-v1.1` for selected local
   action/object relationships. Preserve affirmative requests after explicit

@@ -65,7 +65,7 @@ jobs:
           if-no-files-found: error
 
   action-candidate:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
@@ -75,5 +75,47 @@ jobs:
         uses: ./
         with:
           path: corpus/benign-repo
+      - name: prepare inert comparison snapshots (maintainer test code)
+        env:
+          AZT_LAB_PATH: ${{ runner.temp }}/azt-action-lab
+        run: python3 -I scripts/action_lab.py --output "$AZT_LAB_PATH"
+      - name: candidate Action compares explicit snapshots and reports MEDIUM below HIGH
+        uses: ./
+        with:
+          base-path: ${{ runner.temp }}/azt-action-lab/base snapshot
+          path: ${{ runner.temp }}/azt-action-lab/head snapshot
+          fail-on: high
+      - name: assert expected HIGH/failure exits without treating fixture failures as CI failures
+        run: python3 -m unittest discover -s tests -p test_action_review.py -v
+      - name: acquire explicit current PR base (no target execution)
+        if: github.event_name == 'pull_request'
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          repository: ${{ github.repository }}
+          ref: ${{ github.event.pull_request.base.sha }}
+          path: snapshots/base
+          persist-credentials: false
+          fetch-depth: 1
+          submodules: false
+          lfs: false
+      - name: acquire actual PR head (not synthetic merge)
+        if: github.event_name == 'pull_request'
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          repository: ${{ github.repository }}
+          ref: ${{ github.event.pull_request.head.sha }}
+          path: snapshots/head
+          persist-credentials: false
+          fetch-depth: 1
+          submodules: false
+          lfs: false
+      - name: test candidate helper on full explicit base and head (corpus HIGH exit expected)
+        if: github.event_name == 'pull_request'
+        env:
+          AZT_SCAN_PATH: snapshots/head
+          AZT_BASE_PATH: snapshots/base
+          AZT_HEAD_LABEL: ${{ github.event.pull_request.head.sha }}
+          AZT_BASE_LABEL: ${{ github.event.pull_request.base.sha }}
+        run: python3 -I scripts/test_action_ci.py
       # Exact malicious exit code AND finding are checked by test_artifact.py.
       # An arbitrary failed installation must never count as malicious detection.

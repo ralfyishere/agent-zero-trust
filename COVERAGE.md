@@ -1,5 +1,14 @@
 # Coverage and known limitations
 
+## GitHub review integration (0.1.13 source candidate)
+
+The [optional Action](docs/github-action.md) summarizes validated scan records
+and compares explicit supplied snapshots with the existing comparator. It adds
+no detector, authentication, automatic fetch, approval or runtime enforcement.
+Its [synthetic tests](tests/test_action_review.py) distinguish real CLI runs from
+mocked failure diagnostics. Hosted integration results identify their source/run;
+an ordinary editable PR workflow is not an immutable security boundary.
+
 ## Sensitive-request review (0.1.12; 0.1.13 candidate follow-up)
 
 `request.sensitive_disclosure` adds bounded English requests and explicit one-hop

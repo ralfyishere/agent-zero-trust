@@ -150,7 +150,11 @@ import re as _re
 pyver = _re.search(r'version = "([^"]+)"', (ROOT / "pyproject.toml").read_text()).group(1)
 check(pyver == azt.__version__, "pyproject version == azt.__version__ (%s)" % pyver)
 actyml = (ROOT / "action.yml").read_text()
-check('SPEC="$GITHUB_ACTION_PATH"' in actyml,
+import importlib.util as _util
+_spec = _util.spec_from_file_location('action_review', ROOT/'scripts/action_review.py')
+_action = _util.module_from_spec(_spec)
+_spec.loader.exec_module(_action)
+check(_action.package_spec('') == str(ROOT) and 'scripts/action_review.py' in actyml,
       "action defaults to its checked-out candidate source")
 
 print()
