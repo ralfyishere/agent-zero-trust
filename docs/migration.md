@@ -1,6 +1,32 @@
 # Migrating to 0.1.9 and later
 
-## 0.1.13 (unreleased candidate)
+## 0.1.14 (unreleased candidate)
+
+The analyzer method changes to `sensitive-request-v1.2`. Selected token
+measurements no longer imply credential disclosure. Repeated identical references
+and same-block recipient mentions no longer create artificial ambiguity or
+consume the distinct-reference limit. Different contact blocks remain distinct;
+this does not establish recipient trust or general language understanding.
+
+Scan/review/changes remain v2. The updated reader preserves support for earlier
+`sensitive-request-v1` and `sensitive-request-v1.1` records. New records can carry
+`additional-hop-not-followed` when support points beyond the one-hop boundary;
+an older reader may reject this new status. Upgrade the reader, not the saved
+record. Historical `cycle` observations are preserved as recorded and are not
+reinterpreted using today's filesystem.
+
+Method/engine identity changes reduce comparison confidence and invalidate an
+old optional snapshot-gate receipt. Review and explicitly re-admit; receipts are
+never silently refreshed. Ordinary scanning/comparison needs no hook. MEDIUM
+severity, default HIGH threshold, 0/1/2 scan exits and one-hop access are unchanged.
+No new runtime result or package publication is implied by this candidate.
+
+Human scan output now separates completeness, finding counts and threshold status;
+it no longer prints a standalone `DECISION: pass` or a `TRUST VERDICT` label.
+Text/HTML local reviews use the same summary. Scripts must consume `--json`,
+whose `decision` and exit mappings are unchanged, rather than parse display text.
+
+## 0.1.13
 
 The source Action replaces raw JSON log output with bounded sanitized summaries
 and controlled status lines. Set `job-summary: false` to omit hosted finding

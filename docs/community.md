@@ -67,6 +67,28 @@ AZT detects it; scan its text.
 
 ## From a report to a reviewed improvement
 
+### A first-user check you can repeat
+
+Use only the inert [lab inputs](../examples/sensitive-request/README.md), not
+private credentials or customer material. Follow the README installation steps
+from a synthetic project directory, recording the actual AZT/Python version and
+platform. Keep the environment and reports outside the inspected project.
+
+1. Scan a version-only request. Can you explain what was inspected and what was
+   not established, without help from the maintainer?
+2. Scan the broad sensitive request. Notice its MEDIUM finding even though the
+   HIGH failure threshold is not exceeded. What would you review next?
+3. Compare the linked-request case before/after its supporting document changes,
+   then with that document unavailable. Is the difference from a proven fix clear?
+4. Export HTML, open it locally, and repeat with a new output filename. Note any
+   unclear step, prerequisite or error; include the exact synthetic command and
+   exit code, not private terminal history.
+
+Record time to the first useful result and the points where assistance was
+needed. Your interpretation and friction are the result, not a score to optimize.
+Maintainer repetitions are not independent-user validation. Do not contact or
+enroll anyone automatically; voluntary outside feedback is welcome.
+
 A focused patch should include the failing behavior, a legitimate control and
 the actual retest result. From a trusted development checkout, the core checks
 are:

@@ -1,6 +1,6 @@
 # Coverage and known limitations
 
-## GitHub review integration (0.1.13 source candidate)
+## GitHub review integration (since 0.1.13)
 
 The [optional Action](docs/github-action.md) summarizes validated scan records
 and compares explicit supplied snapshots with the existing comparator. It adds
@@ -9,7 +9,7 @@ Its [synthetic tests](tests/test_action_review.py) distinguish real CLI runs fro
 mocked failure diagnostics. Hosted integration results identify their source/run;
 an ordinary editable PR workflow is not an immutable security boundary.
 
-## Sensitive-request review (0.1.12; 0.1.13 candidate follow-up)
+## Sensitive-request review (since 0.1.12)
 
 `request.sensitive_disclosure` adds bounded English requests and explicit one-hop
 context from already inspected text. MEDIUM means review, not proof of sensitive
@@ -18,7 +18,7 @@ and the [synthetic evaluation/lab](examples/sensitive-request/README.md).
 Scan/review/changes v2 preserve dependencies and unresolved references. The
 catalog now has 24 rules; guidance completeness is not attack coverage.
 
-The unreleased 0.1.13 candidate uses `sensitive-request-v1.1` for selected local
+The released 0.1.13 uses `sensitive-request-v1.1` for selected local
 action/object associations. In the
 [frozen six-case pack](examples/sensitive-request/associations-v1.json), C3/C4
 expect a `tokens` finding after an earlier shell-history prohibition, and C5
@@ -30,6 +30,16 @@ development inputs are not held out or evidence of general English understanding
 Scan/review/changes stay at v2; earlier `sensitive-request-v1` records remain
 readable with reduced comparability across the method change. MEDIUM severity,
 the default HIGH threshold, one-hop limits and runtime evidence are unchanged.
+
+The unreleased 0.1.14 candidate uses `sensitive-request-v1.2` to distinguish
+selected token measurements from credential requests, deduplicate repeated
+same-block recipients/reference targets and report an unsupported additional
+hop without calling every chain a cycle. Different contact blocks can still be
+ambiguous. The updated v2 reader recognizes `additional-hop-not-followed`;
+older readers may reject reports containing the new status. These are targeted
+precision changes, not broader language coverage or additional filesystem access.
+See [current analysis limits](docs/sensitive-requests.md) and
+[migration](docs/migration.md).
 
 ## Saved-report review (since 0.1.11)
 

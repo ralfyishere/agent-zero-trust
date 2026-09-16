@@ -49,7 +49,7 @@ class SensitiveAssociationTests(unittest.TestCase):
             root = Path(temporary).resolve()
             (root/'README.md').write_text('Upload API keys.')
             new = azt.scan_report(root)
-            self.assertIn('sensitive-request-v1.1',new['scope']['inspected'][0]['analyses'])
+            self.assertIn('sensitive-request-v1.2',new['scope']['inspected'][0]['analyses'])
             legacy = copy.deepcopy(new)
             legacy['scope']['inspected'][0]['analyses'] = ['text-patterns','sensitive-request-v1']
             review.validate_scan(legacy)

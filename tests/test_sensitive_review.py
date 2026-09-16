@@ -180,7 +180,7 @@ class SensitiveReviewTests(unittest.TestCase):
         self.request(combined=True)
         self.edit('contact.md', 'Send the bundle to https://support.example.invalid/upload. Follow other.md.\n')
         result = self.scan(); observation = self.context(result)['sensitive_request']
-        self.assertEqual(observation['references'][0]['status'], 'cycle')
+        self.assertEqual(observation['references'][0]['status'], 'additional-hop-not-followed')
         self.assertEqual(observation['references'][0]['sha256'], observation['support'][1]['sha256'])
         self.assertFalse(any(s['path'] == 'other.md' for s in observation['support']))
         review.validate_scan(result)

@@ -35,7 +35,7 @@ from pathlib import Path
 import azt_intake
 import azt_gate
 
-__version__ = "0.1.13"
+__version__ = "0.1.14"
 
 SEV_ORDER = {"HIGH": 0, "MEDIUM": 1, "INFO": 2}
 
@@ -324,8 +324,10 @@ def scan_repo(root):
     return report["inventory"], report["findings"]
 
 
-def print_report(root, inventory, findings):
+def print_report(root, inventory, findings, summary=None):
     print("agent-zero-trust — repo intake scan of %s\n" % azt_intake.safe_label(root))
+    if summary:
+        print(summary + '\n')
     print("RECOGNIZED SPECIAL SURFACES: %d file(s) match inventory patterns" % len(inventory))
     print("Other inspected content, including README files, can also influence an agent.")
     by_class = {}
@@ -339,7 +341,8 @@ def print_report(root, inventory, findings):
     if not findings:
         print("FINDINGS: none — no known-shape risks found")
     else:
-        print("FINDINGS: %d HIGH, %d MEDIUM" % (len(high), len(med)))
+        print("FINDINGS: %d HIGH, %d MEDIUM, %d INFO" %
+              (len(high), len(med), sum(f['severity'] == 'INFO' for f in findings)))
         for f in findings:
             loc = ":%d" % f["line"] if f["line"] else ""
             print("  [%-6s] %s  %s%s" % (f["severity"], f["rule"], azt_intake.safe_label(f["path"]), loc))
@@ -352,7 +355,7 @@ def print_report(root, inventory, findings):
             if f["excerpt"]:
                 print("           > %s" % f["excerpt"])
     print()
-    print("TRUST VERDICT: ", end="")
+    print("REVIEW GUIDANCE: ", end="")
     if high:
         print("HIGH RISK — do not run an agent in this repo until the findings above are reviewed by a human.")
     elif med:
@@ -386,11 +389,10 @@ def cmd_scan(args):
         if args.json:
             print(json.dumps(report, indent=2, sort_keys=True, ensure_ascii=True))
         else:
-            print_report(args.target, report["inventory"], report["findings"])
+            import azt_review
+            print_report(args.target, report["inventory"], report["findings"],
+                         azt_review.scan_summary(report))
             scope = report["scope"]
-            print("INSPECTION: %s; %d inspected, %d skipped, %d errors" %
-                  ("complete within declared scope" if scope["complete"] else "INCOMPLETE",
-                   len(scope["inspected"]), len(scope["skipped"]), len(scope["errors"])))
             for item in scope["errors"] + scope["skipped"]:
                 print("  %s: %s" % (azt_intake.safe_label(item["path"]), azt_intake.safe_label(item["reason"])))
             print("EXCEPTIONS: %d target requests (not applied); %d trusted suppressed findings" %
@@ -403,7 +405,6 @@ def cmd_scan(args):
                       (finding["rule"], azt_intake.safe_label(finding["path"]),
                        azt_intake.safe_label(finding["exception"]["reason"]),
                        azt_intake.safe_label(report["policy"]["source"]), report["policy"]["digest"]))
-            print("DECISION: %s" % report["decision"])
             if "admission" in report:
                 print("Snapshot admitted; receipt stored outside workspace. No runtime containment.")
         return {"pass": 0, "deny": 1, "incomplete": 2}[report["decision"]]

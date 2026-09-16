@@ -548,13 +548,13 @@
           ]
         },
         "status": {
-          "enum": ["resolved","missing","excluded","unreadable","unsupported","unsafe","ambiguous","cycle","limit","no-sharing-context"]
+          "enum": ["resolved","missing","excluded","unreadable","unsupported","unsafe","ambiguous","cycle","additional-hop-not-followed","limit","no-sharing-context"]
         },
         "sha256": {"anyOf":[{"type":"string","pattern":"^[a-f0-9]{64}$"},{"type":"null"}]}
       },
       "allOf": [
         {
-          "if": {"properties":{"status":{"enum":["resolved","no-sharing-context","ambiguous","cycle"]}}},
+          "if": {"properties":{"status":{"enum":["resolved","no-sharing-context","ambiguous","cycle","additional-hop-not-followed"]}}},
           "then": {
             "properties": {
               "path": {

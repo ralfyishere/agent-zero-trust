@@ -4,8 +4,8 @@
 
 Your coding agent reads more than code. A README, setup guide or project
 instruction can ask it to run a command—or ask you to share sensitive information.
-AZT helps you **see what changed, understand what is being asked, and keep a
-review before deciding what to trust**.
+AZT helps you **see what changed, understand what is being asked, and save a
+readable report before deciding what to trust**.
 
 For people building with AI, from their first app to a security review.
 Free. Offline after installation. No account, model API or telemetry.

@@ -5,9 +5,11 @@ bug report. AZT identifies selected English requests to share shell history,
 environment dumps, credential-bearing configuration, tokens or private keys.
 It explains what those materials **may** expose without collecting them to
 check whether credentials exist. This is repository intake, not runtime blocking.
-Sensitive-request review is included in the published 0.1.12 package. Try the
-[synthetic lab](../examples/sensitive-request/README.md). The unreleased 0.1.13
-candidate revises local action/object association as `sensitive-request-v1.1`.
+Sensitive-request review was introduced in 0.1.12 and its action/object handling
+was improved in the [published 0.1.13 release](https://github.com/ralfyishere/agent-zero-trust/releases/tag/v0.1.13).
+Try the [synthetic lab](../examples/sensitive-request/README.md). The unreleased
+0.1.14 candidate refines selected token meanings and reference observations as
+`sensitive-request-v1.2`; use a reviewed candidate build to test those changes.
 
 ## Meaning and next step
 
@@ -40,7 +42,7 @@ Selected prohibitions and quoted warnings are handled; fences, quotations,
 “official,” “approved,” “example” and debugging pretexts are not blanket exemptions.
 Local configuration use or a version-only request is not equivalent to disclosure.
 
-The 0.1.13 candidate uses a selected action grammar: an explicit contrast such as
+Since 0.1.13, a selected action grammar handles an explicit contrast such as
 “instead” can end a prohibition, so a later affirmative request keeps its own
 object. A later “do not include” does not attach its excluded objects to an earlier
 version-only request. Selected coordinated actions can share an object, as in
@@ -48,6 +50,18 @@ version-only request. Selected coordinated actions can share an object, as in
 Sentence/semicolon boundaries and selected action bullets also separate requests.
 Selected contractions accept straight or curly apostrophes. These are bounded
 wording cases, not general English negation, syntax or intent understanding.
+
+The 0.1.14 candidate distinguishes selected token measurements from credential
+requests. Asking for a token count is not the same as asking for an API token.
+The matcher checks at most 64 adjacent characters around a bare `token`/`tokens`
+mention for selected count/budget/usage/total/limit phrases or parser/lexical/syntax
+context. Credential-qualified terms such as `API token` are not exempted, and a
+directly stated authentication role or credential value overrides the selected
+measurement/parser meaning. “The number of tokens” names a quantity; “a number
+of tokens” can request several token values and remains reviewable. A separate
+credential request in the same paragraph still deserves review. This
+is a local wording distinction, not a determination of what a token really
+contains; unfamiliar vocabulary and ambiguous bare-token requests remain limits.
 
 The analysis indexes each eligible document once, within intake's 32 MB total
 read budget. Limits are 32 million retained text characters, 1,000 request
@@ -81,6 +95,18 @@ Missing/excluded/unsupported material stays unresolved. External links are not
 automatically whole-scan errors. Raw addresses/URLs are omitted, including
 userinfo, paths, query strings and fragments. Local paths may still be sensitive.
 
+In the 0.1.14 candidate, identical repeated reference targets are counted once
+within the two-reference request limit; repeating the same recipient within one
+contact block does not establish several recipients. Deduplication uses exact
+strings, not a reputation service or an assumption that different URL paths,
+query strings or letter case identify the same recipient. Different contact blocks remain separate
+contexts even when they repeat an address: this bounded analyzer does not infer
+that their instructions are equivalent. A further reference is labeled
+`additional-hop-not-followed`, not `cycle` merely because it exists. `cycle`
+is reserved for a supported reference back to a document already in this
+one-hop relationship. Neither status grants additional reads or resolves the
+destination. An unknown second hop remains unknown.
+
 ## Reports and authority
 
 Scan-v2 adds bounded `sensitive_request` action/class labels, source ranges,
@@ -90,9 +116,12 @@ remain visible even when the request file is unchanged. Missing/degraded support
 cannot resolve an old request. “No longer observed” does not mean “fixed.”
 Comparison uses saved validated records, not today's filesystem. Engine/method
 changes reduce comparability; unrelated edits do not invalidate every observation.
-The 0.1.13 candidate retains scan/review/changes v2. Its readers still accept
-supported v2 records carrying the earlier `sensitive-request-v1` method; the
-method revision does not authorize rewriting historical reports or their hashes.
+Scan/review/changes remain v2. The 0.1.14 reader accepts supported records with
+`sensitive-request-v1`, `sensitive-request-v1.1` and `sensitive-request-v1.2` methods.
+The new `additional-hop-not-followed` reference status is an explicit contract
+extension: older binaries may reject a new report containing it. Use the updated
+reader instead of editing historical reports, their methods or their hashes.
+See [migration](migration.md).
 
 Existing external single-file exceptions work. A primary-only exception cannot
 suppress **any reference-bearing request**, even when unresolved; the report

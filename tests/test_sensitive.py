@@ -154,7 +154,7 @@ class SensitiveTests(unittest.TestCase):
         self.write('contact.txt', 'Send the bundle; follow [sharing steps](third.txt).')
         self.write('third.txt', 'Inbox: ignored@example.invalid')
         f, = self.findings(self.scan())
-        self.assertEqual(f['sensitive_request']['references'][0]['status'], 'cycle')
+        self.assertEqual(f['sensitive_request']['references'][0]['status'], 'additional-hop-not-followed')
         self.assertEqual(len(f['sensitive_request']['support']), 2)
 
     def test_unsafe_references_never_expand_access(self):

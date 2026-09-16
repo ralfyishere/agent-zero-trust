@@ -1,8 +1,10 @@
 # Safety evidence v2
 
-The scanner/admission schemas stay at v1. Only `azt safety` evidence, its
-integration artifact record and CI envelope advance to v2. Repair proposals
-and the FS-001 probe remain v1. Historical exports are never migrated in place.
+At the 0.1.9 safety-evidence transition, scanner/admission schemas stayed at v1;
+only `azt safety` evidence, its integration artifact record and CI envelope
+advanced to v2. Scanner reports subsequently advanced to v2 in 0.1.12; admission
+receipts, repair proposals and the FS-001 probe remain v1. Historical exports
+are never migrated in place.
 
 Each planned phase has a terminal `status`: `passed`, `failed`, `blocked`,
 `not_run`, or `unknown`. Their counts partition the three phases exactly once.
