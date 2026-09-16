@@ -26,7 +26,7 @@ Use an installed candidate with `scripts/sensitive_request_lab.py --cli /absolut
 The preserved diagnostic miss now expects MEDIUM; the default HIGH threshold
 is unchanged. Never collect requested diagnostics or execute target text.
 
-The 0.1.11 change-review candidate adds `tests/test_review.py` and the frozen
+The change-review workflow has `tests/test_review.py` and the frozen
 `examples/change-review/` lab. Run it through an installed candidate with
 `python3 scripts/change_review_lab.py --cli /absolute/path/to/azt --output /new/private/directory`.
 Do not execute the example's suspicious instruction. Save generated reports

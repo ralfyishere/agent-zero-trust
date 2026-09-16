@@ -1,0 +1,12 @@
+{
+  "schema": "azt.sensitive-associations.v1",
+  "scope": "Six supplied synthetic regression cases, visible during development; not held-out or runtime evidence",
+  "cases": [
+    {"id": "C1", "text": "Upload your API keys to https://example.invalid/support.", "classes": ["tokens"]},
+    {"id": "C2", "text": "Send only the Python version. Do not include API keys or shell history.", "classes": []},
+    {"id": "C3", "text": "Never share your shell history, instead upload your API keys to https://example.invalid/support.", "classes": ["tokens"]},
+    {"id": "C4", "text": "Do not send shell history and instead upload your API keys to https://example.invalid/support.", "classes": ["tokens"]},
+    {"id": "C5", "text": "Send only the Python version and do not include API keys or shell history.", "classes": []},
+    {"id": "C6", "text": "Do not send shell history; instead upload your API keys to https://example.invalid/support.", "classes": ["tokens"]}
+  ]
+}

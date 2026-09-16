@@ -1,6 +1,26 @@
 # Release notes
 
-## 0.1.12 — unreleased sensitive-request review candidate
+## 0.1.13 — unreleased sensitive-request association candidate
+
+- Revise the analyzer method to `sensitive-request-v1.1` for selected local
+  action/object relationships. Preserve affirmative requests after explicit
+  contrasts and keep prohibited objects out of unrelated affirmative requests.
+- Add the six known synthetic association cases and adversarial/legitimate
+  regressions for selected prohibitions, shared objects, local use, warnings,
+  wrapped text and one-hop reference labels. C3/C4 target missed token requests;
+  C5 targets a false alert on a version-only request with explicit exclusions.
+  These development inputs do not establish general English understanding.
+- Retain scan/review/changes v2 and readable earlier `sensitive-request-v1`
+  records. Engine/method differences reduce comparison confidence; the optional
+  snapshot gate requires explicit operator re-admission after upgrade.
+- Keep MEDIUM severity, default HIGH threshold, scan exits, one-hop scope,
+  resource bounds and security limits unchanged. Preserve historical records,
+  known-miss history and FS-001 evidence; add no runtime containment claim.
+
+This is a candidate, not a published release. See
+[migration](docs/migration.md) and [limits](docs/sensitive-requests.md).
+
+## 0.1.12 — sensitive-request review
 
 - Identify selected English diagnostic/authentication disclosure requests and
   explain potential consequences without collecting secrets or uploading.

@@ -7,7 +7,7 @@ import re
 from pathlib import PurePosixPath
 
 RULE = "request.sensitive_disclosure"
-SETTINGS = {"method": "sensitive-request-v1", "block_characters": 4096,
+SETTINGS = {"method": "sensitive-request-v1.1", "block_characters": 4096,
             "block_lines": 16, "references_per_request": 2,
             "reference_characters": 256, "requests": 1000,
             "retained_characters": 32000000, "correlations": 2000}
@@ -24,7 +24,7 @@ PATTERNS = {key: re.compile(value, re.I) for key, value in CLASSES.items()}
 SHARE = re.compile(r"\b(?:send|share|upload|submit|attach|paste|email|forward|post|transmit|provide)\b", re.I)
 COLLECT = re.compile(r"\b(?:gather|collect|copy|capture|bundle|include|export|dump)\b", re.I)
 NEGATE = re.compile(r"\b(?:do\s+not|don't|never|must\s+not|should\s+not|avoid|not\s+to)\b", re.I)
-NEGATED_ACTION = re.compile(r"\b(?:do\s+not|don't|never|must\s+not|should\s+not|avoid|not\s+to)\s+(?:ever\s+)?$", re.I)
+NEGATED_ACTION = re.compile(r"\b(?:do\s+not|don't|never|must\s+not|mustn't|should\s+not|shouldn't|avoid|not\s+to)\s+(?:ever\s+)?$", re.I)
 LOCAL_SHARE = re.compile(r'\b(?:share|provide)\s+(?:(?:it|them|the bundle|these diagnostics)\s+)?locally\b', re.I)
 LOCAL = re.compile(r"\b(?:locally|local-only|on\s+your\s+(?:own\s+)?machine|do\s+not\s+share)\b", re.I)
 BROAD = re.compile(r"\b(?:full|all|entire|complete|unredacted|raw)\b", re.I)
@@ -59,18 +59,79 @@ def blocks(text):
 
 
 def positive(text):
-    """Drop locally prohibited clauses, not all quotations/fences/docs."""
+    """Keep affirmative action/object spans inside a bounded paragraph.
+
+    Sentence/semicolon and explicit contrast boundaries reset a prohibition.
+    Coordinated actions otherwise inherit it. Each action ends at the next
+    action, so a positive version request cannot inherit a prohibited object's
+    words. Original block ranges, not this analysis-only view, locate evidence.
+    This is selected imperative grammar, not general English interpretation.
+    """
     out = []
+    text = text.replace('\u2019', "'")
+    text = re.sub(r'\n[ \t]*[-*+][ \t]+(?=(?:(?:do not|never|don\x27t)\s+)?(?:send|share|upload|submit|attach|paste|email|forward|post|transmit|provide|gather|collect|copy|capture|bundle|include|export|dump)\b)', '; ', text, flags=re.I)
     normalized = re.sub(r"[\t\r\n ]+", " ", text)
-    for clause in re.split(r"(?<=[.!?;])\s+|\bbut\b", normalized, flags=re.I):
-        actions = sorted(list(SHARE.finditer(clause)) + list(COLLECT.finditer(clause)), key=lambda m: m.start())
-        # A noun such as environment 'dump' must not undo a prohibition on send.
-        if actions and NEGATED_ACTION.search(clause[max(0, actions[0].start()-80):actions[0].start()]):
-            continue
+    # Split on grammar, never on a word inside an explicit reference/address.
+    boundary_view = list(normalized)
+    for match in list(LINK.finditer(normalized)) + list(ADDRESS.finditer(normalized)):
+        boundary_view[match.start():match.end()] = ' ' * (match.end()-match.start())
+    for match in BARE.finditer(normalized):
+        boundary_view[match.start(1):match.end(1)] = ' ' * len(match.group(1))
+    cuts = list(re.finditer(r"(?<=[.!?;])\s+|\b(?:but|however|instead|yet)\b\s*,?", ''.join(boundary_view), re.I))
+    starts = [0] + [m.end() for m in cuts]
+    ends = [m.start() for m in cuts] + [len(normalized)]
+    for start, end in zip(starts, ends):
+        clause = normalized[start:end]
         if re.search(r"\b(?:warning|unsafe|dangerous)\b", clause, re.I) and re.search(r"\b(?:do not follow|never follow|do not execute|not an instruction)\b", clause, re.I):
             continue
-        out.append(clause)
-    return "; ".join(out)
+        # Reference labels/addresses may contain action words. They are data,
+        # not new imperatives that may cut a supported Markdown link in half.
+        action_view = list(clause)
+        for match in list(LINK.finditer(clause)) + list(ADDRESS.finditer(clause)):
+            action_view[match.start():match.end()] = ' ' * (match.end()-match.start())
+        for match in BARE.finditer(clause):
+            action_view[match.start(1):match.end(1)] = ' ' * len(match.group(1))
+        action_view = ''.join(action_view)
+        actions = sorted(list(SHARE.finditer(action_view)) + list(COLLECT.finditer(action_view)), key=lambda m: m.start())
+        # 'environment dump' / 'diagnostics bundle' are subjects, not imperatives.
+        actions = [m for m in actions if not (m.group().lower() in ('dump', 'bundle', 'copy') and
+                   re.search(r'\b(?:environment|env|diagnostics|the|a|this|one)\s+$', clause[:m.start()], re.I))]
+        if not actions:
+            # Retain action-free contact/reference/list context for one-hop use,
+            # but not explicitly excluded noun lists.
+            out.append(re.split(r'\b(?:never|excluding|except)\b', clause, maxsplit=1, flags=re.I)[0])
+            continue
+        prohibited, pending = False, ''
+        for index, action in enumerate(actions):
+            prefix = clause[actions[index-1].end() if index else 0:action.start()]
+            explicit = NEGATED_ACTION.search(prefix[-80:])
+            prohibited = bool(explicit) or prohibited
+            end = actions[index+1].start() if index+1<len(actions) else len(clause)
+            span = clause[action.start():end]
+            # A following negated action belongs to the next span; a direct
+            # excluded noun phrase also cannot become this action's subject.
+            span = re.split(r"\b(?:do\s+not|don't|mustn't|shouldn't|must\s+not|should\s+not|never|excluding|except)\b", span, maxsplit=1, flags=re.I)[0]
+            if not prohibited:
+                if not index:
+                    # Preserve only explicit reference/address evidence before
+                    # the action, not unrelated preceding sensitive nouns.
+                    locations = [(m.start(),m.end(),m.group()) for m in LINK.finditer(prefix)]
+                    locations += [(m.start(),m.end(),m.group()) for m in BARE.finditer(prefix) if not m.group(1).startswith('[')]
+                    locations += [(m.start(),m.end(),m.group()) for m in ADDRESS.finditer(prefix)
+                                  if not any(a<=m.start()<b for a,b,_ in locations)]
+                    if locations:
+                        span = ' '.join(v for _,_,v in sorted(locations))+' '+span
+                if action.group().lower() == 'include' and re.search(r'\b(?:bundle|diagnostics)\b', prefix, re.I):
+                    span = prefix + span
+                bare = bool(re.fullmatch(r'(?:'+SHARE.pattern+'|'+COLLECT.pattern+r')\s+(?:and|or)(?:\s+then)?\s*', span, re.I))
+                if bare:
+                    pending += span+' '
+                else:
+                    out.append(pending+span)
+                    pending = ''
+            else:
+                pending = ''
+    return '; '.join(out)
 
 
 def references(text, source):
@@ -117,10 +178,11 @@ def request_classes(text, refs):
     disclosed, collected = set(), set()
     onward_bundle = False
     for clause in clauses:
-        classes = {key for key, pattern in PATTERNS.items() if pattern.search(clause)}
-        if SHARE.search(clause) and not LOCAL_SHARE.search(clause):
+        subject_view = ADDRESS.sub(' ', clause)
+        classes = {key for key, pattern in PATTERNS.items() if pattern.search(subject_view)}
+        if SHARE.search(clause) and not local_share(clause):
             disclosed.update(classes)
-            if re.search(r'\b(?:them|it|both|these|bundle|diagnostics|details|results|material|values)\b', clause, re.I):
+            if re.search(r'\b(?:them|it|both|these|the\s+(?:(?:complete|full|entire)\s+)?(?:diagnostics\s+)?(?:bundle|diagnostics|details|results|material|values))\b', clause, re.I):
                 onward_bundle = True
         if COLLECT.search(clause):
             collected.update(classes)
@@ -131,8 +193,15 @@ def request_classes(text, refs):
     return sorted(disclosed | (collected if onward_bundle or refs else set()))
 
 
+def local_share(clause):
+    return bool(LOCAL_SHARE.search(clause) or
+                (re.match(r'\s*(?:share|provide)\b', clause, re.I) and
+                 re.search(r'\blocally\s*[.!?,:]*\s*$', clause, re.I) and
+                 not re.search(r'\b(?:with|to|after|before|while|once)\b', clause, re.I)))
+
+
 def onward_request(text):
-    return any(SHARE.search(clause) and not LOCAL_SHARE.search(clause) and
+    return any(SHARE.search(clause) and not local_share(clause) and
                re.search(r'\b(?:them|it|both|bundle|diagnostics|details|results|material|values)\b', clause, re.I)
                for clause in re.split(r'(?<=[.!?;])\s+', text))
 

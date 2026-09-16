@@ -1,6 +1,6 @@
 # Coverage and known limitations
 
-## Sensitive-request review (0.1.12 unreleased candidate)
+## Sensitive-request review (0.1.12; 0.1.13 candidate follow-up)
 
 `request.sensitive_disclosure` adds bounded English requests and explicit one-hop
 context from already inspected text. MEDIUM means review, not proof of sensitive
@@ -9,7 +9,20 @@ and the [synthetic evaluation/lab](examples/sensitive-request/README.md).
 Scan/review/changes v2 preserve dependencies and unresolved references. The
 catalog now has 24 rules; guidance completeness is not attack coverage.
 
-## Saved-report review (0.1.11 candidate)
+The unreleased 0.1.13 candidate uses `sensitive-request-v1.1` for selected local
+action/object associations. In the
+[frozen six-case pack](examples/sensitive-request/associations-v1.json), C3/C4
+expect a `tokens` finding after an earlier shell-history prohibition, and C5
+expects no finding when a version-only request explicitly excludes sensitive
+material. [Related regressions](tests/test_sensitive_associations.py) cover selected
+contrast boundaries, prohibitions, coordinated actions with a shared object,
+local use, warning context, wrapped text and reference labels. These known
+development inputs are not held out or evidence of general English understanding.
+Scan/review/changes stay at v2; earlier `sensitive-request-v1` records remain
+readable with reduced comparability across the method change. MEDIUM severity,
+the default HIGH threshold, one-hop limits and runtime evidence are unchanged.
+
+## Saved-report review (since 0.1.11)
 
 `azt changes` compares observations, not live repository state or authenticity.
 It supports complete scan-v1 report shapes, including incomplete inspections;

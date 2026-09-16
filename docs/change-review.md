@@ -5,7 +5,7 @@ executes target code nor grants authority. It does not need a hook or Docker.
 
 ## Inputs and identity
 
-Since the unreleased 0.1.12 candidate, scan-v2 and `azt.review.v2` are accepted
+Since 0.1.12, scan-v2 and `azt.review.v2` are accepted
 alongside v1. Comparisons containing v2 emit `azt.changes.v2`. The versioned
 [sensitive-request observation](sensitive-requests.md) adds supporting inputs,
 safe class/action labels and explicit reference dispositions. Old binaries reject
@@ -66,7 +66,7 @@ existing 0/1/2 semantics are unchanged.
 
 ## Guidance and exports
 
-`azt explain RULE_ID` reads the bundled 23-rule catalog. Each entry gives meaning,
+`azt explain RULE_ID` reads the bundled 24-rule catalog. Each entry gives meaning,
 review rationale, legitimate context, limits and a next step. Unknown IDs fail.
 Old reports may retain unknown rules without pretending they are harmless.
 
@@ -97,8 +97,8 @@ Packaged schema copies accompany the offline guidance catalog.
 
 ## Scope and shared-code impact
 
-The 0.1.11 change-review milestone did not change detection rules. The 0.1.12
-candidate adds sensitive-request detection, intake correlation and gate identity
+The 0.1.11 change-review milestone did not change detection rules. Version 0.1.12
+added sensitive-request detection, intake correlation and gate identity
 binding; dependency-aware comparison includes every supporting input and keeps
 degraded evidence unresolved. No FS-001 runtime module/probe/expectation changed. The
 shared scanner dispatcher/version and additive intake provenance did change;

@@ -17,7 +17,8 @@ MAX_OUTPUT = MAX_REPORT
 MAX_ITEMS = 10000
 SEVERITY = {"HIGH": 0, "MEDIUM": 1, "INFO": 2}
 SENSITIVE_RULE = 'request.sensitive_disclosure'
-SENSITIVE_ANALYSIS = 'sensitive-request-v1'
+SENSITIVE_ANALYSIS = 'sensitive-request-v1.1'
+SENSITIVE_ANALYSES = {SENSITIVE_ANALYSIS, 'sensitive-request-v1'}
 SENSITIVE_LIMITS = ['bounded-english-context', 'wording-not-intent',
                     'no-secret-content-inspected', 'destination-not-verified']
 EXCEPTION_REFUSAL = 'primary-file exception cannot authorize referenced context'
@@ -204,7 +205,7 @@ def sensitive_request(finding, manifest, inspected, errors):
         support_paths[entry['path']] = entry
         require(manifest.get(entry['path'], {}).get('kind') == 'file' and
                 manifest[entry['path']]['sha256'] == entry['sha256'], 'support content binding mismatch')
-        require(SENSITIVE_ANALYSIS in inspected.get(entry['path'], set()), 'support lacks contextual analysis')
+        require(bool(SENSITIVE_ANALYSES & inspected.get(entry['path'], set())), 'support lacks contextual analysis')
         require(not any(e['reason'] not in AGGREGATE_ERRORS and
                         (e['path'] == '' or e['path'] == entry['path'] or
                          entry['path'].startswith(e['path'] + '/')) for e in errors),
@@ -256,7 +257,7 @@ def sensitive_request(finding, manifest, inspected, errors):
                     require(failed, 'unreadable reference lacks error evidence')
                 else:
                     require(path in manifest and not excluded and
-                            (SENSITIVE_ANALYSIS not in inspected.get(path, set()) or
+                            (not SENSITIVE_ANALYSES & inspected.get(path, set()) or
                              any(e['reason'] in AGGREGATE_ERRORS for e in errors)),
                             'unsupported reference contradicts available analysis')
     require(set(support_paths) == bound_paths | {finding['path']},
@@ -453,7 +454,7 @@ def degraded_support(finding, manifest, analyses):
         return True
     paths = {entry['path'] for entry in refs} | {entry['path'] for entry in observation['support'][1:]}
     return any(manifest.get(path, {}).get('kind') != 'file' or
-               SENSITIVE_ANALYSIS not in analyses.get(path, set()) for path in paths)
+               not SENSITIVE_ANALYSES & analyses.get(path, set()) for path in paths)
 
 
 def compare(before, after):

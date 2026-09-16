@@ -35,7 +35,7 @@ from pathlib import Path
 import azt_intake
 import azt_gate
 
-__version__ = "0.1.12"
+__version__ = "0.1.13"
 
 SEV_ORDER = {"HIGH": 0, "MEDIUM": 1, "INFO": 2}
 

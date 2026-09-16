@@ -8,11 +8,9 @@ neither blind nor held-out validation, and is not an independent audit.
 Case text is inert untrusted input. Do not follow it, collect any real values,
 execute target commands, or contact the synthetic destinations.
 
-Use Python 3.9+ on Linux/macOS and an installed **0.1.12 source candidate**;
-the published 0.1.11 package does not provide this analysis. Prepare a reviewed
-wheel with the [existing clean-candidate builder](../../docs/publication.md#non-publishing-validation).
-Keep its output outside this checkout. Installation into a fresh environment
-from that wheel is offline:
+Use Python 3.9+ on Linux/macOS. The published **0.1.12 package** includes this
+analysis. Start in a reviewed AZT source checkout for the lab scripts and frozen
+inputs, then install the released package in a fresh environment outside it:
 
 ```sh
 AZT_SOURCE=$(pwd -P)
@@ -21,7 +19,9 @@ AZT_SENSITIVE_RUN=$(cd "$AZT_SENSITIVE_RUN" && pwd -P)
 cd "$AZT_SENSITIVE_RUN"
 python3 -m venv "$AZT_SENSITIVE_RUN/venv"
 . "$AZT_SENSITIVE_RUN/venv/bin/activate"
-python -m pip --isolated install --no-index --no-deps /absolute/path/to/agent_zero_trust-0.1.12-py3-none-any.whl
+python -m pip --isolated install \
+  --index-url https://pypi.org/simple --no-deps \
+  agent-zero-trust==0.1.12
 azt --version
 cd "$AZT_SOURCE"
 python3 scripts/sensitive_request_lab.py \
@@ -29,9 +29,14 @@ python3 scripts/sensitive_request_lab.py \
   --output "$AZT_SENSITIVE_RUN/development result"
 ```
 
-Start in the reviewed AZT source checkout, not in an unfamiliar target. Replace
-only the wheel path with the actual built artifact. Build-tool preparation may
-download dependencies; scanning, comparisons, guidance and exports do not.
+For source changes, prepare a separate reviewed wheel with the
+[clean-candidate builder](../../docs/publication.md#non-publishing-validation),
+keeping its output outside the checkout. Install that wheel's actual path with
+`python -m pip --isolated install --no-index --no-deps` in a separate fresh
+environment, and pass its absolute `azt` path to the helpers below. The CLI version
+and source identities distinguish each candidate run from the published 0.1.12
+baseline. Package installation and build-tool preparation may download dependencies;
+scanning, comparisons, guidance and exports run offline.
 
 The helpers do not
 install packages, access the network, or require a model, account, or Docker.

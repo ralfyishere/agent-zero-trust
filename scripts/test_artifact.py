@@ -147,7 +147,7 @@ def main():
             run([python, "-I", "-m", "unittest", "discover", "-s", root / "tests", "-p", test, "-q"])
         print("SAFETY ARTIFACT PASS: installed adapter/evaluator tests; repeatable CLI comparison; no Docker trials")
         run([python, "-I", "-m", "unittest", "discover", "-s", root / "tests", "-p", "test_review.py", "-q"])
-        for test in ('test_sensitive.py', 'test_sensitive_review.py'):
+        for test in ('test_sensitive.py', 'test_sensitive_review.py', 'test_sensitive_associations.py'):
             run([python, "-I", "-m", "unittest", "discover", "-s", root / "tests", "-p", test, "-q"])
         for resource in ("review-v1", "changes-v1", "guidance-v1", "scan-v2", "review-v2", "changes-v2"):
             run([python, "-I", "-c", "from importlib.resources import files; import json; json.loads(files('azt_resources').joinpath('"+resource+".schema.json').read_text())"])
@@ -155,6 +155,7 @@ def main():
         print("REVIEW ARTIFACT PASS: installed review regressions, catalog/schemas, four-case scan/compare/explain/HTML/JSON lab")
         run([python, "-I", root / "scripts/sensitive_request_lab.py", "--cli", cli, "--output", work / "sensitive lab"])
         run([python, root / "scripts/evaluate_sensitive.py", "--cli", cli, "--output", work / "sensitive challenge"])
+        run([python, root / "scripts/evaluate_associations.py", "--python", python, "--output", work / "associations.json"])
         print("SENSITIVE ARTIFACT PASS: installed analysis/dependency/exception regressions; 5 development + 8 reviewer-authored inputs; no runtime trials")
         print("ARTIFACT PASS: clean offline wheel install; installed import; help/version; "
               "deterministic JSON; benign=0; malicious=1 with net.pipe_shell; invalid target=2")
