@@ -2,8 +2,8 @@
 
 Every rule needs: a corpus fixture that trips it, and the benign repo must
 stay at zero MEDIUM+ findings (false-positive regression). corpus/misses/
-asserts the OPPOSITE — known-undetectable attacks must NOT be flagged HIGH;
-if one starts being caught, promote it out of misses/ and update COVERAGE.md.
+preserves historical fixtures. The diagnostic request now merits MEDIUM review;
+remaining misses must NOT be represented as caught. See COVERAGE.md.
 """
 import json
 import sys
@@ -46,7 +46,7 @@ for case_dir in sorted((ROOT / "corpus").iterdir()):
               "%s has >= %d HIGH" % (name, expected["min_high"]))
     if expected.get("must_not_flag_high"):
         check(sev_count(findings, "HIGH") == 0,
-              "%s (known misses) stays UNdetected — honesty ledger intact" % name)
+              "%s has no HIGH detection; see current per-rule ledger" % name)
 
 # unit checks: structural scanners not covered by corpus dirs
 prt = azt.scan_workflow("wf.yml", "on:\n  pull_request_target:\njobs:\n  x:\n    steps:\n      - uses: actions/checkout@v4\n        with:\n          ref: ${{ github.event.pull_request.head.sha }}\n")

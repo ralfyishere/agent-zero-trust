@@ -5,6 +5,13 @@ executes target code nor grants authority. It does not need a hook or Docker.
 
 ## Inputs and identity
 
+Since the unreleased 0.1.12 candidate, scan-v2 and `azt.review.v2` are accepted
+alongside v1. Comparisons containing v2 emit `azt.changes.v2`. The versioned
+[sensitive-request observation](sensitive-requests.md) adds supporting inputs,
+safe class/action labels and explicit reference dispositions. Old binaries reject
+v2; current readers preserve legacy records and flag their contextual-analysis gap.
+They never reconstruct missing old analysis from today's files.
+
 `azt changes --before before.json --after after.json` accepts the complete
 scan-v1 shape produced since scanner hardening, or a redacted `azt.review.v1`
 scan export. “Complete shape” includes reports whose inspection was incomplete.
@@ -14,7 +21,9 @@ The library equivalents are `azt_review.load`, `adapt`, `compare`, `explain`
 and `render`; invalid scan structure raises `ReviewError`.
 
 New scans record the engine version, a digest of the `azt.py` and `azt_intake.py`
-file-hash map, and a separate digest of text-rule declarations. The implementation
+file-hash map, and a separate digest of text-rule declarations. From 0.1.12 this
+map also includes `azt_sensitive.py`; the historical `text_rules_sha256` field
+binds the line rules plus contextual settings and source bytes. The implementation
 digest includes structural rules and non-rule code; it is intentionally broader
 than detection logic. Older scan-v1 reports lacking these fields remain readable,
 with missing provenance explicit. The manifest identifies observed input bytes
@@ -88,7 +97,10 @@ Packaged schema copies accompany the offline guidance catalog.
 
 ## Scope and shared-code impact
 
-No detection rules or FS-001 runtime modules/probes/expectations changed. The
+The 0.1.11 change-review milestone did not change detection rules. The 0.1.12
+candidate adds sensitive-request detection, intake correlation and gate identity
+binding; dependency-aware comparison includes every supporting input and keeps
+degraded evidence unresolved. No FS-001 runtime module/probe/expectation changed. The
 shared scanner dispatcher/version and additive intake provenance did change;
 offline scanner, admission, static safety and installed-artifact tests cover them.
 Historical Docker evidence does not verify this rebuilt package. No new Docker

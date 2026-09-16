@@ -5,6 +5,8 @@ import os
 import stat
 from pathlib import Path, PurePosixPath
 
+import azt_sensitive
+
 MAX_FILES = 10000
 MAX_TOTAL_BYTES = 32_000_000
 MAX_DEPTH = 64
@@ -169,7 +171,7 @@ def inspect(root, engine, policy_path=None):
     root = Path(os.path.abspath(root))
     rules = {r[0] for r in engine.TEXT_RULES} | {
         "mcp.server", "hooks.claude", "perm.auto_approve", "pkg.lifecycle",
-        "ci.prt_checkout", "auto.vscode_folderopen", "fs.symlink_escape"}
+        "ci.prt_checkout", "auto.vscode_folderopen", "fs.symlink_escape", azt_sensitive.RULE}
     policy, provenance = load_policy(policy_path, root, rules)
     scope = {"complete": True, "inspected": [], "skipped": [], "errors": [],
              "limits": {"file_bytes": engine.MAX_BYTES, "total_bytes": MAX_TOTAL_BYTES,
@@ -177,7 +179,10 @@ def inspect(root, engine, policy_path=None):
                         "findings": MAX_FINDINGS},
              "builtin_excluded_directories": sorted(engine.SKIP_DIRS),
              "text_extensions": sorted(engine.TEXT_EXT), "bytes_read": 0}
+    scope['limits'].update({'sensitive_' + key: value for key, value in azt_sensitive.SETTINGS.items()
+                           if type(value) is int})
     findings, files, manifest, requests = [], [], [], []
+    snapshots = {}
     excluded = {e["path"]: e for e in policy["exclusions"]}
     visited = 0
 
@@ -274,6 +279,9 @@ def inspect(root, engine, policy_path=None):
                         except (ValueError, TypeError, AttributeError, KeyError, RecursionError):
                             issue(rel, "malformed supported configuration or structural analysis failure")
                 findings.extend(engine.scan_text_file(rel, text))
+                if not any(e['path'] == rel for e in scope['errors']):
+                    snapshots[rel] = {'text': text, 'sha256': sha}
+                    analyses.append(azt_sensitive.SETTINGS['method'])
                 scope["inspected"].append({"path": rel, "analyses": analyses})
                 if len(findings) > MAX_FINDINGS:
                     del findings[MAX_FINDINGS:]
@@ -292,6 +300,34 @@ def inspect(root, engine, policy_path=None):
     finally:
         os.close(fd)
     manifest.sort(key=lambda e: e["path"])
+    dispositions = {e['path']: 'excluded' if e['kind'] == 'excluded' else 'unsupported'
+                    for e in manifest}
+    dispositions.update({e['path']: 'unreadable' for e in scope['errors']})
+    # Prefix exclusions/errors also cover explicitly referenced descendants;
+    # expand only references, never directory contents or filesystem reads.
+    class Dispositions(dict):
+        def get(self, path, default=None):
+            if path in self:
+                return super().get(path)
+            for parent in PurePosixPath(path).parents:
+                value = super().get(str(parent))
+                if value in ('excluded', 'unreadable'):
+                    return value
+            return default
+    contextual, analysis_errors = azt_sensitive.analyze(snapshots, Dispositions(dispositions))
+    pipe_locations = {(f['path'], f['line']) for f in findings if f['rule'] == 'exfil.pipe_out'}
+    # A one-line shell transfer already has precise exfiltration guidance. Keep
+    # that HIGH rule instead of adding a second label for the same request.
+    findings.extend(f for f in contextual if not (
+        not f['sensitive_request']['references']
+        and f['sensitive_request']['support'][0]['start_line'] == f['sensitive_request']['support'][0]['end_line']
+        and (f['path'], f['line']) in pipe_locations))
+    for error in analysis_errors:
+        issue(error['path'], error['reason'])
+    if len(findings) > MAX_FINDINGS:
+        del findings[MAX_FINDINGS:]
+        issue('', 'finding count limit exceeded')
+    snapshots.clear()
     hashes = {e["path"]: e.get("sha256") for e in manifest}
     suppressed, active = [], []
     for finding in findings:
@@ -304,13 +340,17 @@ def inspect(root, engine, policy_path=None):
         match = next((e for e in policy["exceptions"] if e["rule"] == finding["rule"]
                       and e["path"] == finding["path"] and e["sha256"] == hashes.get(finding["path"])), None)
         if match:
-            suppressed.append(dict(finding, exception={"reason": match["reason"], "policy": provenance,
-                                                       "file_sha256": match["sha256"]}))
+            if finding.get('sensitive_request', {}).get('references'):
+                finding['exception_refusal'] = 'primary-file exception cannot authorize referenced context'
+                active.append(finding)
+            else:
+                suppressed.append(dict(finding, exception={"reason": match["reason"], "policy": provenance,
+                                                           "file_sha256": match["sha256"]}))
         else:
             active.append(finding)
     key = lambda f: (engine.SEV_ORDER.get(f["severity"], 9), f["path"], f["line"], f["rule"])
     scope["errors"].sort(key=lambda e: (e["path"], e["reason"]))
-    return {"schema_version": 1, "version": engine.__version__, "inventory": engine.classify_surface(root, files),
+    return {"schema_version": 2, "version": engine.__version__, "inventory": engine.classify_surface(root, files),
             "findings": sorted(active, key=key), "suppressed_findings": sorted(suppressed, key=key),
             "target_requests": requests, "policy": provenance, "scope": scope,
             "manifest": manifest, "input_digest": digest(manifest)}

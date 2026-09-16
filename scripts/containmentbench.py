@@ -19,7 +19,7 @@ import venv
 import zipfile
 
 ROOT = Path(__file__).resolve().parent.parent
-SOURCES = ("azt.py", "azt_intake.py", "azt_gate.py", "azt_runtime.py", "pyproject.toml",
+SOURCES = ("azt.py", "azt_intake.py", "azt_gate.py", "azt_runtime.py", "azt_sensitive.py", "azt_review.py", "pyproject.toml",
            "scripts/containmentbench.py")
 BENIGN_BEFORE = "def add(a, b):\n    return a - b\n"
 BENIGN_AFTER = "def add(a, b):\n    return a + b\n"

@@ -75,7 +75,7 @@ class ReviewTests(unittest.TestCase):
             packaged=files('azt_resources').joinpath(name+'.schema.json').read_bytes()
             public=(Path(__file__).resolve().parents[1]/'schemas'/(name+'.schema.json')).read_bytes()
             self.assertEqual(packaged,public)
-        expected = {r[0] for r in azt.TEXT_RULES} | {'mcp.server','hooks.claude','perm.auto_approve','pkg.lifecycle','ci.prt_checkout','auto.vscode_folderopen','fs.symlink_escape'}
+        expected = {r[0] for r in azt.TEXT_RULES} | {'mcp.server','hooks.claude','perm.auto_approve','pkg.lifecycle','ci.prt_checkout','auto.vscode_folderopen','fs.symlink_escape','request.sensitive_disclosure'}
         self.assertEqual(expected, set(review.catalog()))
         for rule in expected:
             self.assertTrue(all(review.explain(rule)[k] for k in ['meaning','why_review','context_example','limits','next_step']))
@@ -154,7 +154,10 @@ class ReviewTests(unittest.TestCase):
         self.assertIn('engine changed',delta['comparability']['reasons'])
 
     def test_legacy_missing_provenance(self):
-        r=self.scan(); del r['engine']
+        r=self.scan(); r['schema_version']=1; del r['engine']
+        r['scope']['limits'] = {k:v for k,v in r['scope']['limits'].items() if not k.startswith('sensitive_')}
+        for item in r['scope']['inspected']:
+            item['analyses'].remove('sensitive-request-v1')
         delta=review.compare(r,r)
         self.assertEqual(delta['comparability']['status'],'reduced')
         self.assertFalse(delta['meaningful_delta'])
@@ -193,7 +196,7 @@ class ReviewTests(unittest.TestCase):
         self.assertTrue(delta['findings']['unresolved'])
 
     def test_unsupported_and_malformed(self):
-        for mutation in ({'schema_version':2},{'schema_version':True},{'decision':'pass'}):
+        for mutation in ({'schema_version':99},{'schema_version':True},{'decision':'pass'}):
             r=self.attack(); r.update(mutation)
             with self.assertRaises(review.ReviewError):review.adapt(r)
         for raw in [b'{',b'{"x":1,"x":2}',b'{"x":NaN}',b'{"x":0.2}']:

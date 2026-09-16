@@ -11,7 +11,8 @@ Design commitments (see docs/threat-model.md):
   scanner that asks an LLM whether content is safe to show an LLM is itself
   injectable by that content.
 - Honest scope. Pattern matching catches known shapes; it CANNOT catch
-  cleverly worded natural-language social engineering. A clean scan means
+  arbitrary natural-language social engineering. Selected bounded English
+  sensitive-disclosure requests are analyzed contextually. A clean scan means
   "no known-shape red flags", never "safe". Known misses are published in
   corpus/misses/ and COVERAGE.md.
 - Stdlib only, Python 3.9+. Read what you run.
@@ -34,7 +35,7 @@ from pathlib import Path
 import azt_intake
 import azt_gate
 
-__version__ = "0.1.11"
+__version__ = "0.1.12"
 
 SEV_ORDER = {"HIGH": 0, "MEDIUM": 1, "INFO": 2}
 
@@ -343,6 +344,11 @@ def print_report(root, inventory, findings):
             loc = ":%d" % f["line"] if f["line"] else ""
             print("  [%-6s] %s  %s%s" % (f["severity"], f["rule"], azt_intake.safe_label(f["path"]), loc))
             print("           %s" % azt_intake.safe_label(f["description"]))
+            if 'sensitive_request' in f:
+                import azt_sensitive
+                print(azt_sensitive.summary(f['sensitive_request']))
+                if 'exception_refusal' in f:
+                    print('Exception not applied: '+f['exception_refusal'])
             if f["excerpt"]:
                 print("           > %s" % f["excerpt"])
     print()

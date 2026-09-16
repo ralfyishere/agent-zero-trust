@@ -1,4 +1,5 @@
 {
   "must_not_flag_high": true,
-  "note": "These are KNOWN MISSES. Pure natural-language manipulation with no trigger shapes. If a rule ever catches one, move it out of misses/ and update COVERAGE.md."
+  "must_flag": [{"rule": "request.sensitive_disclosure", "path": "social-engineering.md"}],
+  "note": "2026-09-16: preserved social-engineering fixture now produces a MEDIUM sensitive-request review. No HIGH is still expected. Split-instruction cases remain misses; original fixture bytes and historical results are preserved."
 }

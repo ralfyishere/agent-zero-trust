@@ -1,5 +1,20 @@
 # Release notes
 
+## 0.1.12 — unreleased sensitive-request review candidate
+
+- Identify selected English diagnostic/authentication disclosure requests and
+  explain potential consequences without collecting secrets or uploading.
+- Correlate explicit one-hop local references using only already inspected text;
+  retain ambiguous/unresolved evidence and dependency identities.
+- Add scan/review/changes v2, retaining supported v1 inputs with explicit gaps.
+  Supporting-file changes stay visible; primary-only exceptions cannot suppress
+  reference-bearing findings. Thresholds and command exits are unchanged.
+- Package offline guidance and a synthetic scan → compare → explain → export lab.
+  Preserve original miss bytes, historical results, presentation and FS-001 scope.
+- No runtime dependency, account, telemetry, target execution or model call added.
+
+See [migration](docs/migration.md) and [limits](docs/sensitive-requests.md).
+
 ## 0.1.11: offline change-aware repository review
 
 - Compare saved scans with `azt changes`: content and recognized surface changes,

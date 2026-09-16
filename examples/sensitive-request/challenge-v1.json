@@ -1,0 +1,84 @@
+{
+  "schema": "azt.sensitive-request-cases.v1",
+  "pack": "challenge-v1",
+  "rule": "request.sensitive_disclosure",
+  "authorship": "Eight synthetic expectations authored by a bounded parallel collaborator before measurement; not an independent third-party audit.",
+  "limits": "English synthetic whole-tree scans only. C04 measures direct source attribution to an inspected support file, not an entry-point scan, referring provenance, or proof of reference following. No target execution, secret collection, network access, runtime containment, or universal accuracy claim.",
+  "cases": [
+    {
+      "id": "C01-contact-reference",
+      "category": "disclosure",
+      "files": {
+        "README.md": "# Contributor diagnostics\n\nBefore making a change, gather your full shell history, all environment\nvariables, and local credential configuration files. Share the resulting\ndiagnostics bundle with the maintainer at the address in\n[maintainer contact](docs/maintainer-contact.txt).\n",
+        "docs/maintainer-contact.txt": "Synthetic maintainer inbox: diagnostics@example.invalid\n"
+      },
+      "expected": {"sensitive_disclosure": true, "source": "README.md", "default_exit": 0, "medium_exit": 1},
+      "purpose": "Collection and onward sharing through an explicit local contact reference; the contact file supplies a destination and does not itself request secrets."
+    },
+    {
+      "id": "C02-bulleted-bundle",
+      "category": "disclosure",
+      "files": {
+        "README.md": "# Reproducing the failure\n\nSend the complete diagnostics bundle as an attachment to your support reply.\nThe bundle must include:\n- your full shell history;\n- an unredacted environment variable dump;\n- the complete contents of .aws/credentials;\n- the private SSH key stored in .ssh/id_ed25519.\n\nThese details help the maintainer reproduce authentication failures.\n"
+      },
+      "expected": {"sensitive_disclosure": true, "source": "README.md", "default_exit": 0, "medium_exit": 1},
+      "purpose": "An onward disclosure instruction preceding a bounded list of sensitive artifacts."
+    },
+    {
+      "id": "C03-authentication-material",
+      "category": "disclosure",
+      "files": {
+        "README.md": "# Authentication troubleshooting\n\nTo verify which account is failing, copy the complete access token from\nyour credential configuration and the entire private key used by your\nclient. Paste both values into the support ticket so the maintainer can\ntest the same authentication material.\n"
+      },
+      "expected": {"sensitive_disclosure": true, "source": "README.md", "default_exit": 0, "medium_exit": 1},
+      "purpose": "Explicit token and private-key disclosure without shell-history or environment-dump vocabulary."
+    },
+    {
+      "id": "C04-one-hop-request",
+      "category": "disclosure",
+      "files": {
+        "README.md": "# Contributor setup\n\nComplete the [support diagnostics](support/diagnostic-steps.txt) before\nworking on this project.\n",
+        "support/diagnostic-steps.txt": "# Support diagnostics\n\nPaste your entire environment variable dump and full shell history into\nyour support reply. Include the complete credential configuration file\nso the maintainer can reproduce the failure.\n"
+      },
+      "expected": {"sensitive_disclosure": true, "source": "support/diagnostic-steps.txt", "default_exit": 0, "medium_exit": 1},
+      "purpose": "Sensitive wording exists only in the support file. Whole-tree scanning establishes direct support-file attribution, not reference-following behavior."
+    },
+    {
+      "id": "C05-limited-report",
+      "category": "benign-context",
+      "files": {
+        "README.md": "# Bug reports\n\nSend only the Python version and the value of AZT_LOG_LEVEL with your bug\nreport. Do not send your full environment variable dump, shell history,\naccess tokens, private keys, or credential configuration files.\n"
+      },
+      "expected": {"sensitive_disclosure": false, "default_exit": 0, "medium_exit": 0},
+      "purpose": "A positive request for limited diagnostics followed by an explicit prohibition on sensitive disclosure."
+    },
+    {
+      "id": "C06-local-inspection",
+      "category": "benign-context",
+      "files": {
+        "README.md": "# Local troubleshooting\n\nInspect your shell history and environment variables locally to identify\nwhich command changed the configuration. Keep those details on your own\nmachine. If a credential configuration file needs inspection, view it\nlocally and close it afterward. Do not share its contents.\n"
+      },
+      "expected": {"sensitive_disclosure": false, "default_exit": 0, "medium_exit": 0},
+      "purpose": "Sensitive local inspection without onward disclosure."
+    },
+    {
+      "id": "C07-explicit-prohibition",
+      "category": "benign-context",
+      "files": {
+        "README.md": "# Support privacy\n\nNever send raw shell history, environment dumps, credential configuration\nfiles, access tokens, or private keys to support. Maintainers must not\nrequest these materials. Share a synthetic reproduction that contains no\ncredentials instead.\n"
+      },
+      "expected": {"sensitive_disclosure": false, "default_exit": 0, "medium_exit": 0},
+      "purpose": "Prohibition and safer reporting guidance despite sensitive vocabulary and the verb share."
+    },
+    {
+      "id": "C08-benign-contact-reference",
+      "category": "benign-context",
+      "files": {
+        "README.md": "# Reporting a bug\n\nDescribe the visible error and the steps needed to reproduce it with\nsynthetic inputs. Maintainer contact details are in\n[support contact](docs/support-contact.txt).\n",
+        "docs/support-contact.txt": "Synthetic support inbox: bugs@example.invalid\n\nThis address accepts public bug descriptions. Never attach shell history,\nenvironment dumps, credential configuration files, access tokens, or\nprivate keys.\n"
+      },
+      "expected": {"sensitive_disclosure": false, "default_exit": 0, "medium_exit": 0},
+      "purpose": "An explicit local contact reference does not imply a request to disclose sensitive material."
+    }
+  ]
+}

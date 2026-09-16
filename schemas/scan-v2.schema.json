@@ -1,0 +1,432 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "AZT scan report v2: contextual sensitive requests",
+  "description": "Bounded offline assertion contract, not authentication. azt_review additionally checks canonical relative paths, report/node bounds, sorted information classes, primary support and reference identities, line ranges, manifest/input digests, successful analysis and exception bindings. No remote references are resolved by AZT.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "version",
+    "engine",
+    "decision",
+    "threshold",
+    "input_digest",
+    "manifest",
+    "policy",
+    "scope",
+    "inventory",
+    "findings",
+    "suppressed_findings",
+    "target_requests"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {"const":2},
+    "version": {"type":"string","minLength":1,"maxLength":8192},
+    "engine": {"$ref":"#/$defs/engine"},
+    "decision": {"enum":["pass","deny","incomplete"]},
+    "threshold": {"enum":["high","medium","any"]},
+    "input_digest": {"type":"string","pattern":"^[a-f0-9]{64}$"},
+    "manifest": {"type":"array","minItems":0,"maxItems":10000,"items":{"$ref":"#/$defs/manifest"}},
+    "policy": {"$ref":"#/$defs/policy"},
+    "scope": {"$ref":"#/$defs/scope"},
+    "inventory": {"type":"array","minItems":0,"maxItems":10000,"items":{"$ref":"#/$defs/inventory"}},
+    "findings": {"type":"array","minItems":0,"maxItems":10000,"items":{"$ref":"#/$defs/findingV2"}},
+    "suppressed_findings": {"type":"array","minItems":0,"maxItems":10000,"items":{"$ref":"#/$defs/suppressedV2"}},
+    "target_requests": {"type":"array","minItems":0,"maxItems":10000,"items":{"$ref":"#/$defs/request"}},
+    "admission": {}
+  },
+  "$defs": {
+    "policy": {
+      "type": "object",
+      "required": ["source","digest"],
+      "additionalProperties": false,
+      "properties": {"source":{"type":"string","minLength":1,"maxLength":8192},"digest":{"type":"string","pattern":"^[a-f0-9]{64}$"}}
+    },
+    "skipPolicy": {
+      "type": "object",
+      "required": ["source"],
+      "additionalProperties": false,
+      "properties": {"source":{"type":"string","minLength":1,"maxLength":8192},"digest":{"type":"string","pattern":"^[a-f0-9]{64}$"}}
+    },
+    "engine": {
+      "type": "object",
+      "required": ["version","implementation_sha256","text_rules_sha256"],
+      "additionalProperties": false,
+      "properties": {
+        "version": {"type":"string","minLength":1,"maxLength":8192},
+        "implementation_sha256": {"type":"string","pattern":"^[a-f0-9]{64}$"},
+        "text_rules_sha256": {"type":"string","pattern":"^[a-f0-9]{64}$"}
+      }
+    },
+    "manifest": {
+      "oneOf": [
+        {
+          "type": "object",
+          "required": ["path","kind","sha256","executable"],
+          "additionalProperties": false,
+          "properties": {
+            "path": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4096,
+              "pattern": "^(?!/)(?![A-Za-z]:)(?![\\s\\S]*\\\\)(?![\\s\\S]*(?:^|/)(?:\\.|\\.\\.)(?:/|$))(?![\\s\\S]*//)(?![\\s\\S]*/$)[\\s\\S]+$"
+            },
+            "kind": {"const":"file"},
+            "sha256": {"type":"string","pattern":"^[a-f0-9]{64}$"},
+            "executable": {"type":"boolean"}
+          }
+        },
+        {
+          "type": "object",
+          "required": ["path","kind"],
+          "additionalProperties": false,
+          "properties": {
+            "path": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4096,
+              "pattern": "^(?!/)(?![A-Za-z]:)(?![\\s\\S]*\\\\)(?![\\s\\S]*(?:^|/)(?:\\.|\\.\\.)(?:/|$))(?![\\s\\S]*//)(?![\\s\\S]*/$)[\\s\\S]+$"
+            },
+            "kind": {"enum":["directory","excluded"]}
+          }
+        },
+        {
+          "type": "object",
+          "required": ["path","kind","target_digest"],
+          "additionalProperties": false,
+          "properties": {
+            "path": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4096,
+              "pattern": "^(?!/)(?![A-Za-z]:)(?![\\s\\S]*\\\\)(?![\\s\\S]*(?:^|/)(?:\\.|\\.\\.)(?:/|$))(?![\\s\\S]*//)(?![\\s\\S]*/$)[\\s\\S]+$"
+            },
+            "kind": {"const":"symlink"},
+            "target_digest": {"type":"string","pattern":"^[a-f0-9]{64}$"}
+          }
+        }
+      ]
+    },
+    "error": {
+      "type": "object",
+      "required": ["path","reason"],
+      "additionalProperties": false,
+      "properties": {
+        "path": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4096,
+              "pattern": "^(?!/)(?![A-Za-z]:)(?![\\s\\S]*\\\\)(?![\\s\\S]*(?:^|/)(?:\\.|\\.\\.)(?:/|$))(?![\\s\\S]*//)(?![\\s\\S]*/$)[\\s\\S]+$"
+            },
+            {"const":""}
+          ]
+        },
+        "reason": {"type":"string","minLength":1,"maxLength":8192}
+      }
+    },
+    "scope": {
+      "type": "object",
+      "required": ["complete","inspected","skipped","errors","limits","bytes_read","builtin_excluded_directories","text_extensions"],
+      "additionalProperties": false,
+      "properties": {
+        "complete": {"type":"boolean"},
+        "inspected": {
+          "type": "array",
+          "minItems": 0,
+          "maxItems": 10000,
+          "items": {
+            "type": "object",
+            "required": ["path","analyses"],
+            "additionalProperties": false,
+            "properties": {
+              "path": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 4096,
+                "pattern": "^(?!/)(?![A-Za-z]:)(?![\\s\\S]*\\\\)(?![\\s\\S]*(?:^|/)(?:\\.|\\.\\.)(?:/|$))(?![\\s\\S]*//)(?![\\s\\S]*/$)[\\s\\S]+$"
+              },
+              "analyses": {"type":"array","minItems":1,"maxItems":10000,"items":{"type":"string","minLength":1,"maxLength":8192}}
+            }
+          }
+        },
+        "skipped": {
+          "type": "array",
+          "minItems": 0,
+          "maxItems": 10000,
+          "items": {
+            "type": "object",
+            "required": ["path","reason"],
+            "additionalProperties": false,
+            "properties": {
+              "path": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 4096,
+                "pattern": "^(?!/)(?![A-Za-z]:)(?![\\s\\S]*\\\\)(?![\\s\\S]*(?:^|/)(?:\\.|\\.\\.)(?:/|$))(?![\\s\\S]*//)(?![\\s\\S]*/$)[\\s\\S]+$"
+              },
+              "reason": {"type":"string","minLength":1,"maxLength":8192},
+              "policy": {"$ref":"#/$defs/skipPolicy"}
+            }
+          }
+        },
+        "errors": {"type":"array","minItems":0,"maxItems":10000,"items":{"$ref":"#/$defs/error"}},
+        "limits": {
+          "type": "object",
+          "required": ["file_bytes","total_bytes","entries","depth","line_characters","findings"],
+          "additionalProperties": false,
+          "properties": {
+            "file_bytes": {"type":"integer","minimum":0,"maximum":10000000000000000000},
+            "total_bytes": {"type":"integer","minimum":0,"maximum":10000000000000000000},
+            "entries": {"type":"integer","minimum":0,"maximum":10000000000000000000},
+            "depth": {"type":"integer","minimum":0,"maximum":10000000000000000000},
+            "line_characters": {"type":"integer","minimum":0,"maximum":10000000000000000000},
+            "findings": {"type":"integer","minimum":0,"maximum":10000000000000000000}
+          }
+        },
+        "bytes_read": {"type":"integer","minimum":0,"maximum":10000000000000000000},
+        "builtin_excluded_directories": {"type":"array","minItems":0,"maxItems":10000,"items":{"type":"string","maxLength":8192}},
+        "text_extensions": {"type":"array","minItems":0,"maxItems":10000,"items":{"type":"string","maxLength":8192}}
+      }
+    },
+    "inventory": {
+      "type": "object",
+      "required": ["path","class","severity","why"],
+      "additionalProperties": false,
+      "properties": {
+        "path": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4096,
+          "pattern": "^(?!/)(?![A-Za-z]:)(?![\\s\\S]*\\\\)(?![\\s\\S]*(?:^|/)(?:\\.|\\.\\.)(?:/|$))(?![\\s\\S]*//)(?![\\s\\S]*/$)[\\s\\S]+$"
+        },
+        "class": {"type":"string","minLength":1,"maxLength":8192},
+        "severity": {"enum":["HIGH","MEDIUM","INFO"]},
+        "why": {"type":"string","minLength":1,"maxLength":8192}
+      }
+    },
+    "request": {
+      "type": "object",
+      "required": ["path","sha256","status","requested_lines"],
+      "additionalProperties": false,
+      "properties": {
+        "path": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4096,
+          "pattern": "^(?!/)(?![A-Za-z]:)(?![\\s\\S]*\\\\)(?![\\s\\S]*(?:^|/)(?:\\.|\\.\\.)(?:/|$))(?![\\s\\S]*//)(?![\\s\\S]*/$)[\\s\\S]+$"
+        },
+        "sha256": {"type":"string","pattern":"^[a-f0-9]{64}$"},
+        "status": {"const":"untrusted; not applied"},
+        "requested_lines": {"type":"integer","minimum":0,"maximum":10000000000000000000}
+      }
+    },
+    "exception": {
+      "type": "object",
+      "required": ["reason","policy"],
+      "additionalProperties": false,
+      "properties": {
+        "reason": {"type":"string","minLength":1,"maxLength":8192},
+        "policy": {"$ref":"#/$defs/policy"},
+        "file_sha256": {"type":"string","pattern":"^[a-f0-9]{64}$"}
+      }
+    },
+    "reference": {
+      "type": "object",
+      "required": ["path","status","sha256"],
+      "additionalProperties": false,
+      "properties": {
+        "path": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4096,
+              "pattern": "^(?!/)(?![A-Za-z]:)(?![\\s\\S]*\\\\)(?![\\s\\S]*(?:^|/)(?:\\.|\\.\\.)(?:/|$))(?![\\s\\S]*//)(?![\\s\\S]*/$)[\\s\\S]+$"
+            },
+            {"type":"null"}
+          ]
+        },
+        "status": {
+          "enum": ["resolved","missing","excluded","unreadable","unsupported","unsafe","ambiguous","cycle","limit","no-sharing-context"]
+        },
+        "sha256": {"anyOf":[{"type":"string","pattern":"^[a-f0-9]{64}$"},{"type":"null"}]}
+      },
+      "allOf": [
+        {
+          "if": {"properties":{"status":{"enum":["resolved","no-sharing-context","ambiguous","cycle"]}}},
+          "then": {
+            "properties": {
+              "path": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 4096,
+                "pattern": "^(?!/)(?![A-Za-z]:)(?![\\s\\S]*\\\\)(?![\\s\\S]*(?:^|/)(?:\\.|\\.\\.)(?:/|$))(?![\\s\\S]*//)(?![\\s\\S]*/$)[\\s\\S]+$"
+              },
+              "sha256": {"type":"string","pattern":"^[a-f0-9]{64}$"}
+            }
+          },
+          "else": {"properties":{"sha256":{"type":"null"}}}
+        },
+        {"if":{"properties":{"status":{"const":"unsafe"}}},"then":{"properties":{"path":{"type":"null"}}}},
+        {
+          "if": {"properties":{"status":{"enum":["missing","excluded","unreadable","unsupported"]}}},
+          "then": {
+            "properties": {
+              "path": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 4096,
+                "pattern": "^(?!/)(?![A-Za-z]:)(?![\\s\\S]*\\\\)(?![\\s\\S]*(?:^|/)(?:\\.|\\.\\.)(?:/|$))(?![\\s\\S]*//)(?![\\s\\S]*/$)[\\s\\S]+$"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "sensitive": {
+      "type": "object",
+      "required": ["schema","action","information_classes","breadth","destination","support","references","limitations"],
+      "additionalProperties": false,
+      "properties": {
+        "schema": {"const":"azt.sensitive-request.v1"},
+        "action": {"enum":["collect","share","collect-and-share"]},
+        "information_classes": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 5,
+          "items": {"enum":["environment","shell-history","configuration","tokens","private-keys"]},
+          "uniqueItems": true
+        },
+        "breadth": {"enum":["broad","limited","unspecified"]},
+        "destination": {
+          "type": "object",
+          "required": ["status","kind","count"],
+          "additionalProperties": false,
+          "properties": {
+            "status": {"enum":["not-stated","explicit","reference-only","unresolved","ambiguous"]},
+            "kind": {"enum":["unknown","url","email","local-reference"]},
+            "count": {"type":"integer","minimum":0,"maximum":8}
+          }
+        },
+        "support": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 3,
+          "prefixItems": [
+            {
+              "type": "object",
+              "required": ["path","sha256","start_line","end_line","role"],
+              "additionalProperties": false,
+              "properties": {
+                "path": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096,
+                  "pattern": "^(?!/)(?![A-Za-z]:)(?![\\s\\S]*\\\\)(?![\\s\\S]*(?:^|/)(?:\\.|\\.\\.)(?:/|$))(?![\\s\\S]*//)(?![\\s\\S]*/$)[\\s\\S]+$"
+                },
+                "sha256": {"type":"string","pattern":"^[a-f0-9]{64}$"},
+                "start_line": {"type":"integer","minimum":1,"maximum":10000000000000000000},
+                "end_line": {"type":"integer","minimum":1,"maximum":10000000000000000000},
+                "role": {"const":"request"}
+              }
+            }
+          ],
+          "items": {
+            "type": "object",
+            "required": ["path","sha256","start_line","end_line","role"],
+            "additionalProperties": false,
+            "properties": {
+              "path": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 4096,
+                "pattern": "^(?!/)(?![A-Za-z]:)(?![\\s\\S]*\\\\)(?![\\s\\S]*(?:^|/)(?:\\.|\\.\\.)(?:/|$))(?![\\s\\S]*//)(?![\\s\\S]*/$)[\\s\\S]+$"
+              },
+              "sha256": {"type":"string","pattern":"^[a-f0-9]{64}$"},
+              "start_line": {"type":"integer","minimum":1,"maximum":10000000000000000000},
+              "end_line": {"type":"integer","minimum":1,"maximum":10000000000000000000},
+              "role": {"const":"sharing-context"}
+            }
+          }
+        },
+        "references": {
+          "type": "array",
+          "minItems": 0,
+          "maxItems": 2,
+          "items": {"$ref":"#/$defs/reference"},
+          "anyOf": [{"uniqueItems":true},{"items":{"const":{"path":null,"status":"unsafe","sha256":null}}}]
+        },
+        "limitations": {"const":["bounded-english-context","wording-not-intent","no-secret-content-inspected","destination-not-verified"]}
+      }
+    },
+    "findingV2": {
+      "type": "object",
+      "required": ["rule","severity","description","path","line","excerpt"],
+      "additionalProperties": false,
+      "properties": {
+        "rule": {"type":"string","pattern":"^[a-z][a-z0-9_.]{0,100}$"},
+        "severity": {"enum":["HIGH","MEDIUM","INFO"]},
+        "description": {"type":"string","minLength":1,"maxLength":8192},
+        "path": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4096,
+          "pattern": "^(?!/)(?![A-Za-z]:)(?![\\s\\S]*\\\\)(?![\\s\\S]*(?:^|/)(?:\\.|\\.\\.)(?:/|$))(?![\\s\\S]*//)(?![\\s\\S]*/$)[\\s\\S]+$"
+        },
+        "line": {"type":"integer","minimum":0,"maximum":10000000000000000000},
+        "excerpt": {"type":"string","maxLength":8192},
+        "sensitive_request": {"$ref":"#/$defs/sensitive"},
+        "exception_refusal": {"const":"primary-file exception cannot authorize referenced context"}
+      },
+      "allOf": [
+        {
+          "if": {"properties":{"rule":{"const":"request.sensitive_disclosure"}}},
+          "then": {"required":["sensitive_request"],"properties":{"severity":{"const":"MEDIUM"}}},
+          "else": {"not":{"anyOf":[{"required":["sensitive_request"]},{"required":["exception_refusal"]}]}}
+        },
+        {
+          "if": {"required":["exception_refusal"]},
+          "then": {"properties":{"sensitive_request":{"properties":{"references":{"minItems":1}}}}}
+        }
+      ]
+    },
+    "suppressedV2": {
+      "type": "object",
+      "required": ["rule","severity","description","path","line","excerpt","exception"],
+      "additionalProperties": false,
+      "properties": {
+        "rule": {"type":"string","pattern":"^[a-z][a-z0-9_.]{0,100}$"},
+        "severity": {"enum":["HIGH","MEDIUM","INFO"]},
+        "description": {"type":"string","minLength":1,"maxLength":8192},
+        "path": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4096,
+          "pattern": "^(?!/)(?![A-Za-z]:)(?![\\s\\S]*\\\\)(?![\\s\\S]*(?:^|/)(?:\\.|\\.\\.)(?:/|$))(?![\\s\\S]*//)(?![\\s\\S]*/$)[\\s\\S]+$"
+        },
+        "line": {"type":"integer","minimum":0,"maximum":10000000000000000000},
+        "excerpt": {"type":"string","maxLength":8192},
+        "exception": {"$ref":"#/$defs/exception"},
+        "sensitive_request": {"$ref":"#/$defs/sensitive"},
+        "exception_refusal": {"const":"primary-file exception cannot authorize referenced context"}
+      },
+      "allOf": [
+        {
+          "if": {"properties":{"rule":{"const":"request.sensitive_disclosure"}}},
+          "then": {"required":["sensitive_request"],"properties":{"severity":{"const":"MEDIUM"}}},
+          "else": {"not":{"anyOf":[{"required":["sensitive_request"]},{"required":["exception_refusal"]}]}}
+        },
+        {
+          "if": {"required":["exception_refusal"]},
+          "then": {"properties":{"sensitive_request":{"properties":{"references":{"minItems":1}}}}}
+        },
+        {
+          "properties": {"sensitive_request":{"properties":{"support":{"maxItems":1},"references":{"maxItems":0}}}},
+          "not": {"required":["exception_refusal"]}
+        }
+      ]
+    }
+  }
+}

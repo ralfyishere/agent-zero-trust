@@ -1,5 +1,23 @@
 # Migrating to 0.1.9 and later
 
+## 0.1.12 (unreleased candidate)
+
+New scans emit scan-v2; reviews/comparisons containing them use `azt.review.v2`
+and `azt.changes.v2`. Observations add source ranges and reference dependencies.
+Updated readers accept supported scan-v1/review-v1 with explicit contextual gaps.
+Old binaries do not accept v2. Keep historical reports intact; do not hand-edit
+their schema or provenance. Unknown versions still fail clearly.
+
+The preserved diagnostic-request miss now emits MEDIUM. Default HIGH threshold
+and scan 0/1/2 exits are unchanged. Comparison/export 0 means completed
+information generation, not approval. Primary-only exceptions are refused for
+reference-bearing findings; single-file exceptions remain content-bound.
+
+Analyzer source/settings now participate in engine/rule identities and gate
+bindings. Review and explicitly re-admit after upgrade if using the optional
+snapshot gate. Ordinary scan/comparison needs no hook. FS-001 adapter, probe,
+evaluator and expectations are unchanged; new offline results are not runtime evidence.
+
 ## 0.1.11
 
 Existing scan exit codes and findings are preserved. The human inventory header
