@@ -119,6 +119,8 @@ accuracy rate. [Association regressions](../tests/test_sensitive_associations.py
 also exercise legitimate contrasts, coordinated actions, local use, wrapped text,
 warnings and reference labels. Historical sample reports and original miss bytes
 remain tied to their original versions and runs.
+The [September 16 association measurement](../evidence/sensitive-associations/README.md)
+records the installed baseline and candidate, including false alerts and misses.
 
 Submit a minimal **synthetic** request and legitimate contrast, expected classes
 and reference status, version, command and actual output. Use reserved example
