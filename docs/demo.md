@@ -40,14 +40,19 @@ resolve the parent with `pwd -P` first; do not weaken those checks.
 
 ## GitHub Action
 
-The [new source-candidate summary/comparison guide](github-action.md) provides a
-reviewed explicit base/head example. The pinned released example below retains
-the earlier single-snapshot Action behavior.
+The [0.1.13 summary/comparison guide](github-action.md) provides a
+reviewed explicit base/head example. Use that guide for current setup, inputs
+and scope. The historical example below retains the earlier single-snapshot
+Action behavior.
+
+<details>
+<summary>Historical 0.1.12 single-snapshot Action example</summary>
 
 The existing Action scans the checked-out repository. This example pins the
 published 0.1.12 source; update the SHA only after reviewing the new source.
 The Action's local-candidate path and malicious exit/finding checks are covered
-by the repository CI. A finding-filled target correctly makes this job fail.
+by the repository CI. Findings meeting the selected threshold make this job fail;
+MEDIUM-only findings do not fail the default HIGH threshold.
 
 ```yaml
 name: Repository intake
@@ -69,6 +74,8 @@ jobs:
 This is review CI, not admission authority over a hostile PR. Do not execute
 untrusted setup steps or let a target-owned policy approve itself. The Action
 works by repository reference without a Marketplace listing.
+
+</details>
 
 ## Visual sources and scope
 

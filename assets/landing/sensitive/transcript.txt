@@ -1,0 +1,178 @@
+AZT 0.1.13 / recorded synthetic example
+Paths below are portable relative labels, not personal capture paths.
+
+$ azt scan fixtures/broad --json
+[JSON saved as broad-scan.json]
+exit: 0; threshold: high; complete: true; findings: 1
+
+$ azt scan fixtures/limited --json
+[JSON saved as limited-scan.json]
+exit: 0; threshold: high; complete: true; findings: 0
+
+$ azt explain request.sensitive_disclosure
+AZT RULE GUIDANCE: request.sensitive_disclosure
+Meaning: "A bounded contextual request to collect or share potentially sensitive information"
+Why review: "Broad environment, history, configuration, token or private-key material may exceed the information needed for a task."
+Context example: "Support documentation may legitimately request a narrow, redacted diagnostic sample; wording alone does not establish intent."
+Limits: "Bounded English context and explicit local references only. No secret contents, destination trust, actual disclosure or runtime containment are established."
+Next step: "Inspect every bound source locally, narrow the requested information and verify the intended recipient. A primary-file exception cannot authorize referenced context."
+exit: 0
+
+$ azt report --input broad-scan.json --format text
+AZT SCAN REVIEW
+Decision: pass
+Informational review only. Reports are untrusted assertions; hashes and schema validation do not authenticate them. No longer observed does not mean proven fixed. No receipt, authorization, upload or target execution occurs.
+Sensitive request at "CONTRIBUTING.md":1
+This request asks you to share tokens.
+These materials may contain credentials or private activity; their contents were not collected.
+Destination observation: explicit (not verified; recipient details omitted).
+Next step: verify the request independently, provide only necessary diagnostics, and inspect the exact contents before sharing.
+No upload or target execution was performed by this inspection.
+{
+  "guidance": {
+    "request.sensitive_disclosure": {
+      "context_example": "Support documentation may legitimately request a narrow, redacted diagnostic sample; wording alone does not establish intent.",
+      "limits": "Bounded English context and explicit local references only. No secret contents, destination trust, actual disclosure or runtime containment are established.",
+      "meaning": "A bounded contextual request to collect or share potentially sensitive information",
+      "next_step": "Inspect every bound source locally, narrow the requested information and verify the intended recipient. A primary-file exception cannot authorize referenced context.",
+      "why_review": "Broad environment, history, configuration, token or private-key material may exceed the information needed for a task."
+    }
+  },
+  "notice": "Informational review only. Reports are untrusted assertions; hashes and schema validation do not authenticate them. No longer observed does not mean proven fixed. No receipt, authorization, upload or target execution occurs.",
+  "redaction": "Derivative: excerpts and source descriptions omitted; admission discarded. Paths, reasons and labels may still be sensitive.",
+  "scan": {
+    "decision": "pass",
+    "engine": {
+      "implementation_sha256": "6ba0e14ad6c0a697390f0b813d7f6b3b61f8fac3ea24852a826111dea7a8bb8b",
+      "text_rules_sha256": "0a9bd369132895ea221fd7716e1c6c914798b91064750b88a8c8b35d96bd779e",
+      "version": "0.1.13"
+    },
+    "findings": [
+      {
+        "description": "This request asks you to share tokens.\nThese materials may contain credentials or private activity; their contents were not collected.\nDestination observation: explicit (not verified; recipient details omitted).\nNext step: verify the request independently, provide only necessary diagnostics, and inspect the exact contents before sharing.\nNo upload or target execution was performed by this inspection.",
+        "excerpt": "[omitted in review export]",
+        "line": 1,
+        "path": "CONTRIBUTING.md",
+        "rule": "request.sensitive_disclosure",
+        "sensitive_request": {
+          "action": "share",
+          "breadth": "unspecified",
+          "destination": {
+            "count": 1,
+            "kind": "url",
+            "status": "explicit"
+          },
+          "information_classes": [
+            "tokens"
+          ],
+          "limitations": [
+            "bounded-english-context",
+            "wording-not-intent",
+            "no-secret-content-inspected",
+            "destination-not-verified"
+          ],
+          "references": [],
+          "schema": "azt.sensitive-request.v1",
+          "support": [
+            {
+              "end_line": 1,
+              "path": "CONTRIBUTING.md",
+              "role": "request",
+              "sha256": "4a501f22ec405a398b66408b1c3fbba37a2713b6e46442ecf330768a5a941ffa",
+              "start_line": 1
+            }
+          ]
+        },
+        "severity": "MEDIUM"
+      }
+    ],
+    "input_digest": "38dfd81aa603475373e88ad517808e0b015ee9b1e92c18ce885fb2397dffab1d",
+    "inventory": [],
+    "manifest": [
+      {
+        "executable": false,
+        "kind": "file",
+        "path": "CONTRIBUTING.md",
+        "sha256": "4a501f22ec405a398b66408b1c3fbba37a2713b6e46442ecf330768a5a941ffa"
+      }
+    ],
+    "policy": {
+      "digest": "5daa23de347bbd6b6c82a8382b5604820b4e0eed4b7e3ee73d11ccd2a5967318",
+      "source": "built-in"
+    },
+    "schema_version": 2,
+    "scope": {
+      "builtin_excluded_directories": [
+        ".git",
+        ".mypy_cache",
+        ".next",
+        ".tox",
+        ".venv",
+        "__pycache__",
+        "build",
+        "dist",
+        "node_modules",
+        "target",
+        "venv"
+      ],
+      "bytes_read": 57,
+      "complete": true,
+      "errors": [],
+      "inspected": [
+        {
+          "analyses": [
+            "text-patterns",
+            "sensitive-request-v1.1"
+          ],
+          "path": "CONTRIBUTING.md"
+        }
+      ],
+      "limits": {
+        "depth": 64,
+        "entries": 10000,
+        "file_bytes": 1000000,
+        "findings": 10000,
+        "line_characters": 4096,
+        "sensitive_block_characters": 4096,
+        "sensitive_block_lines": 16,
+        "sensitive_correlations": 2000,
+        "sensitive_reference_characters": 256,
+        "sensitive_references_per_request": 2,
+        "sensitive_requests": 1000,
+        "sensitive_retained_characters": 32000000,
+        "total_bytes": 32000000
+      },
+      "skipped": [],
+      "text_extensions": [
+        "",
+        ".bash",
+        ".cfg",
+        ".envrc",
+        ".ini",
+        ".js",
+        ".json",
+        ".md",
+        ".mdc",
+        ".py",
+        ".sh",
+        ".toml",
+        ".ts",
+        ".txt",
+        ".yaml",
+        ".yml",
+        ".zsh"
+      ]
+    },
+    "suppressed_findings": [],
+    "target_requests": [],
+    "threshold": "high",
+    "version": "0.1.13"
+  },
+  "schema": "azt.review.v2",
+  "source_report_sha256": "fdf72e1a6d22eb574420bc516bc9c05dd8e2e0cead37bf3f3edb899aa1000b74"
+}
+exit: 0
+
+$ azt report --input broad-scan.json --format html --output report.html
+[Local HTML export captured in report.html; equivalent stdout bytes saved during capture.]
+exit: 0

@@ -1,0 +1,85 @@
+{
+  "schema": "azt.editorial-timeline.v1",
+  "duration_ms": 22500,
+  "loop": "infinite",
+  "stages": [
+    {
+      "stage": 0,
+      "opacity": 1,
+      "duration_ms": 3800
+    },
+    {
+      "stage": 1,
+      "opacity": 0.25,
+      "duration_ms": 100
+    },
+    {
+      "stage": 1,
+      "opacity": 0.5,
+      "duration_ms": 100
+    },
+    {
+      "stage": 1,
+      "opacity": 0.75,
+      "duration_ms": 100
+    },
+    {
+      "stage": 1,
+      "opacity": 1,
+      "duration_ms": 5100
+    },
+    {
+      "stage": 2,
+      "opacity": 0.25,
+      "duration_ms": 100
+    },
+    {
+      "stage": 2,
+      "opacity": 0.5,
+      "duration_ms": 100
+    },
+    {
+      "stage": 2,
+      "opacity": 0.75,
+      "duration_ms": 100
+    },
+    {
+      "stage": 2,
+      "opacity": 1,
+      "duration_ms": 5100
+    },
+    {
+      "stage": 3,
+      "opacity": 0.25,
+      "duration_ms": 100
+    },
+    {
+      "stage": 3,
+      "opacity": 0.5,
+      "duration_ms": 100
+    },
+    {
+      "stage": 3,
+      "opacity": 0.75,
+      "duration_ms": 100
+    },
+    {
+      "stage": 3,
+      "opacity": 1,
+      "duration_ms": 5100
+    },
+    {
+      "stage": 0,
+      "opacity": 1,
+      "duration_ms": 2500
+    }
+  ],
+  "timing": "Editorial pacing, not measured scanner time",
+  "checks": [
+    "SVG text bounds",
+    "desktop and mobile renders",
+    "browser playback differs at 35 seconds after a complete loop",
+    "reduced-motion picture selects static PNG",
+    "actual report HTML produced no remote requests"
+  ]
+}
