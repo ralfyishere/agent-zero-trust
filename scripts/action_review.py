@@ -34,12 +34,19 @@ def outside(path, root):
 
 
 def canonical(value, base):
+    if len(os.fspath(value))>4096:
+        raise ActionError('input path exceeds limit')
     path = Path(value)
     if '..' in path.parts:
         raise ActionError('path traversal is unsupported')
     path = Path(os.path.abspath(base / path))
-    if path.resolve() != path:
-        raise ActionError('symlink or ambiguous input path')
+    try:
+        if len(path.parts)>128 or any(p.is_symlink() for p in (path,*path.parents)) or path.resolve()!=path:
+            raise ActionError('symlink or ambiguous input path')
+    except (OSError, RuntimeError, ValueError):
+        # Python versions differ on cyclic links. Never expose their raw path
+        # in a traceback or discard an otherwise valid candidate scan.
+        raise ActionError('unsafe or unresolved input path') from None
     return path
 
 

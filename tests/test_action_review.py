@@ -330,6 +330,24 @@ class ActionReviewTests(unittest.TestCase):
             with self.subTest(value=value), self.assertRaises(action.ActionError):
                 action.canonical(value, self.root)
         self.assertEqual(action.canonical('candidate', self.root), self.head)
+        cyclic=self.root/'cycle'
+        cyclic.symlink_to(cyclic.name)
+        with self.assertRaises(action.ActionError):
+            action.canonical(cyclic,self.root)
+
+    def test_diagnostic_cyclic_baseline_retains_candidate_without_path_traceback(self):
+        cyclic=self.root/'cycle-private-label'
+        cyclic.symlink_to(cyclic.name)
+        raw=json.dumps(azt.scan_report(self.head)).encode()
+        env={'GITHUB_WORKSPACE':str(self.root),'RUNNER_TEMP':str(self.work),
+             'AZT_SCAN_PATH':str(self.head),'AZT_BASE_PATH':str(cyclic),
+             'GITHUB_STEP_SUMMARY':str(self.work/'summary.md')}
+        with mock.patch.dict(os.environ,env,clear=True), mock.patch.object(action,'capture',side_effect=[(0,b''),(0,b''),(0,raw)]):
+            out,err=io.StringIO(),io.StringIO()
+            with contextlib.redirect_stdout(out),contextlib.redirect_stderr(err):
+                self.assertEqual(action.main(),2)
+            self.assertIn('Findings: HIGH 0;',out.getvalue())
+            self.assertNotIn('cycle-private-label',out.getvalue()+err.getvalue())
 
     def test_diagnostic_main_rejects_overlapping_inputs_before_tooling(self):
         for baseline, temporary in ((self.head, self.work),
