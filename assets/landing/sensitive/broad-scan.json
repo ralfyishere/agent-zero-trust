@@ -1,0 +1,128 @@
+{
+  "decision": "pass",
+  "engine": {
+    "implementation_sha256": "6ba0e14ad6c0a697390f0b813d7f6b3b61f8fac3ea24852a826111dea7a8bb8b",
+    "text_rules_sha256": "0a9bd369132895ea221fd7716e1c6c914798b91064750b88a8c8b35d96bd779e",
+    "version": "0.1.13"
+  },
+  "findings": [
+    {
+      "description": "Review before sharing potentially sensitive diagnostic or authentication information",
+      "excerpt": "[content omitted; inspect the indicated file locally]",
+      "line": 1,
+      "path": "CONTRIBUTING.md",
+      "rule": "request.sensitive_disclosure",
+      "sensitive_request": {
+        "action": "share",
+        "breadth": "unspecified",
+        "destination": {
+          "count": 1,
+          "kind": "url",
+          "status": "explicit"
+        },
+        "information_classes": [
+          "tokens"
+        ],
+        "limitations": [
+          "bounded-english-context",
+          "wording-not-intent",
+          "no-secret-content-inspected",
+          "destination-not-verified"
+        ],
+        "references": [],
+        "schema": "azt.sensitive-request.v1",
+        "support": [
+          {
+            "end_line": 1,
+            "path": "CONTRIBUTING.md",
+            "role": "request",
+            "sha256": "4a501f22ec405a398b66408b1c3fbba37a2713b6e46442ecf330768a5a941ffa",
+            "start_line": 1
+          }
+        ]
+      },
+      "severity": "MEDIUM"
+    }
+  ],
+  "input_digest": "38dfd81aa603475373e88ad517808e0b015ee9b1e92c18ce885fb2397dffab1d",
+  "inventory": [],
+  "manifest": [
+    {
+      "executable": false,
+      "kind": "file",
+      "path": "CONTRIBUTING.md",
+      "sha256": "4a501f22ec405a398b66408b1c3fbba37a2713b6e46442ecf330768a5a941ffa"
+    }
+  ],
+  "policy": {
+    "digest": "5daa23de347bbd6b6c82a8382b5604820b4e0eed4b7e3ee73d11ccd2a5967318",
+    "source": "built-in"
+  },
+  "schema_version": 2,
+  "scope": {
+    "builtin_excluded_directories": [
+      ".git",
+      ".mypy_cache",
+      ".next",
+      ".tox",
+      ".venv",
+      "__pycache__",
+      "build",
+      "dist",
+      "node_modules",
+      "target",
+      "venv"
+    ],
+    "bytes_read": 57,
+    "complete": true,
+    "errors": [],
+    "inspected": [
+      {
+        "analyses": [
+          "text-patterns",
+          "sensitive-request-v1.1"
+        ],
+        "path": "CONTRIBUTING.md"
+      }
+    ],
+    "limits": {
+      "depth": 64,
+      "entries": 10000,
+      "file_bytes": 1000000,
+      "findings": 10000,
+      "line_characters": 4096,
+      "sensitive_block_characters": 4096,
+      "sensitive_block_lines": 16,
+      "sensitive_correlations": 2000,
+      "sensitive_reference_characters": 256,
+      "sensitive_references_per_request": 2,
+      "sensitive_requests": 1000,
+      "sensitive_retained_characters": 32000000,
+      "total_bytes": 32000000
+    },
+    "skipped": [],
+    "text_extensions": [
+      "",
+      ".bash",
+      ".cfg",
+      ".envrc",
+      ".ini",
+      ".js",
+      ".json",
+      ".md",
+      ".mdc",
+      ".py",
+      ".sh",
+      ".toml",
+      ".ts",
+      ".txt",
+      ".yaml",
+      ".yml",
+      ".zsh"
+    ]
+  },
+  "suppressed_findings": [],
+  "target_requests": [],
+  "threshold": "high",
+  "version": "0.1.13"
+}

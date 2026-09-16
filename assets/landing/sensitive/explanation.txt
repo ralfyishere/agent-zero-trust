@@ -1,0 +1,6 @@
+AZT RULE GUIDANCE: request.sensitive_disclosure
+Meaning: "A bounded contextual request to collect or share potentially sensitive information"
+Why review: "Broad environment, history, configuration, token or private-key material may exceed the information needed for a task."
+Context example: "Support documentation may legitimately request a narrow, redacted diagnostic sample; wording alone does not establish intent."
+Limits: "Bounded English context and explicit local references only. No secret contents, destination trust, actual disclosure or runtime containment are established."
+Next step: "Inspect every bound source locally, narrow the requested information and verify the intended recipient. A primary-file exception cannot authorize referenced context."
