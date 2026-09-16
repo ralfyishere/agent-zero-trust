@@ -112,3 +112,48 @@ generation—not approval. Exports create new files only. Inspect `scan-review.h
 and the reports locally; no public page or upload is created.
 
 [Supported relationships, uncertainty and contribution guidance](../../docs/sensitive-requests.md).
+
+## Recorded measurement — 2026-09-16
+
+The [machine-readable selected results](results-2026-09-16.json) identify the
+frozen inputs, actual observations, engine, source and tested artifacts.
+[This actual local review export](sample-review.json) shows the original request
+with a **synthetic** contact document added. The original miss without that
+document is also covered by the scanner regression: its destination is unresolved.
+Neither case collected diagnostics or contacted a recipient. The export's
+`decision: pass` means below the selected HIGH threshold, not that sharing is safe.
+
+| Frozen pack | Baseline 0.1.11 | Candidate 0.1.12 | Candidate controls |
+| --- | --- | --- | --- |
+| Development (5 cases) | 4 missed positives; 1 control passed | 5/5 expectations met | 0/1 false alerts |
+| Reviewer-authored challenge (8 cases) | 4 missed positives; 4 controls passed | 8/8 expectations met | 0/4 false alerts |
+
+Both versions saw the same inputs and thresholds. Candidate positives are MEDIUM:
+default exit 0, `--fail-on medium` exit 1. Missing reference context remains
+unresolved even when the case correctly passes its uncertainty expectation.
+One early development measurement falsely flagged a negated, minimized request;
+the clause matcher was corrected and the unchanged expectation passed on retest.
+Other adversarial review corrections cover unrelated links, local-only wording,
+negation, dependency-bound exceptions and bounded reference fan-in. These are
+project/model-assisted reviews, not independent third-party audits.
+
+On Darwin 25.6.0 / Python 3.14.6, the challenge run took 1.702 s baseline and
+1.474 s candidate; child-process high-water RSS was 28,065,792 and 28,213,248 bytes.
+These are single observed runs including CLI startup, not a speed improvement
+claim. The candidate development lab took 2.100 s / 28,672,000 bytes and also
+ran comparisons, explanations and exports; its timing is not comparable to the
+baseline's scan-only helper. Supported-window tests do not measure arbitrary
+English, multilingual requests, recipient trust or live-agent behavior.
+
+The measured code is commit
+[`2f9ddc0`](https://github.com/ralfyishere/agent-zero-trust/commit/2f9ddc0bc01f8c5b4e9699db410a36bdc1655e43).
+Its clean build passed 46 scanner checks, 183 unit tests and the installed-wheel /
+extracted-source-distribution group on Python 3.11.15. Artifact identities are in
+the result record. Later documentation/evidence commits and CI builds have their
+own source and byte identities; this record is not relabeled as a later wheel.
+
+The result summary is a sanitized derivative: private command paths and full
+logs are omitted, original export digests are retained for provenance. The sample
+is an actual redacted review export, not raw source evidence. Hashes and schema
+validation do not authenticate its issuer. No historical FS-001 result was changed
+or rerun, and none is evidence for this new detector.
