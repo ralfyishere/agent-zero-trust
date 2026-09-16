@@ -17,8 +17,8 @@ MAX_OUTPUT = MAX_REPORT
 MAX_ITEMS = 10000
 SEVERITY = {"HIGH": 0, "MEDIUM": 1, "INFO": 2}
 SENSITIVE_RULE = 'request.sensitive_disclosure'
-SENSITIVE_ANALYSIS = 'sensitive-request-v1.1'
-SENSITIVE_ANALYSES = {SENSITIVE_ANALYSIS, 'sensitive-request-v1'}
+SENSITIVE_ANALYSIS = 'sensitive-request-v1.2'
+SENSITIVE_ANALYSES = {SENSITIVE_ANALYSIS, 'sensitive-request-v1.1', 'sensitive-request-v1'}
 SENSITIVE_LIMITS = ['bounded-english-context', 'wording-not-intent',
                     'no-secret-content-inspected', 'destination-not-verified']
 EXCEPTION_REFUSAL = 'primary-file exception cannot authorize referenced context'
@@ -26,7 +26,7 @@ AGGREGATE_ERRORS = {'sensitive request count limit exceeded',
                     'sensitive request retained-text limit exceeded',
                     'sensitive correlation work limit exceeded',
                     'finding count limit exceeded'}
-BOUND_REFERENCES = {'resolved', 'no-sharing-context', 'ambiguous', 'cycle'}
+BOUND_REFERENCES = {'resolved', 'no-sharing-context', 'ambiguous', 'cycle', 'additional-hop-not-followed'}
 NOTICE = ("Informational review only. Reports are untrusted assertions; hashes and schema "
           "validation do not authenticate them. No longer observed does not mean proven fixed. "
           "No receipt, authorization, upload or target execution occurs.")
@@ -228,7 +228,8 @@ def sensitive_request(finding, manifest, inspected, errors):
                 (entry['path'] is None and entry['status'] == 'unsafe'), 'duplicate reference record')
         reference_records.add(record)
         require(entry['status'] in ('resolved', 'missing', 'excluded', 'unreadable', 'unsupported',
-                'unsafe', 'ambiguous', 'cycle', 'limit', 'no-sharing-context'), 'invalid reference status')
+                'unsafe', 'ambiguous', 'cycle', 'limit', 'no-sharing-context',
+                'additional-hop-not-followed'), 'invalid reference status')
         path, status = entry['path'], entry['status']
         if status in BOUND_REFERENCES:
             sha(entry['sha256'])
@@ -595,6 +596,32 @@ def sensitive_summaries(scan):
             for f in scan['findings'] + scan['suppressed_findings'] if 'sensitive_request' in f]
 
 
+def scan_summary(scan):
+    """Separate inspection, findings and threshold; never equate exit 0 with approval."""
+    scope = scan['scope']
+    counts = Counter(f['severity'] for f in scan['findings'])
+    threshold = {'high': 0, 'medium': 1, 'any': 2}[scan['threshold']]
+    exceeded = any(SEVERITY[f['severity']] <= threshold for f in scan['findings'])
+    total = len(scan['findings'])
+    lines = [
+        'Inspection: ' + ('completed within declared scope' if scope['complete'] else 'INCOMPLETE') +
+        '; %d inspected, %d skipped, %d errors.' %
+        (len(scope['inspected']), len(scope['skipped']), len(scope['errors'])),
+        'Review findings: %d (%d HIGH, %d MEDIUM, %d INFO).' %
+        (total, counts['HIGH'], counts['MEDIUM'], counts['INFO']),
+        'Selected failure threshold: ' + scan['threshold'].upper() + '; ' +
+        ('exceeded.' if exceeded else 'not exceeded by observed findings.'),
+    ]
+    if not scope['complete']:
+        lines.append('Inspection gaps remain; the result is incomplete regardless of the threshold.')
+    if total:
+        lines.append('Next step: review the findings and use azt explain RULE_ID before following the instruction.')
+    else:
+        lines.append('Next step: review the inspection scope and limits before relying on this result.')
+    lines.append('A threshold result is not human approval or a safety guarantee.')
+    return '\n'.join(lines)
+
+
 def text_report(value):
     if value['schema'] in ('azt.changes.v1', 'azt.changes.v2'):
         lines = ['AZT CHANGE REVIEW', 'Meaningful delta: '+str(value['meaningful_delta']).lower(),
@@ -621,7 +648,7 @@ def text_report(value):
         for key in ('meaning', 'why_review', 'context_example', 'limits', 'next_step'):
             lines.append(key.replace('_', ' ').capitalize()+': '+readable(value[key]))
     else:
-        lines = ['AZT SCAN REVIEW', 'Decision: '+value['scan']['decision'], NOTICE]
+        lines = ['AZT SCAN REVIEW', scan_summary(value['scan']), NOTICE]
         lines.extend(sensitive_summaries(value['scan']))
         lines.append(readable(value))
     return '\n'.join(lines)+'\n'

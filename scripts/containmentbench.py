@@ -30,6 +30,15 @@ def sha(raw):
     return hashlib.sha256(raw).hexdigest()
 
 
+def verify_wheel_sources(wheel, sources):
+    """Bind every reported scanner module, not merely the pre-refactor subset."""
+    with zipfile.ZipFile(wheel) as archive:
+        for name in sources:
+            if '/' not in name and name.endswith('.py'):
+                if sha(archive.read(name)) != sources[name]:
+                    raise ValueError("wheel does not contain the current source: " + name)
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, help="new output directory; existing directories are refused")
@@ -51,10 +60,7 @@ def main():
         if args.wheel:
             wheel = args.wheel.resolve()
             artifact = {"filename": wheel.name, "sha256": sha(wheel.read_bytes())}
-            with zipfile.ZipFile(wheel) as archive:
-                for name in SOURCES[:4]:
-                    if sha(archive.read(name)) != sources[name]:
-                        raise ValueError("wheel does not contain the current source: " + name)
+            verify_wheel_sources(wheel, sources)
             environment = base / "venv"
             venv.EnvBuilder(with_pip=True).create(environment)
             python = environment / "bin/python"
@@ -142,7 +148,7 @@ def main():
                             "Rejected admissions are not OS-denied operations.",
                             "No runtime isolation, model trial, cloud agent, or continuous behavior observation.",
                             "Receipt HMAC cannot be publicly verified without private issuer authority.",
-                            "A/B/C containment comparison blocked: no executable supported Linux profile on this host."],
+                            "This intake-only benchmark does not run the separate FS-001 Docker experiment or an A/B/C containment comparison."],
         }
         # Synthetic-only records have relative workspace filenames, digests and
         # generic errors. Reject accidental personal path inclusion in exports.

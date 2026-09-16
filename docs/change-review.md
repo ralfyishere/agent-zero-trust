@@ -82,6 +82,12 @@ descriptions replaced by maintained catalog text. Paths, reasons and labels can
 still be sensitive: review before sharing. No upload or public page is created.
 This derivative is not the original evidence. Keep original files separately.
 
+In the 0.1.14 source candidate, terminal and text/HTML scan reviews separately
+state inspection completeness, HIGH/MEDIUM/INFO counts, and the selected failure
+threshold. A MEDIUM finding is visible even when HIGH is not exceeded. Incomplete
+inspection remains incomplete regardless of that threshold. The JSON `decision`
+field and scan exits retain their existing meanings; none is human approval.
+
 Input/output is bounded to 8 MiB, nesting to 32, aggregate nodes to 150,000,
 arrays to 10,000 entries, strings to 8,192 and relative paths to 4,096 characters.
 Expanded exports exceeding a bound fail rather than silently truncate. No remote

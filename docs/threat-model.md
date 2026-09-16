@@ -100,11 +100,13 @@ fetched content and unsupported-format semantics remain limitations. AZT does
 not solve prompt injection, alignment or general agent safety. It does not replace
 a dedicated secrets scanner or inspect all installed agent tools.
 
-No runtime launcher is implemented. Network denial, filesystem isolation,
-resource limits, descendant shutdown, credential brokering and cross-session
-isolation are not delivered protections. [Runtime design and acceptance](runtime.md)
-names the additional trusted kernel/backend/supervisor components and tests
-required before making those claims.
+No general agent-workload launcher is implemented. The optional FS-001 pack
+executes only its bundled synthetic filesystem probe and coding task through
+Docker; its [historical evidence](../evidence/README.md) is separate from scanner
+results. That selected check does not establish general network denial,
+descendant shutdown, credential brokering or cross-session isolation.
+[Runtime design and acceptance](runtime.md) names the additional components and
+tests required before making broader claims.
 
 Related projects have separate roles: rules-with-receipts addresses operating
 discipline, rulebench behavioral testing, and agent-failure-modes failure taxonomy.

@@ -7,7 +7,7 @@ import re
 from pathlib import PurePosixPath
 
 RULE = "request.sensitive_disclosure"
-SETTINGS = {"method": "sensitive-request-v1.1", "block_characters": 4096,
+SETTINGS = {"method": "sensitive-request-v1.2", "block_characters": 4096,
             "block_lines": 16, "references_per_request": 2,
             "reference_characters": 256, "requests": 1000,
             "retained_characters": 32000000, "correlations": 2000}
@@ -17,7 +17,7 @@ CLASSES = {
     "environment": r"\b(?:environment\s+(?:variables?|details|dumps?)|env(?:ironment)?\s+dump|printenv)\b",
     "shell-history": r"\b(?:(?:shell|bash|zsh|command|terminal)\s+histor(?:y|ies))\b|\.bash_history\b|\.zsh_history\b",
     "configuration": r"\b(?:(?:local|credential(?:-bearing)?|cloud|authentication)\s+config(?:uration)?(?:\s+(?:files?|folder|directory))?)\b|(?<!\w)\.env\b|\.aws/credentials\b|\.npmrc\b|\.netrc\b",
-    "tokens": r"\b(?:(?:access|api|authentication|auth|session|secret)\s+(?:tokens?|keys?)|tokens?)\b",
+    "tokens": r"\b(?:(?:access|api|authentication|auth|session|secret|bearer)(?:\s+|-)(?:tokens?|keys?)|tokens?)\b",
     "private-keys": r"\bprivate\s+(?:ssh\s+)?keys?\b|\bid_(?:rsa|ed25519)\b",
 }
 PATTERNS = {key: re.compile(value, re.I) for key, value in CLASSES.items()}
@@ -35,6 +35,50 @@ LINK = re.compile(r"\[([^\]\n]{1,128})\]\(([^)\n]{1,1024})\)")
 BARE = re.compile(r"\b(?:address\s+(?:listed\s+)?in|instructions\s+in|steps\s+in|see|refer\s+to|follow)\s+`?([^\s`<>]{1,1024})", re.I)
 RELATION = re.compile(r"\b(?:address|contact|recipient|destination|sharing|upload|send|share|instructions|steps|follow|see|diagnostics)\b", re.I)
 ADDRESS = re.compile(r"https?://[^\s<>\"']{1,1024}|\b[A-Za-z0-9._%+-]{1,64}@[A-Za-z0-9.-]{1,128}\.[A-Za-z]{2,24}\b", re.I)
+# Only these adjacent bare-token noun phrases are recognized as measurements or
+# parser material. A credential-qualified match (API/access/auth token) is never
+# removed, and another bare token elsewhere in the clause is checked separately.
+TOKEN_MEASURE_AFTER = re.compile(r"\s+(?:counts?|budgets?|usage|totals?|limits?)\b", re.I)
+TOKEN_MEASURE_BEFORE = re.compile(r"\b(?:count|the\s+number|budget|total|limit)\s+(?:of|for)\s+(?:model\s+)?$", re.I)
+TOKEN_SYNTAX_BEFORE = re.compile(r"\b(?:parser|lexical|syntax)\s+$", re.I)
+# A selected explicit credential role defeats an otherwise noncredential noun
+# label. Merely discussing an authenticated API request does not establish that
+# the requested token count is itself an authentication value.
+TOKEN_AUTH_ROLE = re.compile(
+    r"^\s+(?:(?:counts?|budgets?|usage|totals?|limits?)\s+)?"
+    r"(?:(?:(?:(?:that|which)\s+(?:is|are)\s+)?(?:used|required|needed)\s+)?"
+    r"(?:to\s+(?:authenticate|authorize|log\s+in|sign\s+in)|for\s+(?:authentication|authorization))"
+    r"|(?:that|which)\s+(?:authenticates?|authorizes?|grants?\s+access))\b", re.I)
+TOKEN_CREDENTIAL_VALUE = re.compile(
+    r"\b(?:including|and|plus|along\s+with)\s+(?:(?:the|your|its|their|a)\s+)?"
+    r"(?:(?:complete|full|actual|raw)\s+)?(?:credential|authentication|access|secret)\s+"
+    r"(?:values?|contents?)\b", re.I)
+
+
+def information_classes(text):
+    """Classify selected subjects, retaining ambiguity for unqualified tokens.
+
+    Bare-token measurements use at most 64 adjacent characters on either side;
+    this is not an exemption for a paragraph discussing model costs. In
+    particular, 'token count and API key' still names authentication material.
+    Explicit credential values or a directly stated authentication role take
+    precedence over a parser/measurement label. 'A number of tokens' can request
+    several values and is not the definite quantity phrase 'the number of'.
+    """
+    found = {key for key, pattern in PATTERNS.items()
+             if key != 'tokens' and pattern.search(text)}
+    for match in PATTERNS['tokens'].finditer(text):
+        bare = match.group().lower() in ('token', 'tokens')
+        before = text[max(0, match.start()-64):match.start()]
+        after = text[match.end():match.end()+64]
+        credential_role = TOKEN_AUTH_ROLE.search(after) or TOKEN_CREDENTIAL_VALUE.search(after)
+        if bare and not credential_role and (TOKEN_MEASURE_AFTER.match(after) or
+                     TOKEN_MEASURE_BEFORE.search(before) or
+                     TOKEN_SYNTAX_BEFORE.search(before)):
+            continue
+        found.add('tokens')
+        break
+    return found
 
 
 def blocks(text):
@@ -143,8 +187,11 @@ def references(text, source):
             candidates.append(match.group(2))
     candidates += [m.group(1).rstrip(".,;") for m in BARE.finditer(text)
                    if not m.group(1).startswith('[')]
+    # The limit applies to distinct exact reference strings. Repeating one
+    # supported link does not require another lookup or imply more recipients.
+    unique = list(dict.fromkeys(candidates))
     result = []
-    for value in dict.fromkeys(candidates):
+    for value in unique:
         status, path = "unsafe", None
         if (len(value) <= SETTINGS["reference_characters"] and
                 re.fullmatch(r"[A-Za-z0-9_.\-/]+", value) and
@@ -156,16 +203,22 @@ def references(text, source):
         result.append({"path": path, "status": status, "sha256": None})
         if len(result) == SETTINGS["references_per_request"]:
             break
-    if len(candidates) > SETTINGS["references_per_request"]:
+    if len(unique) > SETTINGS["references_per_request"]:
         result = [{"path": None, "status": "limit", "sha256": None}]
     return result
 
 
 def addresses(text):
-    matches = list(ADDRESS.finditer(text))[:9]
-    kinds = {"url" if m.group().lower().startswith(('http:', 'https:')) else "email" for m in matches}
-    return {"status": "ambiguous" if len(matches) > 1 else "explicit" if matches else "not-stated",
-            "kind": next(iter(kinds)) if len(kinds) == 1 else "unknown", "count": min(len(matches), 8)}
+    # Exact deduplication only within this bounded block: URL path/query/case and
+    # email case are not normalized into an invented recipient equivalence.
+    distinct = set()
+    for match in ADDRESS.finditer(text):
+        distinct.add(match.group())
+        if len(distinct) == 9:
+            break
+    kinds = {"url" if value.lower().startswith(('http:', 'https:')) else "email" for value in distinct}
+    return {"status": "ambiguous" if len(distinct) > 1 else "explicit" if distinct else "not-stated",
+            "kind": next(iter(kinds)) if len(kinds) == 1 else "unknown", "count": min(len(distinct), 8)}
 
 
 def request_classes(text, refs):
@@ -179,7 +232,7 @@ def request_classes(text, refs):
     onward_bundle = False
     for clause in clauses:
         subject_view = ADDRESS.sub(' ', clause)
-        classes = {key for key, pattern in PATTERNS.items() if pattern.search(subject_view)}
+        classes = information_classes(subject_view)
         if SHARE.search(clause) and not local_share(clause):
             disclosed.update(classes)
             if re.search(r'\b(?:them|it|both|these|the\s+(?:(?:complete|full|entire)\s+)?(?:diagnostics\s+)?(?:bundle|diagnostics|details|results|material|values))\b', clause, re.I):
@@ -189,7 +242,7 @@ def request_classes(text, refs):
     # Bullet semicolons can separate subjects from their include directive.
     # Only explicit include/bundle scaffolding enables this bounded list case.
     if re.search(r'\b(?:bundle|diagnostics)\b[^.]{0,80}\binclude\s*:', text, re.I):
-        collected.update(key for key, pattern in PATTERNS.items() if pattern.search(text))
+        collected.update(information_classes(ADDRESS.sub(' ', text)))
     return sorted(disclosed | (collected if onward_bundle or refs else set()))
 
 
@@ -234,7 +287,7 @@ def analyze(snapshots, dispositions):
             onward = bool(onward_request(text))
             if dest['count'] or onward:
                 if len(contexts) < 3:
-                    contexts.append((support, dest, onward, bool(refs)))
+                    contexts.append((support, dest, onward, refs))
             if not classes or not (share or (collect and refs)):
                 continue
             if not share and not re.search(r'\b(?:sharing|share|send|upload|address|contact|recipient|destination)\b', text, re.I):
@@ -290,7 +343,11 @@ def analyze(snapshots, dispositions):
                 continue
             location, found, onward, further = contexts[0]
             if further:
-                ref['status'] = 'cycle'  # One hop only; never traverse another reference.
+                # Inspect only the already-indexed edge, never the next target.
+                # A second hop is not itself a cycle. Only a known edge to the
+                # primary request or this supporting source establishes one.
+                known_cycle = any(r['path'] in (path, target) for r in further)
+                ref['status'] = 'cycle' if known_cycle else 'additional-hop-not-followed'
                 ref['sha256'] = location['sha256']
                 support.append(dict(location, role='sharing-context'))
                 continue
@@ -327,7 +384,8 @@ def summary(observation):
     verb = 'collect' if observation['action'] == 'collect' else 'share'
     destination = observation['destination']['status']
     return ('This request asks you to '+verb+' '+classes+'.\n'
-            'These materials may contain credentials or private activity; their contents were not collected.\n'
+            'These materials may contain credentials or private activity.\n'
+            'AZT inspected project material within the declared scope; it did not gather diagnostics or transmit anything in response to this request.\n'
             'Destination observation: '+destination+' (not verified; recipient details omitted).\n'
             'Next step: verify the request independently, provide only necessary diagnostics, and inspect the exact contents before sharing.\n'
             'No upload or target execution was performed by this inspection.')

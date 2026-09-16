@@ -1,6 +1,32 @@
 # Release notes
 
-## 0.1.13 — unreleased sensitive-request and GitHub review candidate
+## 0.1.14 — unreleased review-precision candidate
+
+- Refine selected token-measurement wording without treating credential-like
+  token requests as harmless. Keep MEDIUM severity and the default HIGH threshold.
+- Count identical repeated references and same-block recipient mentions once;
+  retain ambiguity between different supporting contexts and distinct recipients.
+- Distinguish an unsupported additional reference hop from a detected cycle
+  without expanding the one-hop inspection boundary.
+- Revise the analyzer method to `sensitive-request-v1.2`; keep v2 report formats
+  and explicit older-record support. New status values can require an updated
+  reader; optional snapshot-gate receipts require explicit re-admission.
+- Correct active release-status guidance while preserving historical captures.
+  Add an offline documentation-drift check for the reviewed published install pin
+  and external-environment quickstart. It does not query package availability.
+- Lead terminal and local text/HTML scan reviews with inspection completeness,
+  all severity counts, the selected failure threshold and a next review step.
+  Replace the human "trust verdict" label; JSON decisions and exits are unchanged.
+  Clarify that reading project material is distinct from gathering or sending
+  requested diagnostics.
+- Verify every declared scanner-module identity in the installed-wheel intake
+  benchmark, including the contextual analyzer and saved-report reader. Keep its
+  admission results separate from the unchanged historical Docker experiment.
+
+This is source-only candidate work, not a published package or a new runtime
+trial. See [migration](docs/migration.md) and [analysis limits](docs/sensitive-requests.md).
+
+## 0.1.13 — sensitive-request precision and GitHub review
 
 - Add a bounded GitHub job summary with an opt-out and optional explicitly
   supplied base/head comparison using one trusted scanner installation. Preserve
@@ -27,7 +53,8 @@
   resource bounds and security limits unchanged. Preserve historical records,
   known-miss history and FS-001 evidence; add no runtime containment claim.
 
-This is a candidate, not a published release. See
+Published as [v0.1.13](https://github.com/ralfyishere/agent-zero-trust/releases/tag/v0.1.13).
+Historical candidate artifacts and results retain their original identities. See
 [migration](docs/migration.md) and [limits](docs/sensitive-requests.md).
 
 ## 0.1.12 — sensitive-request review
