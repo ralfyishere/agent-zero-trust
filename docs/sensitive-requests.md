@@ -5,7 +5,9 @@ bug report. AZT identifies selected English requests to share shell history,
 environment dumps, credential-bearing configuration, tokens or private keys.
 It explains what those materials **may** expose without collecting them to
 check whether credentials exist. This is repository intake, not runtime blocking.
-Try the [synthetic lab](../examples/sensitive-request/README.md).
+Sensitive-request review is included in the published 0.1.12 package. Try the
+[synthetic lab](../examples/sensitive-request/README.md). The unreleased 0.1.13
+candidate revises local action/object association as `sensitive-request-v1.1`.
 
 ## Meaning and next step
 
@@ -37,6 +39,15 @@ to sharing. Blank paragraphs and window boundaries do not carry pronouns.
 Selected prohibitions and quoted warnings are handled; fences, quotations,
 “official,” “approved,” “example” and debugging pretexts are not blanket exemptions.
 Local configuration use or a version-only request is not equivalent to disclosure.
+
+The 0.1.13 candidate uses a selected action grammar: an explicit contrast such as
+“instead” can end a prohibition, so a later affirmative request keeps its own
+object. A later “do not include” does not attach its excluded objects to an earlier
+version-only request. Selected coordinated actions can share an object, as in
+“collect and upload”; a prohibition can apply to both in “do not collect or upload”.
+Sentence/semicolon boundaries and selected action bullets also separate requests.
+Selected contractions accept straight or curly apostrophes. These are bounded
+wording cases, not general English negation, syntax or intent understanding.
 
 The analysis indexes each eligible document once, within intake's 32 MB total
 read budget. Limits are 32 million retained text characters, 1,000 request
@@ -79,6 +90,9 @@ remain visible even when the request file is unchanged. Missing/degraded support
 cannot resolve an old request. “No longer observed” does not mean “fixed.”
 Comparison uses saved validated records, not today's filesystem. Engine/method
 changes reduce comparability; unrelated edits do not invalidate every observation.
+The 0.1.13 candidate retains scan/review/changes v2. Its readers still accept
+supported v2 records carrying the earlier `sensitive-request-v1` method; the
+method revision does not authorize rewriting historical reports or their hashes.
 
 Existing external single-file exceptions work. A primary-only exception cannot
 suppress **any reference-bearing request**, even when unresolved; the report
@@ -95,6 +109,16 @@ The original miss bytes and historical results remain unchanged. The
 and reviewer-authored inputs and discloses actual results and performance.
 Cases seen during development are not held out. This is not a live-agent trial,
 third-party audit, or real-world safety percentage; FS-001 evidence is separate.
+
+The [six-case association pack](../examples/sensitive-request/associations-v1.json)
+records the follow-up's known development inputs. C3 and C4 require only the
+affirmatively requested `tokens` class after a shell-history prohibition; C5
+requires no sensitive-request finding for a version-only request that excludes
+API keys and shell history. These are regression expectations, not a measured
+accuracy rate. [Association regressions](../tests/test_sensitive_associations.py)
+also exercise legitimate contrasts, coordinated actions, local use, wrapped text,
+warnings and reference labels. Historical sample reports and original miss bytes
+remain tied to their original versions and runs.
 
 Submit a minimal **synthetic** request and legitimate contrast, expected classes
 and reference status, version, command and actual output. Use reserved example

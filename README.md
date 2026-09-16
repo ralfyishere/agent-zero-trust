@@ -51,7 +51,7 @@ python3 -m venv "$AZT_REVIEW/venv"
 . "$AZT_REVIEW/venv/bin/activate"
 python -m pip --isolated install \
   --index-url https://pypi.org/simple --no-deps \
-  agent-zero-trust==0.1.11
+  agent-zero-trust==0.1.12
 azt --version
 azt scan "$AZT_PROJECT"
 ```
@@ -97,8 +97,8 @@ does not approve the change. [JSON/text exports and advanced syntax](docs/change
 
 ## Reproduce the demo
 
-**New in source, not yet published:** [sensitive-request review](examples/sensitive-request/README.md)
-helps you spot helpful-looking instructions asking for shell history, environment
+**[Sensitive-request review](examples/sensitive-request/README.md)** helps you
+spot helpful-looking instructions asking for shell history, environment
 dumps or authentication material. Use the same scan → compare → explain → export
 workflow; AZT never collects the requested diagnostics or sends them.
 

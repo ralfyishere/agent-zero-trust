@@ -1,6 +1,25 @@
 # Migrating to 0.1.9 and later
 
-## 0.1.12 (unreleased candidate)
+## 0.1.13 (unreleased candidate)
+
+The analyzer method changes from `sensitive-request-v1` to
+`sensitive-request-v1.1`; scan/review/changes remain v2. Supported saved reports
+with the earlier method remain readable. Comparisons across changed method or
+engine identities have reduced comparability; preserve historical report bytes
+and provenance rather than rewriting them to the current method.
+
+Selected affirmative requests after a prohibition can now be observed, while
+explicitly excluded objects no longer supply the sensitive subject of a
+version-only request. The [known association cases](../examples/sensitive-request/associations-v1.json)
+and [bounded grammar](sensitive-requests.md#bounded-relationships) describe the
+scope; this is not a general English interpreter. MEDIUM severity, default HIGH
+threshold, scan 0/1/2 exits, one-hop resolution and authority limits are unchanged.
+
+Review and explicitly re-admit after this engine change if using the optional
+snapshot gate. Receipts are not renewed automatically. Ordinary scans and saved
+report comparisons still need no hook. No new runtime evidence is claimed.
+
+## 0.1.12
 
 New scans emit scan-v2; reviews/comparisons containing them use `azt.review.v2`
 and `azt.changes.v2`. Observations add source ranges and reference dependencies.

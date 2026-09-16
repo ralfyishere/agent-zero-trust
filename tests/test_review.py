@@ -157,7 +157,7 @@ class ReviewTests(unittest.TestCase):
         r=self.scan(); r['schema_version']=1; del r['engine']
         r['scope']['limits'] = {k:v for k,v in r['scope']['limits'].items() if not k.startswith('sensitive_')}
         for item in r['scope']['inspected']:
-            item['analyses'].remove('sensitive-request-v1')
+            item['analyses'].remove(review.SENSITIVE_ANALYSIS)
         delta=review.compare(r,r)
         self.assertEqual(delta['comparability']['status'],'reduced')
         self.assertFalse(delta['meaningful_delta'])
