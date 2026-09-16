@@ -76,7 +76,9 @@ def positive(text):
 def references(text, source):
     candidates = []
     for match in LINK.finditer(text):
-        if RELATION.search(text[max(0, match.start()-100):match.end()]):
+        # The link label itself must identify the contact/sharing context.
+        # A nearby sensitive request cannot turn an unrelated style link into it.
+        if RELATION.search(match.group(1)):
             candidates.append(match.group(2))
     candidates += [m.group(1).rstrip(".,;") for m in BARE.finditer(text)
                    if not m.group(1).startswith('[')]
@@ -170,6 +172,11 @@ def analyze(snapshots, dispositions):
                 continue
             if not share and LOCAL.search(text) and not refs:
                 continue
+            # Addresses elsewhere in a paragraph are not automatically the
+            # destination of this request. Referenced contact blocks retain
+            # their separate context summary above.
+            request_destination = addresses(' '.join(c for c in re.split(r'(?<=[.!?;])\s+', text)
+                                                     if SHARE.search(c)))
             if len(requests) >= SETTINGS['requests']:
                 error = {'path': path, 'reason': 'sensitive request count limit exceeded'}
                 if path not in capped_paths:
@@ -179,7 +186,7 @@ def analyze(snapshots, dispositions):
                 # Truncating it here could turn multiple recipients into one.
                 continue
             support['role'] = 'request'
-            requests.append((path, support.copy(), classes, share, collect, refs, dest,
+            requests.append((path, support.copy(), classes, share, collect, refs, request_destination,
                              'broad' if BROAD.search(text) else 'limited' if LIMITED.search(text) else 'unspecified'))
         index[path] = contexts
     findings, correlations = [], 0
