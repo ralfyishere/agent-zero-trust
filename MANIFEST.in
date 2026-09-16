@@ -9,5 +9,6 @@ recursive-include corpus * .azt-ignore .envrc .mcp.json
 recursive-include evidence *.md *.json *.patch
 recursive-include packs *.md *.json
 recursive-include examples/change-review *.md *.json *.txt *.svg *.png *.gif *.py
+recursive-include examples/sensitive-request *.md *.json *.txt
 recursive-include assets/launch *.svg *.png *.gif *.txt *.json *.py
 prune .azt-local

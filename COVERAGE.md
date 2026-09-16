@@ -1,12 +1,21 @@
 # Coverage and known limitations
 
+## Sensitive-request review (0.1.12 unreleased candidate)
+
+`request.sensitive_disclosure` adds bounded English requests and explicit one-hop
+context from already inspected text. MEDIUM means review, not proof of sensitive
+contents, intent or disclosure. See [relationships and bounds](docs/sensitive-requests.md)
+and the [synthetic evaluation/lab](examples/sensitive-request/README.md).
+Scan/review/changes v2 preserve dependencies and unresolved references. The
+catalog now has 24 rules; guidance completeness is not attack coverage.
+
 ## Saved-report review (0.1.11 candidate)
 
 `azt changes` compares observations, not live repository state or authenticity.
 It supports complete scan-v1 report shapes, including incomplete inspections;
 old reports without engine/approval digests get explicit reduced-comparability
 cautions. Unknown versions fail. It does not ingest arbitrary tool output.
-`azt explain` covers all 23 currently emitted rules; that is guidance coverage,
+`azt explain` originally covered 23 rules in 0.1.11; that is guidance coverage,
 not detection completeness. See [semantics and bounds](docs/change-review.md).
 
 The [four-case lab](examples/change-review/README.md) and frozen report regression
@@ -57,11 +66,14 @@ corpus is retained and checked for zero MEDIUM-or-higher findings.
 
 ## Known misses
 
-- **Natural-language social engineering.** The fixture in
-  `corpus/misses/social-engineering.md` asks for sensitive diagnostic material
-  without a recognized trigger shape. The corpus asserts no HIGH detection.
+- **Natural-language social engineering beyond the selected subset.** On
+  2026-09-16 the preserved `corpus/misses/social-engineering.md` gained a MEDIUM
+  diagnostic-request finding. Baseline 0.1.11 produced zero findings on that
+  fixture. No-HIGH remains true; a new must-flag assertion records the change.
+  Ambiguous language and relationships outside the bounded context still miss.
 - **Instructions split across files.** The two `split-instructions` fixtures
-  each appear innocuous alone. AZT does not reconstruct cross-file intent.
+  each appear innocuous alone. AZT does not reconstruct arbitrary cross-file
+  intent; the explicit one-hop diagnostic subset does not resolve these cases.
 - **DNS execution inside a Markdown table.** A table-wrapped DNS TXT command
   piped to a shell can evade `net.dns_exec`. That rule is suppressed on
   table-looking lines because its broad pipe pattern also matches benign

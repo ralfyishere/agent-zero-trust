@@ -1,5 +1,11 @@
 # Contributing
 
+For sensitive-request corrections, start with [the inert lab](examples/sensitive-request/README.md)
+and [supported relationships](docs/sensitive-requests.md). Submit a minimal
+synthetic request plus a legitimate contrast, expected information classes and
+reference status, and actual output. Never attach real diagnostics or credentials.
+Run `python3 -m unittest discover -s tests -p 'test_sensitive*.py' -v`.
+
 Start with repository intake: a minimal missed-detection fixture, a benign
 false-positive example or a confusing first-run result is useful. See the
 [published-package demo](docs/demo.md) and [known misses](COVERAGE.md).

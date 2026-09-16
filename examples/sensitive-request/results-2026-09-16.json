@@ -1,0 +1,677 @@
+{
+  "artifact_verification": {
+    "build": {
+      "exit_code": 0,
+      "name": "build-once",
+      "output_bytes": 24861,
+      "output_sha256": "111e14680210b48ace5ad2a3b41972cf3fa918ab5d700befe63672e431fb5fa4",
+      "seconds": 0.319
+    },
+    "dependencies": {
+      "packaging": "26.0",
+      "setuptools": "83.0.0",
+      "wheel": "0.47.0"
+    },
+    "distributions": {
+      "agent_zero_trust-0.1.12-py3-none-any.whl": {
+        "bytes": 80014,
+        "sha256": "b7628a175d411fe59aa86b614aa03ad86c7f5a0c5b614d26d466af1e472a0a99"
+      },
+      "agent_zero_trust-0.1.12.tar.gz": {
+        "bytes": 989460,
+        "sha256": "988347fcf52692ecb4645367cc2b1ba522ba7d2a70ced4ff9b0dee0401495a19"
+      }
+    },
+    "event": "local",
+    "pip": "26.1.2",
+    "python": "3.11.15",
+    "repository": "local",
+    "run_attempt": "1",
+    "run_id": "local",
+    "schema": "azt.release-manifest.v1",
+    "scope": "offline scanner/unit/installed wheel/extracted sdist tests; no new runtime trial",
+    "source": {
+      "sha": "2f9ddc0bc01f8c5b4e9699db410a36bdc1655e43",
+      "tag": "",
+      "tree": "7e2180b8dd426ecf3f64bdf70011dfc308d22bcf",
+      "version": "0.1.12"
+    },
+    "status": "verified",
+    "tests": [
+      {
+        "exit_code": 0,
+        "name": "scanner",
+        "output_bytes": 3107,
+        "output_sha256": "3f8883fe4d76ab613760c38802dd46523d7582382847e36655afc3ddfd1ad1b7",
+        "seconds": 0.259
+      },
+      {
+        "exit_code": 0,
+        "name": "unit",
+        "output_bytes": 24530,
+        "output_sha256": "52bc1cfe41627a8f40ecac9f80a20c40f9fdbb18bb01ed557f18d69b03a71df7",
+        "reported_unit_tests": 183,
+        "seconds": 7.337
+      },
+      {
+        "exit_code": 0,
+        "name": "installed-artifacts",
+        "output_bytes": 703,
+        "output_sha256": "4b9f583b806c38ca7ace581f86e98545d3bb4c81e2c4ece423d07d40e20338b8",
+        "seconds": 16.047
+      }
+    ]
+  },
+  "baseline_source": "708f4d6d2ab32211c33dd26427ef958240e10973",
+  "baseline_wheel": {
+    "filename": "agent_zero_trust-0.1.11-py3-none-any.whl",
+    "note": "Prior clean presentation build; scanner modules identical to baseline main.",
+    "sha256": "a165ae7ab85b47f1cf1db8df0dc21a4c868f37e0cfc1ca30b07d17a306f01924"
+  },
+  "date": "2026-09-16",
+  "limitations": [
+    "Synthetic wording tests; not real-world accuracy, live-agent behavior or runtime protection.",
+    "Reviewer-authored cases were visible during development; not held-out or an independent audit.",
+    "One measurement per configuration; elapsed time includes CLI startup and is not a speed claim.",
+    "Development candidate lab includes exports/comparisons; baseline development scan-only timing is not comparable to that extra work.",
+    "Selected derivative; private command paths/logs omitted, source exports retained locally.",
+    "No new Docker trials. Historical FS-001 evidence retains its original identities."
+  ],
+  "runs": [
+    {
+      "case_count": 8,
+      "cases": [
+        {
+          "complete": true,
+          "default_exit": 0,
+          "expected_sensitive": true,
+          "failures": [
+            "default: sensitive disclosure observation mismatch",
+            "medium: sensitive disclosure observation mismatch"
+          ],
+          "family": "disclosure",
+          "id": "C01-contact-reference",
+          "information_classes": [],
+          "input_digest": "94db4d2208c51a86c819572fe538de72dcc2c7e4577c1784c8bc12ad4bd99dfe",
+          "medium_exit": 0,
+          "observed_sensitive": false,
+          "passed": false,
+          "reference_statuses": []
+        },
+        {
+          "complete": true,
+          "default_exit": 0,
+          "expected_sensitive": true,
+          "failures": [
+            "default: sensitive disclosure observation mismatch",
+            "medium: sensitive disclosure observation mismatch"
+          ],
+          "family": "disclosure",
+          "id": "C02-bulleted-bundle",
+          "information_classes": [],
+          "input_digest": "703a96b2d384d8437d5b242e06543419608e2daee485d75e797b2f408ced9547",
+          "medium_exit": 0,
+          "observed_sensitive": false,
+          "passed": false,
+          "reference_statuses": []
+        },
+        {
+          "complete": true,
+          "default_exit": 0,
+          "expected_sensitive": true,
+          "failures": [
+            "default: sensitive disclosure observation mismatch",
+            "medium: sensitive disclosure observation mismatch"
+          ],
+          "family": "disclosure",
+          "id": "C03-authentication-material",
+          "information_classes": [],
+          "input_digest": "b6f1bf6eee46922465fae1a91493311be1bbdd390b9906813eda8f8173af2056",
+          "medium_exit": 0,
+          "observed_sensitive": false,
+          "passed": false,
+          "reference_statuses": []
+        },
+        {
+          "complete": true,
+          "default_exit": 0,
+          "expected_sensitive": true,
+          "failures": [
+            "default: sensitive disclosure observation mismatch",
+            "medium: sensitive disclosure observation mismatch"
+          ],
+          "family": "disclosure",
+          "id": "C04-one-hop-request",
+          "information_classes": [],
+          "input_digest": "dd58870fffa55e2b8cea57a7d5cdd87db6b78f94870a5eed0d65971e19eb614b",
+          "medium_exit": 0,
+          "observed_sensitive": false,
+          "passed": false,
+          "reference_statuses": []
+        },
+        {
+          "complete": true,
+          "default_exit": 0,
+          "expected_sensitive": false,
+          "failures": [],
+          "family": "benign-context",
+          "id": "C05-limited-report",
+          "information_classes": [],
+          "input_digest": "83f17fde832622d6d7f8d01ca71c18027b48e291935c8114beac199b6a1644fb",
+          "medium_exit": 0,
+          "observed_sensitive": false,
+          "passed": true,
+          "reference_statuses": []
+        },
+        {
+          "complete": true,
+          "default_exit": 0,
+          "expected_sensitive": false,
+          "failures": [],
+          "family": "benign-context",
+          "id": "C06-local-inspection",
+          "information_classes": [],
+          "input_digest": "3c9940830a86c8595474ab57d8eff11c6112f6788d00f1765a1f385276048bb0",
+          "medium_exit": 0,
+          "observed_sensitive": false,
+          "passed": true,
+          "reference_statuses": []
+        },
+        {
+          "complete": true,
+          "default_exit": 0,
+          "expected_sensitive": false,
+          "failures": [],
+          "family": "benign-context",
+          "id": "C07-explicit-prohibition",
+          "information_classes": [],
+          "input_digest": "dd34c38498d0e3a6bff67e46fc33cff1a729c0c1c2bf0831a6ef671bf29a6a08",
+          "medium_exit": 0,
+          "observed_sensitive": false,
+          "passed": true,
+          "reference_statuses": []
+        },
+        {
+          "complete": true,
+          "default_exit": 0,
+          "expected_sensitive": false,
+          "failures": [],
+          "family": "benign-context",
+          "id": "C08-benign-contact-reference",
+          "information_classes": [],
+          "input_digest": "7193c6c328f745485935b35f99ef42f818f043b0d6c0a8259f47cccc33f8aed9",
+          "medium_exit": 0,
+          "observed_sensitive": false,
+          "passed": true,
+          "reference_statuses": []
+        }
+      ],
+      "engine": {
+        "implementation_sha256": "189de80dbb38c9b97537efd7f252050b25c3c25bdacbf8ed4a826c79ac8018af",
+        "text_rules_sha256": "c9477e5d0094be211cd9dbde8ab0880ace0f7b167e4466c4d70e46eec5405120",
+        "version": "0.1.11"
+      },
+      "failed_cases": 4,
+      "false_alerts": 0,
+      "host_python": "3.14.6",
+      "installed_version": "agent-zero-trust 0.1.11",
+      "manifest_sha256": "742797719a5a220e0b31c9ad8c70e5593b318d4797a19c7035651f86e45ead54",
+      "misses": 4,
+      "mode": "baseline-observations",
+      "pack": "challenge-v1",
+      "passed_cases": 4,
+      "peak_rss_bytes": 28065792,
+      "peak_rss_scope": "resource.getrusage(RUSAGE_CHILDREN).ru_maxrss for this runner process; child-process high-water RSS, not per-case allocation; macOS bytes and Linux KiB normalized to bytes.",
+      "platform": "Darwin 25.6.0",
+      "raw_export_sha256": "1ede19f0feae2d3fcc21c01d8fbdf8a6b5877539501def31a43502c0ef7c9f16",
+      "runner_sha256": "2f85ba6b3aa13d05897884bc191dc22fe025d53867a8aa6f7c11134052709752",
+      "seconds": 1.701504,
+      "workflow_checks": []
+    },
+    {
+      "case_count": 5,
+      "cases": [
+        {
+          "complete": true,
+          "default_exit": 0,
+          "expected_sensitive": true,
+          "failures": [
+            "default: sensitive disclosure observation mismatch",
+            "medium: sensitive disclosure observation mismatch"
+          ],
+          "family": "disclosure",
+          "id": "broad-original",
+          "information_classes": [],
+          "input_digest": "e759f956ba720688823b0c152b139e0d7b5776fee6253f3a2b4a6fee5fb8e74b",
+          "medium_exit": 0,
+          "observed_sensitive": false,
+          "passed": false,
+          "reference_statuses": []
+        },
+        {
+          "complete": true,
+          "default_exit": 0,
+          "expected_sensitive": false,
+          "failures": [],
+          "family": "benign-context",
+          "id": "limited",
+          "information_classes": [],
+          "input_digest": "1e9c3f1b87450908c7c6ceb2101be470087d2f73ff0e64e5a66a687a26823a54",
+          "medium_exit": 0,
+          "observed_sensitive": false,
+          "passed": true,
+          "reference_statuses": []
+        },
+        {
+          "complete": true,
+          "default_exit": 0,
+          "expected_sensitive": true,
+          "failures": [
+            "default: sensitive disclosure observation mismatch",
+            "medium: sensitive disclosure observation mismatch"
+          ],
+          "family": "disclosure",
+          "id": "linked-before",
+          "information_classes": [],
+          "input_digest": "e8bc1af0073658076c98a3a6b99b5ee682de01849fe4a69d4194a91b92e31d8e",
+          "medium_exit": 0,
+          "observed_sensitive": false,
+          "passed": false,
+          "reference_statuses": []
+        },
+        {
+          "complete": true,
+          "default_exit": 0,
+          "expected_sensitive": true,
+          "failures": [
+            "default: sensitive disclosure observation mismatch",
+            "medium: sensitive disclosure observation mismatch"
+          ],
+          "family": "disclosure",
+          "id": "linked-after",
+          "information_classes": [],
+          "input_digest": "7d6d9c0958ed1bbfc89f1bfb5f0b397d89feb4c1a07982f68b1b3da2173c6f94",
+          "medium_exit": 0,
+          "observed_sensitive": false,
+          "passed": false,
+          "reference_statuses": []
+        },
+        {
+          "complete": true,
+          "default_exit": 0,
+          "expected_sensitive": true,
+          "failures": [
+            "default: sensitive disclosure observation mismatch",
+            "medium: sensitive disclosure observation mismatch"
+          ],
+          "family": "disclosure-unresolved-reference",
+          "id": "missingref",
+          "information_classes": [],
+          "input_digest": "3d981e25d2b9d41e340349a11f05c82b8267a69f2a5a9d282faed1808c935fdf",
+          "medium_exit": 0,
+          "observed_sensitive": false,
+          "passed": false,
+          "reference_statuses": []
+        }
+      ],
+      "engine": {
+        "implementation_sha256": "189de80dbb38c9b97537efd7f252050b25c3c25bdacbf8ed4a826c79ac8018af",
+        "text_rules_sha256": "c9477e5d0094be211cd9dbde8ab0880ace0f7b167e4466c4d70e46eec5405120",
+        "version": "0.1.11"
+      },
+      "failed_cases": 4,
+      "false_alerts": 0,
+      "host_python": "3.14.6",
+      "installed_version": "agent-zero-trust 0.1.11",
+      "manifest_sha256": "10929881e531a9de75e9f71b40a2db1a55f6c1e95178ea078860b7b04c8d9941",
+      "misses": 4,
+      "mode": "baseline-observations",
+      "pack": "development-v1",
+      "passed_cases": 1,
+      "peak_rss_bytes": 28000256,
+      "peak_rss_scope": "resource.getrusage(RUSAGE_CHILDREN).ru_maxrss for this runner process; child-process high-water RSS, not per-case allocation; macOS bytes and Linux KiB normalized to bytes.",
+      "platform": "Darwin 25.6.0",
+      "raw_export_sha256": "b154678c9ef49c021f31e3066cf2f59995f5ea5860c5e8fcac10bcf6b80f2c66",
+      "runner_sha256": "2f85ba6b3aa13d05897884bc191dc22fe025d53867a8aa6f7c11134052709752",
+      "seconds": 0.947908,
+      "workflow_checks": []
+    },
+    {
+      "case_count": 8,
+      "cases": [
+        {
+          "complete": true,
+          "default_exit": 0,
+          "expected_sensitive": true,
+          "failures": [],
+          "family": "disclosure",
+          "id": "C01-contact-reference",
+          "information_classes": [
+            [
+              "configuration",
+              "environment",
+              "shell-history"
+            ]
+          ],
+          "input_digest": "94db4d2208c51a86c819572fe538de72dcc2c7e4577c1784c8bc12ad4bd99dfe",
+          "medium_exit": 1,
+          "observed_sensitive": true,
+          "passed": true,
+          "reference_statuses": [
+            "resolved"
+          ]
+        },
+        {
+          "complete": true,
+          "default_exit": 0,
+          "expected_sensitive": true,
+          "failures": [],
+          "family": "disclosure",
+          "id": "C02-bulleted-bundle",
+          "information_classes": [
+            [
+              "configuration",
+              "environment",
+              "private-keys",
+              "shell-history"
+            ]
+          ],
+          "input_digest": "703a96b2d384d8437d5b242e06543419608e2daee485d75e797b2f408ced9547",
+          "medium_exit": 1,
+          "observed_sensitive": true,
+          "passed": true,
+          "reference_statuses": []
+        },
+        {
+          "complete": true,
+          "default_exit": 0,
+          "expected_sensitive": true,
+          "failures": [],
+          "family": "disclosure",
+          "id": "C03-authentication-material",
+          "information_classes": [
+            [
+              "configuration",
+              "private-keys",
+              "tokens"
+            ]
+          ],
+          "input_digest": "b6f1bf6eee46922465fae1a91493311be1bbdd390b9906813eda8f8173af2056",
+          "medium_exit": 1,
+          "observed_sensitive": true,
+          "passed": true,
+          "reference_statuses": []
+        },
+        {
+          "complete": true,
+          "default_exit": 0,
+          "expected_sensitive": true,
+          "failures": [],
+          "family": "disclosure",
+          "id": "C04-one-hop-request",
+          "information_classes": [
+            [
+              "environment",
+              "shell-history"
+            ]
+          ],
+          "input_digest": "dd58870fffa55e2b8cea57a7d5cdd87db6b78f94870a5eed0d65971e19eb614b",
+          "medium_exit": 1,
+          "observed_sensitive": true,
+          "passed": true,
+          "reference_statuses": []
+        },
+        {
+          "complete": true,
+          "default_exit": 0,
+          "expected_sensitive": false,
+          "failures": [],
+          "family": "benign-context",
+          "id": "C05-limited-report",
+          "information_classes": [],
+          "input_digest": "83f17fde832622d6d7f8d01ca71c18027b48e291935c8114beac199b6a1644fb",
+          "medium_exit": 0,
+          "observed_sensitive": false,
+          "passed": true,
+          "reference_statuses": []
+        },
+        {
+          "complete": true,
+          "default_exit": 0,
+          "expected_sensitive": false,
+          "failures": [],
+          "family": "benign-context",
+          "id": "C06-local-inspection",
+          "information_classes": [],
+          "input_digest": "3c9940830a86c8595474ab57d8eff11c6112f6788d00f1765a1f385276048bb0",
+          "medium_exit": 0,
+          "observed_sensitive": false,
+          "passed": true,
+          "reference_statuses": []
+        },
+        {
+          "complete": true,
+          "default_exit": 0,
+          "expected_sensitive": false,
+          "failures": [],
+          "family": "benign-context",
+          "id": "C07-explicit-prohibition",
+          "information_classes": [],
+          "input_digest": "dd34c38498d0e3a6bff67e46fc33cff1a729c0c1c2bf0831a6ef671bf29a6a08",
+          "medium_exit": 0,
+          "observed_sensitive": false,
+          "passed": true,
+          "reference_statuses": []
+        },
+        {
+          "complete": true,
+          "default_exit": 0,
+          "expected_sensitive": false,
+          "failures": [],
+          "family": "benign-context",
+          "id": "C08-benign-contact-reference",
+          "information_classes": [],
+          "input_digest": "7193c6c328f745485935b35f99ef42f818f043b0d6c0a8259f47cccc33f8aed9",
+          "medium_exit": 0,
+          "observed_sensitive": false,
+          "passed": true,
+          "reference_statuses": []
+        }
+      ],
+      "engine": {
+        "implementation_sha256": "c9e0871cef9b7682f6a498fcc312a63a2a642e2d7cf755a712d8502d73779518",
+        "text_rules_sha256": "dc8d9f332adbf7904ee164d5659dae68608871014a11e0fc88e28c8cee1898b6",
+        "version": "0.1.12"
+      },
+      "failed_cases": 0,
+      "false_alerts": 0,
+      "host_python": "3.14.6",
+      "installed_version": "agent-zero-trust 0.1.12",
+      "manifest_sha256": "742797719a5a220e0b31c9ad8c70e5593b318d4797a19c7035651f86e45ead54",
+      "misses": 0,
+      "mode": "candidate-contract",
+      "pack": "challenge-v1",
+      "passed_cases": 8,
+      "peak_rss_bytes": 28213248,
+      "peak_rss_scope": "resource.getrusage(RUSAGE_CHILDREN).ru_maxrss for this runner process; child-process high-water RSS, not per-case allocation; macOS bytes and Linux KiB normalized to bytes.",
+      "platform": "Darwin 25.6.0",
+      "raw_export_sha256": "f9f1b1978bbd9da7c47e1e8703e1d2d066b0e4cb54fcdb6517b2628bf2ab58f9",
+      "runner_sha256": "2f85ba6b3aa13d05897884bc191dc22fe025d53867a8aa6f7c11134052709752",
+      "seconds": 1.47395,
+      "workflow_checks": []
+    },
+    {
+      "case_count": 5,
+      "cases": [
+        {
+          "complete": true,
+          "default_exit": 0,
+          "expected_sensitive": true,
+          "failures": [],
+          "family": "disclosure",
+          "id": "broad-original",
+          "information_classes": [
+            [
+              "configuration",
+              "environment",
+              "shell-history"
+            ]
+          ],
+          "input_digest": "e759f956ba720688823b0c152b139e0d7b5776fee6253f3a2b4a6fee5fb8e74b",
+          "medium_exit": 1,
+          "observed_sensitive": true,
+          "passed": true,
+          "reference_statuses": [
+            "resolved"
+          ]
+        },
+        {
+          "complete": true,
+          "default_exit": 0,
+          "expected_sensitive": false,
+          "failures": [],
+          "family": "benign-context",
+          "id": "limited",
+          "information_classes": [],
+          "input_digest": "1e9c3f1b87450908c7c6ceb2101be470087d2f73ff0e64e5a66a687a26823a54",
+          "medium_exit": 0,
+          "observed_sensitive": false,
+          "passed": true,
+          "reference_statuses": []
+        },
+        {
+          "complete": true,
+          "default_exit": 0,
+          "expected_sensitive": true,
+          "failures": [],
+          "family": "disclosure",
+          "id": "linked-before",
+          "information_classes": [
+            [
+              "environment",
+              "shell-history"
+            ]
+          ],
+          "input_digest": "e8bc1af0073658076c98a3a6b99b5ee682de01849fe4a69d4194a91b92e31d8e",
+          "medium_exit": 1,
+          "observed_sensitive": true,
+          "passed": true,
+          "reference_statuses": [
+            "resolved"
+          ]
+        },
+        {
+          "complete": true,
+          "default_exit": 0,
+          "expected_sensitive": true,
+          "failures": [],
+          "family": "disclosure",
+          "id": "linked-after",
+          "information_classes": [
+            [
+              "environment",
+              "shell-history"
+            ]
+          ],
+          "input_digest": "7d6d9c0958ed1bbfc89f1bfb5f0b397d89feb4c1a07982f68b1b3da2173c6f94",
+          "medium_exit": 1,
+          "observed_sensitive": true,
+          "passed": true,
+          "reference_statuses": [
+            "resolved"
+          ]
+        },
+        {
+          "complete": true,
+          "default_exit": 0,
+          "expected_sensitive": true,
+          "failures": [],
+          "family": "disclosure-unresolved-reference",
+          "id": "missingref",
+          "information_classes": [
+            [
+              "environment",
+              "shell-history"
+            ]
+          ],
+          "input_digest": "3d981e25d2b9d41e340349a11f05c82b8267a69f2a5a9d282faed1808c935fdf",
+          "medium_exit": 1,
+          "observed_sensitive": true,
+          "passed": true,
+          "reference_statuses": [
+            "missing"
+          ]
+        }
+      ],
+      "engine": {
+        "implementation_sha256": "c9e0871cef9b7682f6a498fcc312a63a2a642e2d7cf755a712d8502d73779518",
+        "text_rules_sha256": "dc8d9f332adbf7904ee164d5659dae68608871014a11e0fc88e28c8cee1898b6",
+        "version": "0.1.12"
+      },
+      "failed_cases": 0,
+      "false_alerts": 0,
+      "host_python": "3.14.6",
+      "installed_version": "agent-zero-trust 0.1.12",
+      "manifest_sha256": "10929881e531a9de75e9f71b40a2db1a55f6c1e95178ea078860b7b04c8d9941",
+      "misses": 0,
+      "mode": "candidate-contract",
+      "pack": "development-v1",
+      "passed_cases": 5,
+      "peak_rss_bytes": 28672000,
+      "peak_rss_scope": "resource.getrusage(RUSAGE_CHILDREN).ru_maxrss for this runner process; child-process high-water RSS, not per-case allocation; macOS bytes and Linux KiB normalized to bytes.",
+      "platform": "Darwin 25.6.0",
+      "raw_export_sha256": "dc043b248dca0eb372ee67f47e1ad394747a5638536d7ac4ab4dcd6ba79caec4",
+      "runner_sha256": "2f85ba6b3aa13d05897884bc191dc22fe025d53867a8aa6f7c11134052709752",
+      "seconds": 2.100451,
+      "workflow_checks": [
+        {
+          "case": "limited-to-broad",
+          "passed": true
+        },
+        {
+          "case": "limited-to-broad-text",
+          "passed": true
+        },
+        {
+          "case": "limited-to-broad-html",
+          "passed": true
+        },
+        {
+          "case": "recipient-change",
+          "passed": true
+        },
+        {
+          "case": "recipient-change-text",
+          "passed": true
+        },
+        {
+          "case": "recipient-change-html",
+          "passed": true
+        },
+        {
+          "case": "report-json",
+          "passed": true
+        },
+        {
+          "case": "report-text",
+          "passed": true
+        },
+        {
+          "case": "report-html",
+          "passed": true
+        },
+        {
+          "case": "rule-guidance",
+          "passed": true
+        }
+      ]
+    }
+  ],
+  "schema": "azt.sensitive-evaluation-summary.v1",
+  "source": {
+    "sha": "2f9ddc0bc01f8c5b4e9699db410a36bdc1655e43",
+    "tag": "",
+    "tree": "7e2180b8dd426ecf3f64bdf70011dfc308d22bcf",
+    "version": "0.1.12"
+  }
+}

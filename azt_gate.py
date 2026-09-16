@@ -15,7 +15,7 @@ MAX_TTL_SECONDS = 86400
 def engine_digest():
     directory = Path(__file__).parent
     return digest({name: hashlib.sha256((directory / name).read_bytes()).hexdigest()
-                   for name in ("azt.py", "azt_intake.py", "azt_gate.py")})
+                   for name in ("azt.py", "azt_intake.py", "azt_gate.py", "azt_sensitive.py", "azt_review.py")})
 
 
 def workspace_id(root):

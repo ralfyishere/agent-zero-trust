@@ -90,6 +90,11 @@ marker were incorrect; [SECURITY.md](../SECURITY.md) records the correction.
 
 ## Outside current claims
 
+Selected sensitive-request wording now receives bounded English analysis and
+one-hop explicit references within already inspected text. This does not recover
+arbitrary intent or establish that secrets exist. A mentioned destination is not
+a trusted identity. See [the exact subset](sensitive-requests.md).
+
 Natural-language manipulation, split instructions, unknown patterns, dynamically
 fetched content and unsupported-format semantics remain limitations. AZT does
 not solve prompt injection, alignment or general agent safety. It does not replace

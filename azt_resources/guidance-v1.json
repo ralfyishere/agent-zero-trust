@@ -1,6 +1,13 @@
 {
   "schema": "azt.guidance-catalog.v1",
   "rules": {
+    "request.sensitive_disclosure": {
+      "meaning": "A bounded contextual request to collect or share potentially sensitive information",
+      "why_review": "Broad environment, history, configuration, token or private-key material may exceed the information needed for a task.",
+      "context_example": "Support documentation may legitimately request a narrow, redacted diagnostic sample; wording alone does not establish intent.",
+      "limits": "Bounded English context and explicit local references only. No secret contents, destination trust, actual disclosure or runtime containment are established.",
+      "next_step": "Inspect every bound source locally, narrow the requested information and verify the intended recipient. A primary-file exception cannot authorize referenced context."
+    },
     "net.pipe_shell": {
       "meaning": "Pipe-to-shell: downloads and executes remote code in one step",
       "why_review": "Downloading directly into an interpreter removes a review step.",

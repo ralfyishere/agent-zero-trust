@@ -13,6 +13,10 @@ can contain private paths or labels.
 
 ## Scanner boundary
 
+Sensitive-request review identifies selected wording, not actual secret contents
+or prevented disclosure. References use only already inspected text. Primary-only
+exceptions cannot suppress reference-bearing requests. [Exact limits](docs/sensitive-requests.md).
+
 AZT inspects repository content without executing it or calling a model.
 Its security-sensitive components are the filesystem reader, configuration
 validation, exception policy and optional admission receipt lifecycle.

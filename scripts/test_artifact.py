@@ -85,7 +85,10 @@ def main():
                        "packs/AZT-FS-001/v1/candidate.compose.json", "packs/AZT-FS-001/v1/variant/candidate.compose.json",
                        "schemas/safety-evidence-v2.schema.json", "scripts/test_safety_integration.py",
                        "examples/change-review/fixtures.json", "azt_resources/guidance-v1.json",
-                       "azt_resources/changes-v1.schema.json"):
+                       "azt_resources/changes-v1.schema.json", "azt_sensitive.py",
+                       "azt_resources/scan-v2.schema.json", "azt_resources/review-v2.schema.json",
+                       "azt_resources/changes-v2.schema.json", "examples/sensitive-request/challenge-v1.json",
+                       "scripts/sensitive_request_lab.py"):
             assert (source / needed).is_file(), "sdist missing " + needed
         assert not (source / ".azt-local").exists(), "private continuity state must not ship"
         result = subprocess.run([sys.executable, "test_azt.py"], cwd=source,
@@ -144,10 +147,15 @@ def main():
             run([python, "-I", "-m", "unittest", "discover", "-s", root / "tests", "-p", test, "-q"])
         print("SAFETY ARTIFACT PASS: installed adapter/evaluator tests; repeatable CLI comparison; no Docker trials")
         run([python, "-I", "-m", "unittest", "discover", "-s", root / "tests", "-p", "test_review.py", "-q"])
-        for resource in ("review-v1", "changes-v1", "guidance-v1"):
+        for test in ('test_sensitive.py', 'test_sensitive_review.py'):
+            run([python, "-I", "-m", "unittest", "discover", "-s", root / "tests", "-p", test, "-q"])
+        for resource in ("review-v1", "changes-v1", "guidance-v1", "scan-v2", "review-v2", "changes-v2"):
             run([python, "-I", "-c", "from importlib.resources import files; import json; json.loads(files('azt_resources').joinpath('"+resource+".schema.json').read_text())"])
         run([python, "-I", root / "scripts/change_review_lab.py", "--cli", cli, "--output", work / "lab"])
         print("REVIEW ARTIFACT PASS: installed review regressions, catalog/schemas, four-case scan/compare/explain/HTML/JSON lab")
+        run([python, "-I", root / "scripts/sensitive_request_lab.py", "--cli", cli, "--output", work / "sensitive lab"])
+        run([python, root / "scripts/evaluate_sensitive.py", "--cli", cli, "--output", work / "sensitive challenge"])
+        print("SENSITIVE ARTIFACT PASS: installed analysis/dependency/exception regressions; 5 development + 8 reviewer-authored inputs; no runtime trials")
         print("ARTIFACT PASS: clean offline wheel install; installed import; help/version; "
               "deterministic JSON; benign=0; malicious=1 with net.pipe_shell; invalid target=2")
     return 0

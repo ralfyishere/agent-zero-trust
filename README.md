@@ -97,6 +97,11 @@ does not approve the change. [JSON/text exports and advanced syntax](docs/change
 
 ## Reproduce the demo
 
+**New in source, not yet published:** [sensitive-request review](examples/sensitive-request/README.md)
+helps you spot helpful-looking instructions asking for shell history, environment
+dumps or authentication material. Use the same scan → compare → explain → export
+workflow; AZT never collects the requested diagnostics or sends them.
+
 **This instruction asks your agent to download and run a remote script.**
 **Review the source before using it.** That is the reason for review—not a
 claim that the source is malicious.
