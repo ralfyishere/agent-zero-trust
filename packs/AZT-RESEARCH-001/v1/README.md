@@ -22,8 +22,13 @@ not an independent third-party audit.
 | T9 input handling | safe intake, capture/encoding/path/shadowing regressions | locally tested |
 | T10 usefulness/coverage | benign/concerning/partial local captures and lab | locally tested |
 
-The final evidence index will preserve actual failed/passed/not-run outcomes;
-this preparation table is not a result of execution.
+This table preserves the preparation state. The first Linux
+[run 35274221693](https://github.com/ralfyishere/agent-zero-trust/actions/runs/35274221693)
+passed the original nine runtime cases; [selected results](../../../evidence/protected-research/run-35274221693.json)
+identify its exact source, image and artifacts. A subsequent candidate adds a
+paused-controller lease check and exercises T1 through the public CLI; those
+additional assertions require their own verification. No earlier result is
+retroactively assigned to new code.
 
 ## Reproduce
 

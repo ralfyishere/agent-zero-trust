@@ -46,6 +46,10 @@ class ResearchTests(ResearchFixture):
         self.assertEqual([f['rule'] for f in scan['findings']], ['request.sensitive_disclosure'])
         for fmt in ('json', 'html', 'text'):
             self.assertIn('request.sensitive_disclosure', research.render(bad.report, fmt))
+        rendered=research.render(bad.report,'text')
+        self.assertIn('Why review:',rendered)
+        self.assertIn('Next step:',rendered)
+        self.assertNotIn('"manifest":',rendered)
 
     def test_frozen_bytes_and_no_target_execution_or_network(self):
         (self.input / 'json.py').write_text('raise AssertionError("target executed")')
@@ -184,6 +188,15 @@ class ResearchTests(ResearchFixture):
         (self.input / '%2e%2e').mkdir()
         (self.input / '%2e%2e' / 'guide.md').write_text(self.text)
         with self.assertRaises(ValueError): self.capture([dict(self.item, path='%2e%2e/guide.md')])
+
+    def test_incomplete_human_review_names_gap_not_a_clean_result(self):
+        (self.input/'large.md').write_bytes(b'x\n'*5000)
+        self.item.update(kind='repository',path='.',method='repository-snapshot')
+        report=self.capture().report
+        for fmt in ('text','html'):
+            value=research.render(report,fmt)
+            self.assertIn('INCOMPLETE',value)
+            self.assertIn('Inspection gap:',value)
 
 
 class BrokerTests(ResearchFixture):

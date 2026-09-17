@@ -1,0 +1,37 @@
+# Captured-source lab
+
+These are inert synthetic documents, not instructions to execute or diagnostics
+to gather. Registration `sources.json` is outside the `captures` input root.
+
+Follow the [installed-candidate commands](../../docs/protected-research.md#start-without-docker),
+or run `scripts/research_lab.py --cli /absolute/path/to/azt --output /new/private/lab`
+from the reviewed source checkout with its installed candidate. The lab asserts
+each observation before writing its transcript. Tooling/output stay outside the
+input tree; the Action/ordinary scanner do not require this optional workflow.
+
+Recorded installed candidate `9803f223212ad7eb8e512ec6ea4a09ce9a341ce2`, macOS,
+Python 3.11.15, 2026-09-17:
+
+```text
+AZT captured-source lab
+3 selected sources inspected.
+Limited request: no finding.
+Broad diagnostics: MEDIUM request.sensitive_disclosure; HIGH threshold not exceeded.
+Claimed peer role: retained only as an untrusted identity hash.
+HTML/text exported; pending case grants no authority.
+Duplicate output rejected (exit 2).
+No Docker, source execution, diagnostics collection, network or model calls.
+```
+
+Repeated saved JSON was byte-identical. The separate CLI review took about 0.07s
+wall time on this local run; system resource telemetry was unavailable under the
+local sandbox, so no peak-memory result is claimed. This is a small development
+example, not real-world detection accuracy or independent-user validation.
+
+For incomplete evidence, register a missing `.md` path or an unsupported `.pdf`
+file in a copy of the manifest outside the input root. Expect exit 2, an omitted
+source, and retained inspection of unaffected sources—not a clean result.
+
+The [runtime pack](../../packs/AZT-RESEARCH-001/v1/README.md) requires a separately
+prepared native-Linux Docker environment and records its own results. Never
+reinterpret this offline transcript as evidence that an action was blocked.

@@ -151,8 +151,27 @@ class Harness:
         save(self.root/'partial.json', self.results)
 
     def legitimate(self):
-        result = self.run()
+        # Exercise the user-facing installed command, durable output reservation
+        # and reports, not only the runtime library used by adversarial probes.
+        output=self.root/'public CLI run'
+        session=output/'runtime-control'/'session.json'
+        try:
+            call=subprocess.run([sys.executable,'-I','-m','azt','research','run',
+                '--manifest',str(self.root/'registration.json'),'--root','captures='+str(self.root/'captured sources'),
+                '--image',self.image,'--endpoint',self.endpoint,'--output',str(output)],
+                cwd=self.root,env=runtime.ENV,capture_output=True,timeout=40)
+        finally:
+            if session.exists(): self.owned.append(json.loads(session.read_text())['container_id'])
+        self.partial={'public_cli_exit':call.returncode,'final_record_present':(output/'report.json').is_file()}
+        evidence=json.loads((output/'report.json').read_text())
+        result=evidence['execution']; result['broker']=evidence['mission']
+        result['denied_calls']=sum(e['decision']=='broker-rejected' for e in evidence['events'])
+        result['externally_absent']=self.absent(result['container_id'])
+        result['public_cli_verified']=all((output/p).is_file() for p in ('inspection.json','events.jsonl','report.json','summary.txt','review.html'))
+        self.partial=result
+        demand(call.returncode==0 and len(call.stdout)+len(call.stderr)<4096, 'installed public CLI completion')
         self.completed(result)
+        demand(result['public_cli_verified'], 'durable public output complete')
         demand(result['denied_calls']==0, 'no unnecessary broker denials')
         return result
 
@@ -277,10 +296,18 @@ class Harness:
                         if len(pids)>=4: break
                 time.sleep(.05)
             demand(container and len(pids)>=4, 'externally observed worker and descendants before stop')
-            started=time.monotonic(); proc.send_signal(sig); proc.wait(timeout=3)
-            demand(proc.returncode==-int(sig), 'normal controller actually terminated by selected signal')
-            while time.monotonic()-started<8 and not self.absent(container): time.sleep(.05)
-            demand(self.absent(container), 'container removed within eight-second stop bound')
+            started=time.monotonic(); proc.send_signal(sig)
+            paused=sig==signal.SIGSTOP
+            if paused:
+                time.sleep(.05)
+                demand(proc.poll() is None and Path('/proc/%s/stat'%proc.pid).read_text().split()[2]=='T',
+                       'normal controller actually paused with lifeline open')
+            else:
+                proc.wait(timeout=3)
+                demand(proc.returncode==-int(sig), 'normal controller actually terminated by selected signal')
+            bound=28 if paused else 8
+            while time.monotonic()-started<bound and not self.absent(container): time.sleep(.05)
+            demand(self.absent(container), 'container removed within selected stop bound')
             running=[]
             for pid in pids:
                 try:
@@ -289,8 +316,8 @@ class Harness:
                     pass
             demand(not running, 'externally observed descendants stopped')
             lease=json.loads((directory/'runtime'/'lease-result.json').read_text())
-            demand(lease['cleanup']=='removed' and lease['reason']=='controller_channel_closed' and
-                   time.monotonic()-started<=8, 'independent supervisor observed death and removed within bound')
+            demand(lease['cleanup']=='removed' and lease['reason']==('lease_expired' if paused else 'controller_channel_closed') and
+                   time.monotonic()-started<=bound, 'independent supervisor used expected trigger and removal bound')
             return {'controller_signal':int(sig),'processes_observed':len(pids),'processes_still_running':len(running),
                 'container_absent':True,'seconds_to_stop':round(time.monotonic()-started,3),'lease':lease,
                 'complete_review':False,'observation':'host /proc and Docker, outside evaluated worker'}
@@ -351,6 +378,7 @@ def main():
             for name,fn in [('T1-legitimate',h.legitimate),('T2-forged-authority',h.authority),
                 ('T3-matched-boundaries',h.boundary),('T5-private-state-and-tamper',h.tamper),
                 ('T6-operator-stop',lambda:h.death(signal.SIGTERM)),('T6-controller-SIGKILL',lambda:h.death(signal.SIGKILL)),
+                ('T6-paused-controller-lease',lambda:h.death(signal.SIGSTOP)),
                 ('T7-resources',h.resource),('T7-output-flood',lambda:h.failure('flood')),('T8-audit-failure',lambda:h.failure('audit'))]:
                 h.case(name,fn)
         else:
@@ -358,8 +386,8 @@ def main():
     finally:
         result['cleanup']=h.cleanup()
         result['outcomes']={key:sum(c['outcome']==key for c in h.results) for key in ('passed','failed')}
-        result['outcomes']['not_run']=9-len(h.results)
-        result['status']='passed' if len(h.results)==9 and all(c['outcome']=='passed' for c in h.results) and result['cleanup'] else 'failed'
+        result['outcomes']['not_run']=10-len(h.results)
+        result['status']='passed' if len(h.results)==10 and all(c['outcome']=='passed' for c in h.results) and result['cleanup'] else 'failed'
         result['modules']={name:hashlib.sha256(Path(module.__file__).read_bytes()).hexdigest() for name,module in
             [('azt',azt),('capture',research),('broker',policy),('runtime',runtime)]}
         result['evaluator_sha256']=hashlib.sha256(Path(__file__).read_bytes()).hexdigest()

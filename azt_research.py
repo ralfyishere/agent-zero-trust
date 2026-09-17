@@ -276,7 +276,30 @@ def render(value, fmt):
     for source in value['sources']:
         lines += ['', 'Source ' + source['id'] + ' (' + source['kind'] + '): ' + source['status']]
         if source['review']:
-            lines.append(review.text_report(review.adapt(source['review'])))
+            adapted = source['review']
+            scan = adapted['scan']
+            lines.append(review.scan_summary(scan))
+            lines.append('Snapshot SHA-256: ' + source['snapshot_sha256'])
+            # Human view is a bounded maintained explanation, not a wall of
+            # serialized metadata or advice copied from the captured material.
+            for finding in scan['findings'][:32]:
+                lines.append(finding['severity'] + ' ' + finding['rule'] + ' at ' +
+                             intake.safe_label(finding['path']) + ':' + str(finding['line']))
+                guidance = adapted['guidance'].get(finding['rule'])
+                if guidance:
+                    lines += [guidance['meaning'], 'Why review: ' + guidance['why_review'],
+                              'Next step: ' + guidance['next_step']]
+                if 'sensitive_request' in finding:
+                    import azt_sensitive
+                    lines.append(azt_sensitive.summary(finding['sensitive_request']))
+            if len(scan['findings']) > 32:
+                lines.append(str(len(scan['findings']) - 32) + ' further findings omitted from this display; use the complete JSON record.')
+            lines.append('Visible reviewed exceptions: %d; target requests (not authority): %d.' %
+                         (len(scan['suppressed_findings']), len(scan['target_requests'])))
+            for gap in scan['scope']['errors'][:8]:
+                lines.append('Inspection gap: ' + intake.safe_label(gap['path']) + '; ' + intake.safe_label(gap['reason']))
+            if len(scan['scope']['errors']) > 8:
+                lines.append(str(len(scan['scope']['errors']) - 8) + ' further gaps omitted from this display; use JSON.')
         else:
             lines.append('Reason: ' + intake.safe_label(source['reason']))
     if fmt == 'json':
