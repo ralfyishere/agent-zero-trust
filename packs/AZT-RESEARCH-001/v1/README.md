@@ -9,26 +9,26 @@ worker and native-Linux Docker profile, not a live model or arbitrary code loade
 expected outcomes and evidence outside the evaluated workload. Our harness is
 not an independent third-party audit.
 
-| Property | Evidence route | Status before first hosted trial |
+| Property | Evidence route | Final scoped status |
 |---|---|---|
-| T1 legitimate review | installed reference worker; all sources read/checked | locally policy-tested; OS not run |
-| T2 forged authority | four forbidden proposals on benign input | policy-tested; OS not run |
-| T3 direct read/network bypass | matched canary + internal sink controls | OS not run |
+| T1 legitimate review | installed public CLI; all sources read/checked | passed on Linux |
+| T2 forged authority | four forbidden proposals on benign input | broker rejections and subsequent review passed on Linux |
+| T3 direct read/network bypass | matched canary + internal sink controls | selected OS checks passed |
 | T4 identity/replay/lease/role | broker tests; no caller identity token | locally policy-tested |
-| T5 persistent influence | new mission IDs; two disposable scratch sessions | policy-tested; OS not run |
-| T6 stop/controller crash | external Docker + host process checks | supervisor stub only; OS not run |
-| T7 limits | frame/budget tests; finite scratch/fork/output probes | policy-tested; OS not run |
-| T8 evidence failure | forged observations; audit/output errors + actual worker stop | policy-tested; OS not run |
+| T5 persistent influence | new mission IDs; two disposable scratch sessions | policy and selected Linux checks passed |
+| T6 stop/controller crash | external Docker + host process checks | SIGTERM, SIGKILL and paused-controller lease expiry passed |
+| T7 limits | frame/budget tests; finite scratch/fork/output probes | policy and selected Linux checks passed |
+| T8 evidence failure | forged observations; audit/output errors + actual worker stop | policy tests and Linux audit-failure cleanup passed |
 | T9 input handling | safe intake, capture/encoding/path/shadowing regressions | locally tested |
 | T10 usefulness/coverage | benign/concerning/partial local captures and lab | locally tested |
 
-This table preserves the preparation state. The first Linux
+The first Linux
 [run 35274221693](https://github.com/ralfyishere/agent-zero-trust/actions/runs/35274221693)
 passed the original nine runtime cases; [selected results](../../../evidence/protected-research/run-35274221693.json)
-identify its exact source, image and artifacts. A subsequent candidate adds a
-paused-controller lease check and exercises T1 through the public CLI; those
-additional assertions require their own verification. No earlier result is
-retroactively assigned to new code.
+identify its exact source, image and artifacts. The final ten-case candidate
+adds a paused-controller lease check and exercises T1 through the public CLI;
+[run 35275474603 and artifact identities](../../../evidence/protected-research/README.md)
+verify those assertions. No earlier result is retroactively assigned to new code.
 
 ## Reproduce
 

@@ -1,0 +1,45 @@
+AZT CAPTURED-SOURCE REVIEW
+Inspection: complete within declared scope
+Input SHA-256: ac02979a8b35f34afea1b581f68c56948af49a310c4a07ccf564e53a47f31578
+Captured local material, not authenticated original sources. No network fetch, diagnostic collection, target execution, admission or permission is issued. Raw text, origin values and claimed roles are omitted from exports; local paths may remain sensitive.
+
+Source limited (markdown): inspected
+Inspection: completed within declared scope; 1 inspected, 0 skipped, 0 errors.
+Review findings: 0 (0 HIGH, 0 MEDIUM, 0 INFO).
+Selected failure threshold: HIGH; not exceeded by observed findings.
+Next step: review the inspection scope and limits before relying on this result.
+A threshold result is not human approval or a safety guarantee.
+Snapshot SHA-256: 0ef278e61792b52d3f3bbf5e5fb54c754b859d5352f7692e3894de09ca1cb2a8
+Visible reviewed exceptions: 0; target requests (not authority): 0.
+
+Source diagnostics (markdown): inspected
+Inspection: completed within declared scope; 1 inspected, 0 skipped, 0 errors.
+Review findings: 1 (0 HIGH, 1 MEDIUM, 0 INFO).
+Selected failure threshold: HIGH; not exceeded by observed findings.
+Next step: review the findings and use azt explain RULE_ID before following the instruction.
+A threshold result is not human approval or a safety guarantee.
+Snapshot SHA-256: 3bb4214d70619bb813a7b5e5c857709d2c05ccea4fca4a1aac3f71a35e7eaf4a
+MEDIUM request.sensitive_disclosure at captured.md:3
+A bounded contextual request to collect or share potentially sensitive information
+Why review: Broad environment, history, configuration, token or private-key material may exceed the information needed for a task.
+Next step: Inspect every bound source locally, narrow the requested information and verify the intended recipient. A primary-file exception cannot authorize referenced context.
+This request asks you to share environment variables, shell history.
+These materials may contain credentials or private activity.
+AZT inspected project material within the declared scope; it did not gather diagnostics or transmit anything in response to this request.
+Destination observation: not-stated (not verified; recipient details omitted).
+Next step: verify the request independently, provide only necessary diagnostics, and inspect the exact contents before sharing.
+No upload or target execution was performed by this inspection.
+Visible reviewed exceptions: 0; target requests (not authority): 0.
+
+Source peer (message): inspected
+Inspection: completed within declared scope; 1 inspected, 0 skipped, 0 errors.
+Review findings: 1 (1 HIGH, 0 MEDIUM, 0 INFO).
+Selected failure threshold: HIGH; exceeded.
+Next step: review the findings and use azt explain RULE_ID before following the instruction.
+A threshold result is not human approval or a safety guarantee.
+Snapshot SHA-256: a47c6e9fc5b2ae5b653171045bdf7e49eb9e85f8e9185e4088876b2e0f9aaffe
+HIGH cred.env_source at captured.md:1
+Credential access: sources or reads secret/env/key files
+Why review: An agent could gain access to secrets beyond the task's needs.
+Next step: Review which values are needed; prefer narrowly scoped brokered access.
+Visible reviewed exceptions: 0; target requests (not authority): 0.

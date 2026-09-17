@@ -163,6 +163,11 @@ produce a completed protected review. Audit is written before broker data releas
 worker claims cannot append controller execution records. Observation is limited
 to broker events and selected probes, not every syscall or covert channel.
 
+The [final evidence index](../evidence/protected-research/README.md) records ten
+passed native-Linux cases at the exact candidate source, including public-CLI
+completion, controller death and paused-controller lease expiry. These results
+do not establish a live-model or general hostile-program profile.
+
 Raw controller records are not signed and are not independently authenticated.
 The worker cannot access their store in this profile; the trusted host operator
 can. Exported/redacted reports are derivatives, not original source bytes.
