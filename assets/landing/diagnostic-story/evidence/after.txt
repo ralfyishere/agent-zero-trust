@@ -1,0 +1,24 @@
+agent-zero-trust — repo intake scan of fixtures/broad-original
+
+Inspection: completed within declared scope; 2 inspected, 0 skipped, 0 errors.
+Review findings: 1 (0 HIGH, 1 MEDIUM, 0 INFO).
+Selected failure threshold: HIGH; not exceeded by observed findings.
+Next step: review the findings and use azt explain RULE_ID before following the instruction.
+A threshold result is not human approval or a safety guarantee.
+
+RECOGNIZED SPECIAL SURFACES: 0 file(s) match inventory patterns
+Other inspected content, including README files, can also influence an agent.
+
+FINDINGS: 0 HIGH, 1 MEDIUM, 0 INFO
+  [MEDIUM] request.sensitive_disclosure  README.md:3
+           Review before sharing potentially sensitive diagnostic or authentication information
+This request asks you to share configuration, environment variables, shell history.
+These materials may contain credentials or private activity.
+AZT inspected project material within the declared scope; it did not gather diagnostics or transmit anything in response to this request.
+Destination observation: explicit (not verified; recipient details omitted).
+Next step: verify the request independently, provide only necessary diagnostics, and inspect the exact contents before sharing.
+No upload or target execution was performed by this inspection.
+           > [content omitted; inspect the indicated file locally]
+
+REVIEW GUIDANCE: REVIEW FIRST — read each MEDIUM finding before letting an agent operate here.
+EXCEPTIONS: 0 target requests (not applied); 0 trusted suppressed findings

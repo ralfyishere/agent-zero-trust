@@ -1,0 +1,256 @@
+{
+  "captured_at": "2026-09-17T13:55:21.236290+00:00",
+  "cases": {
+    "broad-original": {
+      "engine": {
+        "implementation_sha256": "fe63539ac4d3955e397471ebff0c987dafc3b50e883bba215339e9d1323f4b73",
+        "text_rules_sha256": "9ba6b8654c7f6fcb68f397d616d6a50284870b8fd335738404481a434beb9a25",
+        "version": "0.1.14"
+      },
+      "findings": [
+        {
+          "description": "Review before sharing potentially sensitive diagnostic or authentication information",
+          "excerpt": "[content omitted; inspect the indicated file locally]",
+          "line": 3,
+          "path": "README.md",
+          "rule": "request.sensitive_disclosure",
+          "sensitive_request": {
+            "action": "collect-and-share",
+            "breadth": "broad",
+            "destination": {
+              "count": 1,
+              "kind": "email",
+              "status": "explicit"
+            },
+            "information_classes": [
+              "configuration",
+              "environment",
+              "shell-history"
+            ],
+            "limitations": [
+              "bounded-english-context",
+              "wording-not-intent",
+              "no-secret-content-inspected",
+              "destination-not-verified"
+            ],
+            "references": [
+              {
+                "path": "docs/maintainer-contact.txt",
+                "sha256": "74e2a1912acaa5ef0871b36e60f7145dffd68afa500ef74a206b0336d9a364b9",
+                "status": "resolved"
+              }
+            ],
+            "schema": "azt.sensitive-request.v1",
+            "support": [
+              {
+                "end_line": 7,
+                "path": "README.md",
+                "role": "request",
+                "sha256": "dc5789767ce14a3220306ee299e709cfdc17cc6f92a21f962ac420d7e01dd50a",
+                "start_line": 3
+              },
+              {
+                "end_line": 1,
+                "path": "docs/maintainer-contact.txt",
+                "role": "sharing-context",
+                "sha256": "74e2a1912acaa5ef0871b36e60f7145dffd68afa500ef74a206b0336d9a364b9",
+                "start_line": 1
+              }
+            ]
+          },
+          "severity": "MEDIUM"
+        }
+      ],
+      "input_digest": "e759f956ba720688823b0c152b139e0d7b5776fee6253f3a2b4a6fee5fb8e74b",
+      "inspected_paths": [
+        "README.md",
+        "docs/maintainer-contact.txt"
+      ],
+      "medium_exit": 1,
+      "scan_exit": 0,
+      "scope_complete": true,
+      "threshold": "high"
+    },
+    "limited": {
+      "engine": {
+        "implementation_sha256": "fe63539ac4d3955e397471ebff0c987dafc3b50e883bba215339e9d1323f4b73",
+        "text_rules_sha256": "9ba6b8654c7f6fcb68f397d616d6a50284870b8fd335738404481a434beb9a25",
+        "version": "0.1.14"
+      },
+      "findings": [],
+      "input_digest": "1e9c3f1b87450908c7c6ceb2101be470087d2f73ff0e64e5a66a687a26823a54",
+      "inspected_paths": [
+        "README.md"
+      ],
+      "medium_exit": 0,
+      "scan_exit": 0,
+      "scope_complete": true,
+      "threshold": "high"
+    }
+  },
+  "commands": [
+    {
+      "command": "azt --version",
+      "exit": 0,
+      "stderr_bytes": 0,
+      "stdout_file": null,
+      "stdout_sha256": "9350a7eb751b22385f70d004c7aebc1dc81da28da044f0da8d723869acf88160"
+    },
+    {
+      "command": "azt scan fixtures/limited --json",
+      "exit": 0,
+      "stderr_bytes": 0,
+      "stdout_file": "before.json",
+      "stdout_sha256": "4951b2c2e4e38533642013520ab2079c8f95a1b10fe5349d1b77e1ff680453b5"
+    },
+    {
+      "command": "azt scan fixtures/limited",
+      "exit": 0,
+      "stderr_bytes": 0,
+      "stdout_file": "before.txt",
+      "stdout_sha256": "7ef229b4d09995a01b6a32ac66fb5cef26211cca279ecdf8e0598ad65b9cb443"
+    },
+    {
+      "command": "azt scan fixtures/limited --fail-on medium --json",
+      "exit": 0,
+      "stderr_bytes": 0,
+      "stdout_file": "limited-medium-scan.json",
+      "stdout_sha256": "4bb312224309f5dca2247b4b6f68a729c62bff9c4b66367e334cbe2e189a6785"
+    },
+    {
+      "command": "azt scan fixtures/broad-original --json",
+      "exit": 0,
+      "stderr_bytes": 0,
+      "stdout_file": "after.json",
+      "stdout_sha256": "0d7903db19f6072daed5f10e00ebf1f530480fe2e1f9d24e3d36379dffe74874"
+    },
+    {
+      "command": "azt scan fixtures/broad-original",
+      "exit": 0,
+      "stderr_bytes": 0,
+      "stdout_file": "after.txt",
+      "stdout_sha256": "e0be00f64b4925677444896362b48073db8bb149edd2a14f836d652ba024c075"
+    },
+    {
+      "command": "azt scan fixtures/broad-original --fail-on medium --json",
+      "exit": 1,
+      "stderr_bytes": 0,
+      "stdout_file": "broad-original-medium-scan.json",
+      "stdout_sha256": "102237ca1b276b4767107cc55480ecd07667cd8458756fe87d3cba166fe802a2"
+    },
+    {
+      "command": "azt changes --before before.json --after after.json --json",
+      "exit": 0,
+      "stderr_bytes": 0,
+      "stdout_file": "changes.json",
+      "stdout_sha256": "ae1a4f3cc71d54d8643c11b4123712bc30cf42effe139c945fdf0e0ee31b4f7d"
+    },
+    {
+      "command": "azt changes --before before.json --after after.json",
+      "exit": 0,
+      "stderr_bytes": 0,
+      "stdout_file": "changes.txt",
+      "stdout_sha256": "93b741e262b75174144ff9992d43506171ef7d34d4d60bc91479b48d90367ffa"
+    },
+    {
+      "command": "azt explain request.sensitive_disclosure",
+      "exit": 0,
+      "stderr_bytes": 0,
+      "stdout_file": "explanation.txt",
+      "stdout_sha256": "2112fce6827e841161737ee48f820d372f177b2d70de840ae24771535fed1a8c"
+    },
+    {
+      "command": "azt report --input after.json --format text",
+      "exit": 0,
+      "stderr_bytes": 0,
+      "stdout_file": "report.txt",
+      "stdout_sha256": "42d44314cc45f2749cc94c13e8e2087ad7fc24d2f81503fc1868b15adb2d849a"
+    },
+    {
+      "command": "azt report --input after.json --format html",
+      "exit": 0,
+      "stderr_bytes": 0,
+      "stdout_file": "report.html",
+      "stdout_sha256": "794a782eea71c920d5d72b71f72d6e5c828e9175b99abd1139d5152a6a9b7a60"
+    },
+    {
+      "command": "azt report --input after.json --format json",
+      "exit": 0,
+      "stderr_bytes": 0,
+      "stdout_file": "report.json",
+      "stdout_sha256": "3c95d471bed4535f16c02a881bc76dde3b341587e0af611a4f26b48d3fd6f932"
+    },
+    {
+      "command": "azt report --input after.json --format html --output 'local review.html'",
+      "exit": 0,
+      "stderr_bytes": 0,
+      "stdout_file": null,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "comparison": {
+    "comparability": "comparable",
+    "meaningful_delta": true
+  },
+  "environment": {
+    "architecture": "arm64",
+    "release": "25.6.0",
+    "system": "Darwin"
+  },
+  "helper_sha256": "08ca942baeda66c3aabae65e162362c774de6d5e9e25535588c29fa07bbb31d0",
+  "installed_identity": {
+    "modules": {
+      "azt": {
+        "environment_relative_path": "lib/python3.11/site-packages/azt.py",
+        "sha256": "37417fbadd9c9d22f82b21bd39343974c5f7152be80d75535f6fd0a652934e1e"
+      },
+      "azt_intake": {
+        "environment_relative_path": "lib/python3.11/site-packages/azt_intake.py",
+        "sha256": "5b24928c4b0cf442b7e8a9f85d2f9391a135551758e0e3907105afecdcd598fa"
+      },
+      "azt_review": {
+        "environment_relative_path": "lib/python3.11/site-packages/azt_review.py",
+        "sha256": "476317d8144ce29651ec15ef9c19b83a453fddcc376e06198f9c2ef2623dcfe0"
+      },
+      "azt_sensitive": {
+        "environment_relative_path": "lib/python3.11/site-packages/azt_sensitive.py",
+        "sha256": "0a27f0e95ac6086d49ea0abdf29368c3f2237f7f17a6c863dc90dd1a8aa9865e"
+      }
+    },
+    "python": "3.11.15"
+  },
+  "notes": "Command labels use portable paths; saved stdout bytes are unchanged. Fixture source text is synthetic. Reports omit request text and recipient values by default. The app-startup scenario is editorial framing, not a fixture quote or an observed application failure.",
+  "outputs": {
+    "after.json": "0d7903db19f6072daed5f10e00ebf1f530480fe2e1f9d24e3d36379dffe74874",
+    "after.txt": "e0be00f64b4925677444896362b48073db8bb149edd2a14f836d652ba024c075",
+    "before.json": "4951b2c2e4e38533642013520ab2079c8f95a1b10fe5349d1b77e1ff680453b5",
+    "before.txt": "7ef229b4d09995a01b6a32ac66fb5cef26211cca279ecdf8e0598ad65b9cb443",
+    "broad-original-medium-scan.json": "102237ca1b276b4767107cc55480ecd07667cd8458756fe87d3cba166fe802a2",
+    "changes.json": "ae1a4f3cc71d54d8643c11b4123712bc30cf42effe139c945fdf0e0ee31b4f7d",
+    "changes.txt": "93b741e262b75174144ff9992d43506171ef7d34d4d60bc91479b48d90367ffa",
+    "explanation.txt": "2112fce6827e841161737ee48f820d372f177b2d70de840ae24771535fed1a8c",
+    "fixtures.json": "80acb951bcf490477ed503a77d119a351ee5987c3c6ce206768484a075f7d8cb",
+    "limited-medium-scan.json": "4bb312224309f5dca2247b4b6f68a729c62bff9c4b66367e334cbe2e189a6785",
+    "report.html": "794a782eea71c920d5d72b71f72d6e5c828e9175b99abd1139d5152a6a9b7a60",
+    "report.json": "3c95d471bed4535f16c02a881bc76dde3b341587e0af611a4f26b48d3fd6f932",
+    "report.txt": "42d44314cc45f2749cc94c13e8e2087ad7fc24d2f81503fc1868b15adb2d849a",
+    "transcript.txt": "2bed003cbf661b0b688c39827b41e6ad19ea56671e09bbdf171b2dd5d9ae76a8"
+  },
+  "pack": {
+    "cases": [
+      "limited",
+      "broad-original"
+    ],
+    "path": "examples/sensitive-request/development-v1.json",
+    "sha256": "10929881e531a9de75e9f71b40a2db1a55f6c1e95178ea078860b7b04c8d9941"
+  },
+  "release_run": "https://github.com/ralfyishere/agent-zero-trust/actions/runs/35176398216",
+  "schema": "azt.editorial-capture.v1",
+  "scope": "Two frozen synthetic development cases; not held-out evaluation, an executed target, live agent, or runtime protection test.",
+  "source": "fce49dd727f1be4ba4407394a6b4f544e763ef20",
+  "version": "0.1.14",
+  "wheel": {
+    "filename": "agent_zero_trust-0.1.14-py3-none-any.whl",
+    "sha256": "be250d871a1b3783423ac92e96238e5154beec4b358015c07371ddecdf98db68"
+  }
+}
