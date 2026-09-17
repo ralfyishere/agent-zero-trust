@@ -167,7 +167,7 @@ def load_policy(path, root, rules):
     return policy, {"source": str(path), "digest": hashlib.sha256(raw).hexdigest()}
 
 
-def inspect(root, engine, policy_path=None):
+def inspect(root, engine, policy_path=None, capture=None):
     root = Path(os.path.abspath(root))
     rules = {r[0] for r in engine.TEXT_RULES} | {
         "mcp.server", "hooks.claude", "perm.auto_approve", "pkg.lifecycle",
@@ -280,6 +280,11 @@ def inspect(root, engine, policy_path=None):
                             issue(rel, "malformed supported configuration or structural analysis failure")
                 findings.extend(engine.scan_text_file(rel, text))
                 if not any(e['path'] == rel for e in scope['errors']):
+                    if capture is not None:
+                        # Optional controller-owned sink receives the exact bytes
+                        # just inspected, never a later filesystem reread. Sink
+                        # limits become explicit inspection errors below.
+                        capture(rel, raw, sha)
                     snapshots[rel] = {'text': text, 'sha256': sha}
                     analyses.append(azt_sensitive.SETTINGS['method'])
                 scope["inspected"].append({"path": rel, "analyses": analyses})

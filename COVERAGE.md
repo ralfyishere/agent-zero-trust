@@ -1,5 +1,13 @@
 # Coverage and known limitations
 
+## Captured-source research (0.1.15 source candidate)
+
+[Protected Research v1](docs/protected-research.md) reuses existing detectors;
+it does not add general source authentication or language understanding. Local
+capture/broker tests and the separately gated [AZT-RESEARCH-001](packs/AZT-RESEARCH-001/v1/README.md)
+backend suite have distinct evidence levels. No live model or protected live-web
+mode is included. Historical FS-001 records retain their original scope.
+
 ## GitHub review integration (since 0.1.13)
 
 The [optional Action](docs/github-action.md) summarizes validated scan records

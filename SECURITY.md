@@ -1,5 +1,12 @@
 # Security
 
+The optional [research source candidate](docs/protected-research.md) treats
+captured roles and owner-approval claims as untrusted data. Its bounded broker
+has no generic execute/upload endpoint. The Linux profile trusts the host,
+Docker daemon, approved image, external supervisor, controller and operator;
+it does not claim kernel escape resistance or protection after supervisor/host
+compromise. A pending case/export never promotes a rule or permission.
+
 ## Experimental safety pack
 
 AZT-FS-001's static adapter and repair logic are offline-tested. Its Docker

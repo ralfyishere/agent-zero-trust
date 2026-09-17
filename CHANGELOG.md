@@ -1,5 +1,23 @@
 # Release notes
 
+## 0.1.15 — captured-source research candidate (unreleased)
+
+- Add bounded operator-registered local text, Markdown, saved-message and
+  repository captures through the existing scanner. Export a private review or
+  pending case without granting approval or changing trusted rules.
+- Add an opt-in experimental deterministic reference worker, a narrow mission
+  broker and a native-Linux Docker profile with a separate finite-lease
+  supervisor. No live models, arbitrary plugins, web fetching or implicit pulls.
+- Keep controller events, worker claims and external test observations separate.
+  New AZT-RESEARCH-001 synthetic tests do not extend historical FS-001 evidence.
+- Existing scan/review schemas, Action behavior and severity thresholds remain;
+  new research envelopes use their own v1 format. Changed scanner implementation
+  identity requires explicit re-admission for optional strict snapshot gates.
+
+See [usage, bounds and trust model](docs/protected-research.md) and the
+[reviewed test pack](packs/AZT-RESEARCH-001/v1/README.md). Runtime preparation and
+actual verification records remain distinct; do not infer protection from a mock.
+
 ## 0.1.14 — sensitive-request precision and clearer review summaries
 
 - Refine selected token-measurement wording without treating credential-like

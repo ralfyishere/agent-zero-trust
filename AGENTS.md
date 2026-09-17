@@ -1,5 +1,11 @@
 # Development
 
+Captured-source research: `python3 -m unittest discover -s tests -p 'test_research*.py' -v`.
+Read `docs/protected-research.md` before editing this optional profile. The
+offline installed lab is `scripts/research_lab.py`; actual Docker verification
+is separately gated in `research.yml`. Do not count policy mocks as containment.
+Never let captured messages select workers, expected results, policy or outputs.
+
 AZT is an offline deterministic intake scanner with an experimental bundled
 configuration safety pack. One synthetic filesystem case has real Docker/Linux
 evidence; every claim must name its tested input/source/run. Diagnostic mocks are not containment evidence. Preserve

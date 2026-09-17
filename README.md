@@ -261,6 +261,10 @@ continuous authorization or general containment is provided.
 
 ### Optional: snapshot gate and experimental access check
 
+In the unreleased source candidate: [review registered local captures and try the
+optional protected reference-worker lab](docs/protected-research.md). Ordinary
+scanning needs neither Docker nor that experimental profile.
+
 The [snapshot gate](docs/migration.md) is an opt-in workflow aid; edits require
 operator re-admission. A same-user hook or signing key is not a sandbox.
 

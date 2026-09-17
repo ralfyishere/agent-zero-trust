@@ -1,0 +1,67 @@
+name: AZT-RESEARCH-001 reviewed integration
+
+# Push works for a new workflow on the selected branch. A marker expresses the
+# operator's selected test event, not cryptographic authorization or policy.
+on:
+  push:
+    branches: [feat/protected-research]
+permissions:
+  contents: read
+concurrency:
+  group: azt-research-reviewed-integration
+  cancel-in-progress: false
+jobs:
+  research:
+    if: >-
+      github.repository == 'ralfyishere/agent-zero-trust' &&
+      github.event.repository.private == false &&
+      github.event.deleted == false &&
+      github.run_attempt == 1 &&
+      contains(github.event.head_commit.message, '[azt-research-once]')
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+          fetch-depth: 1
+      - name: Explicit setup download — existing pinned build tools
+        timeout-minutes: 2
+        run: |
+          python3 -m venv "$RUNNER_TEMP/research-build"
+          "$RUNNER_TEMP/research-build/bin/python" -m pip --isolated --disable-pip-version-check --no-cache-dir --timeout 20 --retries 1 install --only-binary=:all: --no-deps setuptools==83.0.0 wheel==0.47.0 packaging==26.0
+      - name: Build and test the exact candidate
+        timeout-minutes: 3
+        run: |
+          export AZT_RESEARCH_DIST="$RUNNER_TEMP/research-dist"
+          "$RUNNER_TEMP/research-build/bin/python" -c 'import os,setuptools.build_meta as b; b.build_wheel(os.environ["AZT_RESEARCH_DIST"]); b.build_sdist(os.environ["AZT_RESEARCH_DIST"])'
+          python3 test_azt.py
+          python3 -m unittest discover -s tests -q
+          python3 scripts/test_artifact.py "$AZT_RESEARCH_DIST"
+          python3 -m venv "$RUNNER_TEMP/research-installed"
+          "$RUNNER_TEMP/research-installed/bin/python" -m pip --isolated install --no-index --no-deps "$AZT_RESEARCH_DIST"/*.whl
+      - name: Resolve then explicitly pull one official Python image by digest
+        timeout-minutes: 3
+        run: |
+          mkdir -m 700 "$RUNNER_TEMP/research-registry"
+          docker --config "$RUNNER_TEMP/research-registry" --host unix:///var/run/docker.sock manifest inspect docker.io/library/python:3.12-slim > "$RUNNER_TEMP/research-image-index.json"
+          digest=$(python3 -c 'import json,os,re; d=json.load(open(os.environ["RUNNER_TEMP"]+"/research-image-index.json")); x=[m["digest"] for m in d["manifests"] if m["platform"].get("os")=="linux" and m["platform"].get("architecture")=="amd64"]; assert len(x)==1 and re.fullmatch("sha256:[0-9a-f]{64}",x[0]); print(x[0])')
+          printf 'Resolved approved image: docker.io/library/python@%s\n' "$digest"
+          timeout 120s docker --config "$RUNNER_TEMP/research-registry" --host unix:///var/run/docker.sock pull --platform linux/amd64 "docker.io/library/python@$digest"
+          image_id=$(docker --config "$RUNNER_TEMP/research-registry" --host unix:///var/run/docker.sock image inspect "docker.io/library/python@$digest" --format '{{.Id}}')
+          printf 'AZT_RESEARCH_IMAGE=%s\n' "$image_id" >> "$GITHUB_ENV"
+      - name: Execute installed synthetic research suite
+        timeout-minutes: 5
+        run: |
+          cd "$RUNNER_TEMP"
+          "$RUNNER_TEMP/research-installed/bin/python" -I "$GITHUB_WORKSPACE/scripts/test_research_integration.py" --image "$AZT_RESEARCH_IMAGE" --output "$RUNNER_TEMP/research-evidence"
+      - name: Export bounded sanitized evidence to log, even on failure
+        if: always()
+        timeout-minutes: 1
+        run: |
+          python3 -I scripts/research_ci_evidence.py --evidence "$RUNNER_TEMP/research-evidence/evaluation.json" --dist "$RUNNER_TEMP/research-dist"
+      # No package publication, artifacts, caches, secrets, OIDC or write token.
+      # All workers have independent leases; test network/sink have finite life.
+      # Standard public runner/logs incur no additional Actions minutes/storage:
+      # https://docs.github.com/en/billing/concepts/product-billing/github-actions
