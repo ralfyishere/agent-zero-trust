@@ -1,0 +1,114 @@
+AZT CHANGE REVIEW
+Meaningful delta: true
+Comparability: comparable
+Special surfaces added: 0
+Special surfaces removed: 0
+Special surfaces modified: 0
+Special surfaces unavailable: 0
+Findings new: 1
+Findings persisting: 0
+Findings no_longer_observed: 0
+Findings unresolved: 0
+Before input: 1e9c3f1b87450908c7c6ceb2101be470087d2f73ff0e64e5a66a687a26823a54
+Before inspection: 1 files; complete=true
+After input: e759f956ba720688823b0c152b139e0d7b5776fee6253f3a2b4a6fee5fb8e74b
+After inspection: 2 files; complete=true
+After Sensitive request at "README.md":3
+This request asks you to share configuration, environment variables, shell history.
+These materials may contain credentials or private activity.
+AZT inspected project material within the declared scope; it did not gather diagnostics or transmit anything in response to this request.
+Destination observation: explicit (not verified; recipient details omitted).
+Next step: verify the request independently, provide only necessary diagnostics, and inspect the exact contents before sharing.
+No upload or target execution was performed by this inspection.
+content / added: [
+  "docs",
+  "docs/maintainer-contact.txt"
+]
+content / modified: [
+  "README.md"
+]
+findings / new: [
+  {
+    "description": "This request asks you to share configuration, environment variables, shell history.\nThese materials may contain credentials or private activity.\nAZT inspected project material within the declared scope; it did not gather diagnostics or transmit anything in response to this request.\nDestination observation: explicit (not verified; recipient details omitted).\nNext step: verify the request independently, provide only necessary diagnostics, and inspect the exact contents before sharing.\nNo upload or target execution was performed by this inspection.",
+    "excerpt": "[omitted in review export]",
+    "line": 3,
+    "path": "README.md",
+    "rule": "request.sensitive_disclosure",
+    "sensitive_request": {
+      "action": "collect-and-share",
+      "breadth": "broad",
+      "destination": {
+        "count": 1,
+        "kind": "email",
+        "status": "explicit"
+      },
+      "information_classes": [
+        "configuration",
+        "environment",
+        "shell-history"
+      ],
+      "limitations": [
+        "bounded-english-context",
+        "wording-not-intent",
+        "no-secret-content-inspected",
+        "destination-not-verified"
+      ],
+      "references": [
+        {
+          "path": "docs/maintainer-contact.txt",
+          "sha256": "74e2a1912acaa5ef0871b36e60f7145dffd68afa500ef74a206b0336d9a364b9",
+          "status": "resolved"
+        }
+      ],
+      "schema": "azt.sensitive-request.v1",
+      "support": [
+        {
+          "end_line": 7,
+          "path": "README.md",
+          "role": "request",
+          "sha256": "dc5789767ce14a3220306ee299e709cfdc17cc6f92a21f962ac420d7e01dd50a",
+          "start_line": 3
+        },
+        {
+          "end_line": 1,
+          "path": "docs/maintainer-contact.txt",
+          "role": "sharing-context",
+          "sha256": "74e2a1912acaa5ef0871b36e60f7145dffd68afa500ef74a206b0336d9a364b9",
+          "start_line": 1
+        }
+      ]
+    },
+    "severity": "MEDIUM"
+  }
+]
+Provenance/scope differences: {
+  "scope.inspected": {
+    "after": [
+      {
+        "analyses": [
+          "text-patterns",
+          "sensitive-request-v1.2"
+        ],
+        "path": "README.md"
+      },
+      {
+        "analyses": [
+          "text-patterns",
+          "sensitive-request-v1.2"
+        ],
+        "path": "docs/maintainer-contact.txt"
+      }
+    ],
+    "before": [
+      {
+        "analyses": [
+          "text-patterns",
+          "sensitive-request-v1.2"
+        ],
+        "path": "README.md"
+      }
+    ]
+  }
+}
+Next step: review changed content and scope; use azt explain RULE_ID.
+Informational review only. Reports are untrusted assertions; hashes and schema validation do not authenticate them. No longer observed does not mean proven fixed. No receipt, authorization, upload or target execution occurs.

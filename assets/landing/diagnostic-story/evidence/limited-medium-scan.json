@@ -1,0 +1,90 @@
+{
+  "decision": "pass",
+  "engine": {
+    "implementation_sha256": "fe63539ac4d3955e397471ebff0c987dafc3b50e883bba215339e9d1323f4b73",
+    "text_rules_sha256": "9ba6b8654c7f6fcb68f397d616d6a50284870b8fd335738404481a434beb9a25",
+    "version": "0.1.14"
+  },
+  "findings": [],
+  "input_digest": "1e9c3f1b87450908c7c6ceb2101be470087d2f73ff0e64e5a66a687a26823a54",
+  "inventory": [],
+  "manifest": [
+    {
+      "executable": false,
+      "kind": "file",
+      "path": "README.md",
+      "sha256": "c4e231ee5d2763abfc643521cbabbe10b691992a925469502b70b8ca745f88b6"
+    }
+  ],
+  "policy": {
+    "digest": "5daa23de347bbd6b6c82a8382b5604820b4e0eed4b7e3ee73d11ccd2a5967318",
+    "source": "built-in"
+  },
+  "schema_version": 2,
+  "scope": {
+    "builtin_excluded_directories": [
+      ".git",
+      ".mypy_cache",
+      ".next",
+      ".tox",
+      ".venv",
+      "__pycache__",
+      "build",
+      "dist",
+      "node_modules",
+      "target",
+      "venv"
+    ],
+    "bytes_read": 166,
+    "complete": true,
+    "errors": [],
+    "inspected": [
+      {
+        "analyses": [
+          "text-patterns",
+          "sensitive-request-v1.2"
+        ],
+        "path": "README.md"
+      }
+    ],
+    "limits": {
+      "depth": 64,
+      "entries": 10000,
+      "file_bytes": 1000000,
+      "findings": 10000,
+      "line_characters": 4096,
+      "sensitive_block_characters": 4096,
+      "sensitive_block_lines": 16,
+      "sensitive_correlations": 2000,
+      "sensitive_reference_characters": 256,
+      "sensitive_references_per_request": 2,
+      "sensitive_requests": 1000,
+      "sensitive_retained_characters": 32000000,
+      "total_bytes": 32000000
+    },
+    "skipped": [],
+    "text_extensions": [
+      "",
+      ".bash",
+      ".cfg",
+      ".envrc",
+      ".ini",
+      ".js",
+      ".json",
+      ".md",
+      ".mdc",
+      ".py",
+      ".sh",
+      ".toml",
+      ".ts",
+      ".txt",
+      ".yaml",
+      ".yml",
+      ".zsh"
+    ]
+  },
+  "suppressed_findings": [],
+  "target_requests": [],
+  "threshold": "medium",
+  "version": "0.1.14"
+}

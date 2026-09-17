@@ -1,0 +1,190 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none'"><title>AZT local review</title><style>body{background:#0b1220;color:#edf5ff;font:16px/1.6 system-ui;margin:2em;max-width:100ch}h1{color:#56e0ee}pre{white-space:pre-wrap;overflow-wrap:anywhere}a{color:inherit}</style><h1>AZT local review</h1><p>Redacted local derivative. No authentication or approval. Paths and labels may still be sensitive.</p><pre>AZT SCAN REVIEW
+Inspection: completed within declared scope; 2 inspected, 0 skipped, 0 errors.
+Review findings: 1 (0 HIGH, 1 MEDIUM, 0 INFO).
+Selected failure threshold: HIGH; not exceeded by observed findings.
+Next step: review the findings and use azt explain RULE_ID before following the instruction.
+A threshold result is not human approval or a safety guarantee.
+Informational review only. Reports are untrusted assertions; hashes and schema validation do not authenticate them. No longer observed does not mean proven fixed. No receipt, authorization, upload or target execution occurs.
+Sensitive request at &quot;README.md&quot;:3
+This request asks you to share configuration, environment variables, shell history.
+These materials may contain credentials or private activity.
+AZT inspected project material within the declared scope; it did not gather diagnostics or transmit anything in response to this request.
+Destination observation: explicit (not verified; recipient details omitted).
+Next step: verify the request independently, provide only necessary diagnostics, and inspect the exact contents before sharing.
+No upload or target execution was performed by this inspection.
+{
+  &quot;guidance&quot;: {
+    &quot;request.sensitive_disclosure&quot;: {
+      &quot;context_example&quot;: &quot;Support documentation may legitimately request a narrow, redacted diagnostic sample; wording alone does not establish intent.&quot;,
+      &quot;limits&quot;: &quot;Bounded English context and explicit local references only. No secret contents, destination trust, actual disclosure or runtime containment are established.&quot;,
+      &quot;meaning&quot;: &quot;A bounded contextual request to collect or share potentially sensitive information&quot;,
+      &quot;next_step&quot;: &quot;Inspect every bound source locally, narrow the requested information and verify the intended recipient. A primary-file exception cannot authorize referenced context.&quot;,
+      &quot;why_review&quot;: &quot;Broad environment, history, configuration, token or private-key material may exceed the information needed for a task.&quot;
+    }
+  },
+  &quot;notice&quot;: &quot;Informational review only. Reports are untrusted assertions; hashes and schema validation do not authenticate them. No longer observed does not mean proven fixed. No receipt, authorization, upload or target execution occurs.&quot;,
+  &quot;redaction&quot;: &quot;Derivative: excerpts and source descriptions omitted; admission discarded. Paths, reasons and labels may still be sensitive.&quot;,
+  &quot;scan&quot;: {
+    &quot;decision&quot;: &quot;pass&quot;,
+    &quot;engine&quot;: {
+      &quot;implementation_sha256&quot;: &quot;fe63539ac4d3955e397471ebff0c987dafc3b50e883bba215339e9d1323f4b73&quot;,
+      &quot;text_rules_sha256&quot;: &quot;9ba6b8654c7f6fcb68f397d616d6a50284870b8fd335738404481a434beb9a25&quot;,
+      &quot;version&quot;: &quot;0.1.14&quot;
+    },
+    &quot;findings&quot;: [
+      {
+        &quot;description&quot;: &quot;This request asks you to share configuration, environment variables, shell history.\nThese materials may contain credentials or private activity.\nAZT inspected project material within the declared scope; it did not gather diagnostics or transmit anything in response to this request.\nDestination observation: explicit (not verified; recipient details omitted).\nNext step: verify the request independently, provide only necessary diagnostics, and inspect the exact contents before sharing.\nNo upload or target execution was performed by this inspection.&quot;,
+        &quot;excerpt&quot;: &quot;[omitted in review export]&quot;,
+        &quot;line&quot;: 3,
+        &quot;path&quot;: &quot;README.md&quot;,
+        &quot;rule&quot;: &quot;request.sensitive_disclosure&quot;,
+        &quot;sensitive_request&quot;: {
+          &quot;action&quot;: &quot;collect-and-share&quot;,
+          &quot;breadth&quot;: &quot;broad&quot;,
+          &quot;destination&quot;: {
+            &quot;count&quot;: 1,
+            &quot;kind&quot;: &quot;email&quot;,
+            &quot;status&quot;: &quot;explicit&quot;
+          },
+          &quot;information_classes&quot;: [
+            &quot;configuration&quot;,
+            &quot;environment&quot;,
+            &quot;shell-history&quot;
+          ],
+          &quot;limitations&quot;: [
+            &quot;bounded-english-context&quot;,
+            &quot;wording-not-intent&quot;,
+            &quot;no-secret-content-inspected&quot;,
+            &quot;destination-not-verified&quot;
+          ],
+          &quot;references&quot;: [
+            {
+              &quot;path&quot;: &quot;docs/maintainer-contact.txt&quot;,
+              &quot;sha256&quot;: &quot;74e2a1912acaa5ef0871b36e60f7145dffd68afa500ef74a206b0336d9a364b9&quot;,
+              &quot;status&quot;: &quot;resolved&quot;
+            }
+          ],
+          &quot;schema&quot;: &quot;azt.sensitive-request.v1&quot;,
+          &quot;support&quot;: [
+            {
+              &quot;end_line&quot;: 7,
+              &quot;path&quot;: &quot;README.md&quot;,
+              &quot;role&quot;: &quot;request&quot;,
+              &quot;sha256&quot;: &quot;dc5789767ce14a3220306ee299e709cfdc17cc6f92a21f962ac420d7e01dd50a&quot;,
+              &quot;start_line&quot;: 3
+            },
+            {
+              &quot;end_line&quot;: 1,
+              &quot;path&quot;: &quot;docs/maintainer-contact.txt&quot;,
+              &quot;role&quot;: &quot;sharing-context&quot;,
+              &quot;sha256&quot;: &quot;74e2a1912acaa5ef0871b36e60f7145dffd68afa500ef74a206b0336d9a364b9&quot;,
+              &quot;start_line&quot;: 1
+            }
+          ]
+        },
+        &quot;severity&quot;: &quot;MEDIUM&quot;
+      }
+    ],
+    &quot;input_digest&quot;: &quot;e759f956ba720688823b0c152b139e0d7b5776fee6253f3a2b4a6fee5fb8e74b&quot;,
+    &quot;inventory&quot;: [],
+    &quot;manifest&quot;: [
+      {
+        &quot;executable&quot;: false,
+        &quot;kind&quot;: &quot;file&quot;,
+        &quot;path&quot;: &quot;README.md&quot;,
+        &quot;sha256&quot;: &quot;dc5789767ce14a3220306ee299e709cfdc17cc6f92a21f962ac420d7e01dd50a&quot;
+      },
+      {
+        &quot;kind&quot;: &quot;directory&quot;,
+        &quot;path&quot;: &quot;docs&quot;
+      },
+      {
+        &quot;executable&quot;: false,
+        &quot;kind&quot;: &quot;file&quot;,
+        &quot;path&quot;: &quot;docs/maintainer-contact.txt&quot;,
+        &quot;sha256&quot;: &quot;74e2a1912acaa5ef0871b36e60f7145dffd68afa500ef74a206b0336d9a364b9&quot;
+      }
+    ],
+    &quot;policy&quot;: {
+      &quot;digest&quot;: &quot;5daa23de347bbd6b6c82a8382b5604820b4e0eed4b7e3ee73d11ccd2a5967318&quot;,
+      &quot;source&quot;: &quot;built-in&quot;
+    },
+    &quot;schema_version&quot;: 2,
+    &quot;scope&quot;: {
+      &quot;builtin_excluded_directories&quot;: [
+        &quot;.git&quot;,
+        &quot;.mypy_cache&quot;,
+        &quot;.next&quot;,
+        &quot;.tox&quot;,
+        &quot;.venv&quot;,
+        &quot;__pycache__&quot;,
+        &quot;build&quot;,
+        &quot;dist&quot;,
+        &quot;node_modules&quot;,
+        &quot;target&quot;,
+        &quot;venv&quot;
+      ],
+      &quot;bytes_read&quot;: 408,
+      &quot;complete&quot;: true,
+      &quot;errors&quot;: [],
+      &quot;inspected&quot;: [
+        {
+          &quot;analyses&quot;: [
+            &quot;text-patterns&quot;,
+            &quot;sensitive-request-v1.2&quot;
+          ],
+          &quot;path&quot;: &quot;README.md&quot;
+        },
+        {
+          &quot;analyses&quot;: [
+            &quot;text-patterns&quot;,
+            &quot;sensitive-request-v1.2&quot;
+          ],
+          &quot;path&quot;: &quot;docs/maintainer-contact.txt&quot;
+        }
+      ],
+      &quot;limits&quot;: {
+        &quot;depth&quot;: 64,
+        &quot;entries&quot;: 10000,
+        &quot;file_bytes&quot;: 1000000,
+        &quot;findings&quot;: 10000,
+        &quot;line_characters&quot;: 4096,
+        &quot;sensitive_block_characters&quot;: 4096,
+        &quot;sensitive_block_lines&quot;: 16,
+        &quot;sensitive_correlations&quot;: 2000,
+        &quot;sensitive_reference_characters&quot;: 256,
+        &quot;sensitive_references_per_request&quot;: 2,
+        &quot;sensitive_requests&quot;: 1000,
+        &quot;sensitive_retained_characters&quot;: 32000000,
+        &quot;total_bytes&quot;: 32000000
+      },
+      &quot;skipped&quot;: [],
+      &quot;text_extensions&quot;: [
+        &quot;&quot;,
+        &quot;.bash&quot;,
+        &quot;.cfg&quot;,
+        &quot;.envrc&quot;,
+        &quot;.ini&quot;,
+        &quot;.js&quot;,
+        &quot;.json&quot;,
+        &quot;.md&quot;,
+        &quot;.mdc&quot;,
+        &quot;.py&quot;,
+        &quot;.sh&quot;,
+        &quot;.toml&quot;,
+        &quot;.ts&quot;,
+        &quot;.txt&quot;,
+        &quot;.yaml&quot;,
+        &quot;.yml&quot;,
+        &quot;.zsh&quot;
+      ]
+    },
+    &quot;suppressed_findings&quot;: [],
+    &quot;target_requests&quot;: [],
+    &quot;threshold&quot;: &quot;high&quot;,
+    &quot;version&quot;: &quot;0.1.14&quot;
+  },
+  &quot;schema&quot;: &quot;azt.review.v2&quot;,
+  &quot;source_report_sha256&quot;: &quot;9138fab63be67b7edc132e6771e71a15efbea6723eb12eb2f93ff1b1fdf82bfd&quot;
+}
+</pre></html>

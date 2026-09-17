@@ -1,0 +1,17 @@
+agent-zero-trust — repo intake scan of fixtures/limited
+
+Inspection: completed within declared scope; 1 inspected, 0 skipped, 0 errors.
+Review findings: 0 (0 HIGH, 0 MEDIUM, 0 INFO).
+Selected failure threshold: HIGH; not exceeded by observed findings.
+Next step: review the inspection scope and limits before relying on this result.
+A threshold result is not human approval or a safety guarantee.
+
+RECOGNIZED SPECIAL SURFACES: 0 file(s) match inventory patterns
+Other inspected content, including README files, can also influence an agent.
+
+FINDINGS: none — no known-shape risks found
+
+REVIEW GUIDANCE: no known-shape red flags. This is NOT a safety guarantee: pattern matching cannot catch
+cleverly worded natural-language manipulation (see COVERAGE.md and corpus/misses/). Skim
+the instruction-environment files above before trusting them.
+EXCEPTIONS: 0 target requests (not applied); 0 trusted suppressed findings

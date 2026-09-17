@@ -18,14 +18,15 @@ installation. No account, model API or telemetry.
 **[Scan your project →](#scan-your-project)** · [Watch the examples](#reproduce-the-demo) · [Use in GitHub](#bring-the-review-to-a-pull-request) · [Contribute](#help-make-the-next-review-better)
 
 <picture>
-  <source media="(prefers-reduced-motion: reduce) and (max-width: 600px)" srcset="https://raw.githubusercontent.com/ralfyishere/agent-zero-trust/7e3abdfb7a7c435fa7b66331ddf187804b23369d/assets/landing/sequence/mobile.png">
-  <source media="(prefers-reduced-motion: reduce)" srcset="https://raw.githubusercontent.com/ralfyishere/agent-zero-trust/7e3abdfb7a7c435fa7b66331ddf187804b23369d/assets/landing/sequence/desktop.png">
-  <source media="(max-width: 600px)" srcset="https://raw.githubusercontent.com/ralfyishere/agent-zero-trust/7e3abdfb7a7c435fa7b66331ddf187804b23369d/assets/landing/sequence/mobile.gif">
-  <img src="https://raw.githubusercontent.com/ralfyishere/agent-zero-trust/7e3abdfb7a7c435fa7b66331ddf187804b23369d/assets/landing/sequence/desktop.gif" alt="Illustrated recorded CLI workflow, not an AZT graphical interface: an AGENTS.md instruction changes in place, is highlighted, and produces two findings. Guidance says to review the source before using it; the review can be exported locally. The target instruction is never executed.">
+  <source media="(prefers-reduced-motion: reduce) and (max-width: 600px)" srcset="assets/landing/diagnostic-story/mobile.png">
+  <source media="(prefers-reduced-motion: reduce)" srcset="assets/landing/diagnostic-story/desktop.png">
+  <source media="(max-width: 600px)" srcset="assets/landing/diagnostic-story/mobile.gif">
+  <img src="assets/landing/diagnostic-story/desktop.gif" alt="Illustrated recorded CLI workflow: a limited diagnostic request changes to ask for shell history, environment variables and local configuration. AZT reports one new MEDIUM finding. These materials may contain credentials or private activity. Next: verify the request, share only what is necessary and inspect the exact contents. Not a graphical AZT app or a blocked upload.">
 </picture>
 
-Illustrated recorded CLI workflow—not a graphical AZT app or live-agent test.
-[Reproduce it](examples/change-review/README.md) · [Motion-free view](assets/landing/sequence/desktop.png) · [Mobile still](assets/landing/sequence/mobile.png) · [Recording and timing](assets/landing/sequence/README.md)
+**A helpful request can ask for more than you meant to share.** Illustrated from
+recorded 0.1.14 CLI output—not a graphical app or live-agent test.
+[Reproduce this story](assets/landing/diagnostic-story/README.md) · [Motion-free view](assets/landing/diagnostic-story/desktop.png) · [Mobile still](assets/landing/diagnostic-story/mobile.png)
 
 > I use AI to build, and I take its risks seriously. AZT is my contribution
 > to helping people use it with less blind trust.
@@ -99,61 +100,42 @@ does not approve the change. [JSON/text exports and advanced syntax](docs/change
 
 ## Reproduce the demo
 
-### 1. A setup instruction changes
+### When “help us debug” asks for too much
 
-**Before following setup instructions:** the opening animation shows a project
-asking your agent to download and run a remote script. **Review the source before
-using it.** A documented installer may be legitimate; the finding is a reason to
-look closer, not a verdict about its author.
+Imagine your app won't start. The contribution guide asks for diagnostics.
+Yesterday it wanted a software version and one log setting. Today it asks you to
+gather **shell history, environment variables and local configuration**, then
+share them. Those materials may contain credentials or private activity.
 
-[Run the four-case synthetic lab](examples/change-review/README.md#install-and-reproduce-version-0111)
-for the complete setup and scan → compare → explain → export commands. It uses
-inert example text, not your project or real credentials; the suspicious
-instruction is never executed. The lab keeps its environment and reports
-outside its fixture trees.
+The opening animation follows that change using two existing synthetic lab
+inputs. The released scanner reports **0 findings before, 1 MEDIUM finding after**;
+the comparison identifies it as new. Both scans complete within their declared
+scope. The default HIGH failure threshold is not exceeded—that does not make the
+request approved.
 
-The illustrated `AGENTS.md` edit has **two new findings**: `net.pipe_shell`
-(HIGH: download piped directly into an interpreter) and `net.fetch_unknown`
-(MEDIUM: a download host outside the rule's allowlist). The benign edit has
-**none**; incomplete inspection retains **two unresolved observations**.
-The graphic uses the recorded **0.1.11 candidate** at
-[`0296face`](https://github.com/ralfyishere/agent-zero-trust/commit/0296facec2565668386c3c0d5dbacb734e6241e3),
-not new execution evidence. [Transcript](examples/change-review/transcript.txt) · [Visual provenance](assets/landing/sequence/README.md).
+**The useful decision: ask which specific diagnostics are needed before sharing.**
+Verify the request independently, provide only the minimum relevant information,
+and inspect the exact contents. AZT doesn't establish that secrets are present or
+that a recipient is trustworthy. It doesn't gather or send the requested diagnostics.
 
-### 2. A helpful-looking request asks for sensitive information
+**[Run this exact scan → compare → explain → export story →](assets/landing/diagnostic-story/README.md)**
+The reproduction uses inert text, keeps tooling and reports outside the inspected
+fixtures, and works without Docker, an account or a model.
+[Recorded transcript](assets/landing/diagnostic-story/evidence/transcript.txt) · [Supported matching and limits](docs/sensitive-requests.md).
 
-“Upload your API keys” is a different request from “Send only the Python version;
-do not include API keys.” AZT's sensitive-request review distinguishes these
-supported examples and explains the possible consequence **without looking for
-your actual keys**.
+### Keep the reason, not just a warning
 
-<picture>
-  <source media="(prefers-reduced-motion: reduce) and (max-width: 600px)" srcset="https://raw.githubusercontent.com/ralfyishere/agent-zero-trust/5e50626c0b5b6a0576b3c645581cfc04e16cf6dc/assets/landing/sensitive/mobile.png">
-  <source media="(prefers-reduced-motion: reduce)" srcset="https://raw.githubusercontent.com/ralfyishere/agent-zero-trust/5e50626c0b5b6a0576b3c645581cfc04e16cf6dc/assets/landing/sensitive/desktop.png">
-  <source media="(max-width: 600px)" srcset="https://raw.githubusercontent.com/ralfyishere/agent-zero-trust/5e50626c0b5b6a0576b3c645581cfc04e16cf6dc/assets/landing/sensitive/mobile.gif">
-  <img src="https://raw.githubusercontent.com/ralfyishere/agent-zero-trust/5e50626c0b5b6a0576b3c645581cfc04e16cf6dc/assets/landing/sensitive/desktop.gif" alt="Illustrated recorded sensitive-request review: an API-key sharing instruction receives a MEDIUM review finding; a version-only request that excludes sensitive information does not. Maintained guidance and a local report help a human decide what to share. No keys are collected or sent.">
-</picture>
-
-[Motion-free view](assets/landing/sensitive/desktop.png) · [Mobile still](assets/landing/sensitive/mobile.png) · [Inputs, actual output and reproduction](assets/landing/sensitive/README.md)
-
-Illustrated recorded 0.1.13 CLI results, not a blocked upload. This MEDIUM finding
-remains visible below the default HIGH failure threshold. AZT reviews selected
-English requests; it does not establish that secrets exist or were disclosed.
-[Try the sensitive-request lab](examples/sensitive-request/README.md) · [Current matching and limits](docs/sensitive-requests.md).
-
-### 3. Keep something you can actually review
-
-Export the scan or comparison as a local HTML report, readable text or JSON.
-This is an **actual 0.1.14 local HTML export** for the synthetic API-key request.
-It separates inspection completion, the finding, the HIGH threshold and the next
-review step. No server or account is involved.
+This is the finding excerpt from the **actual local HTML report from the same
+0.1.14 scan**, not a designed dashboard. The full report preserves scope,
+threshold, identities and review guidance. Save it as HTML, readable text or JSON;
+no server is involved.
 
 <picture>
-  <source media="(max-width: 600px)" srcset="assets/landing/review-0.1.14/report-mobile.png">
-  <img src="assets/landing/review-0.1.14/report-desktop.png" alt="Actual AZT 0.1.14 local report: inspection completed within declared scope; one MEDIUM finding; HIGH threshold not exceeded. Review the sensitive request before sharing. The report is a local file, not a hosted dashboard.">
+  <source media="(max-width: 600px)" srcset="assets/landing/diagnostic-story/report-mobile.png">
+  <img src="assets/landing/diagnostic-story/report-desktop.png" alt="Actual AZT local report for the broad diagnostic request: one MEDIUM finding below the HIGH threshold. The request includes shell history, environment variables and configuration. The report explains possible consequences, observed context and a useful next step.">
 </picture>
 
-[Full report and exact reproduction](assets/landing/review-0.1.14/README.md) · [Readable text](assets/landing/review-0.1.14/report.txt) · [Earlier 0.1.13 capture](assets/landing/sensitive/README.md)
+[Full HTML file](assets/landing/diagnostic-story/evidence/report.html) · [Readable report](assets/landing/diagnostic-story/evidence/report.txt) · [Inputs and capture identities](assets/landing/diagnostic-story/README.md)
 
 Continue in the quickstart's activated terminal. Save a scan and export it with
 new filenames (a scan exit of 1 still produces a report; run without `set -e`):
@@ -167,6 +149,35 @@ azt report --input "$AZT_REVIEW/report-scan.json" \
 Open the file locally. Nothing is uploaded by the export command. Raw excerpts
 are omitted by default, but paths and labels can still be sensitive: review a
 report before choosing to share it.
+
+<details>
+<summary>Another recorded example: setup instructions change</summary>
+
+A project asks your agent to download and run a remote script. **Review the
+source before using it.** A documented installer may be legitimate; a finding is
+a reason to look closer, not a verdict about its author.
+
+<picture>
+  <source media="(prefers-reduced-motion: reduce) and (max-width: 600px)" srcset="assets/landing/sequence/mobile.png">
+  <source media="(prefers-reduced-motion: reduce)" srcset="assets/landing/sequence/desktop.png">
+  <source media="(max-width: 600px)" srcset="assets/landing/sequence/mobile.gif">
+  <img src="assets/landing/sequence/desktop.gif" alt="Historical illustrated CLI workflow: an AGENTS.md setup instruction changes and produces two findings. Guidance recommends reviewing the source before using it. Not a graphical app or an executed instruction.">
+</picture>
+
+The synthetic `AGENTS.md` edit has **two new findings**: `net.pipe_shell`
+(HIGH: download piped into an interpreter) and `net.fetch_unknown`
+(MEDIUM: a download host outside the rule's allowlist). The benign edit has
+none; incomplete inspection retains two unresolved observations.
+
+This preserves the **0.1.11 candidate** recording at
+[`0296face`](https://github.com/ralfyishere/agent-zero-trust/commit/0296facec2565668386c3c0d5dbacb734e6241e3),
+not new execution evidence. [Reproduce the four-case lab](examples/change-review/README.md#install-and-reproduce-version-0111) · [Transcript](examples/change-review/transcript.txt) · [Motion-free view and provenance](assets/landing/sequence/README.md).
+
+[Earlier API-key illustration and 0.1.13 capture](assets/landing/sensitive/README.md)
+and the [earlier 0.1.14 report preview](assets/landing/review-0.1.14/README.md)
+remain available unchanged.
+
+</details>
 
 ## Four steps, one review
 

@@ -1,0 +1,160 @@
+{
+  "decision": "deny",
+  "engine": {
+    "implementation_sha256": "fe63539ac4d3955e397471ebff0c987dafc3b50e883bba215339e9d1323f4b73",
+    "text_rules_sha256": "9ba6b8654c7f6fcb68f397d616d6a50284870b8fd335738404481a434beb9a25",
+    "version": "0.1.14"
+  },
+  "findings": [
+    {
+      "description": "Review before sharing potentially sensitive diagnostic or authentication information",
+      "excerpt": "[content omitted; inspect the indicated file locally]",
+      "line": 3,
+      "path": "README.md",
+      "rule": "request.sensitive_disclosure",
+      "sensitive_request": {
+        "action": "collect-and-share",
+        "breadth": "broad",
+        "destination": {
+          "count": 1,
+          "kind": "email",
+          "status": "explicit"
+        },
+        "information_classes": [
+          "configuration",
+          "environment",
+          "shell-history"
+        ],
+        "limitations": [
+          "bounded-english-context",
+          "wording-not-intent",
+          "no-secret-content-inspected",
+          "destination-not-verified"
+        ],
+        "references": [
+          {
+            "path": "docs/maintainer-contact.txt",
+            "sha256": "74e2a1912acaa5ef0871b36e60f7145dffd68afa500ef74a206b0336d9a364b9",
+            "status": "resolved"
+          }
+        ],
+        "schema": "azt.sensitive-request.v1",
+        "support": [
+          {
+            "end_line": 7,
+            "path": "README.md",
+            "role": "request",
+            "sha256": "dc5789767ce14a3220306ee299e709cfdc17cc6f92a21f962ac420d7e01dd50a",
+            "start_line": 3
+          },
+          {
+            "end_line": 1,
+            "path": "docs/maintainer-contact.txt",
+            "role": "sharing-context",
+            "sha256": "74e2a1912acaa5ef0871b36e60f7145dffd68afa500ef74a206b0336d9a364b9",
+            "start_line": 1
+          }
+        ]
+      },
+      "severity": "MEDIUM"
+    }
+  ],
+  "input_digest": "e759f956ba720688823b0c152b139e0d7b5776fee6253f3a2b4a6fee5fb8e74b",
+  "inventory": [],
+  "manifest": [
+    {
+      "executable": false,
+      "kind": "file",
+      "path": "README.md",
+      "sha256": "dc5789767ce14a3220306ee299e709cfdc17cc6f92a21f962ac420d7e01dd50a"
+    },
+    {
+      "kind": "directory",
+      "path": "docs"
+    },
+    {
+      "executable": false,
+      "kind": "file",
+      "path": "docs/maintainer-contact.txt",
+      "sha256": "74e2a1912acaa5ef0871b36e60f7145dffd68afa500ef74a206b0336d9a364b9"
+    }
+  ],
+  "policy": {
+    "digest": "5daa23de347bbd6b6c82a8382b5604820b4e0eed4b7e3ee73d11ccd2a5967318",
+    "source": "built-in"
+  },
+  "schema_version": 2,
+  "scope": {
+    "builtin_excluded_directories": [
+      ".git",
+      ".mypy_cache",
+      ".next",
+      ".tox",
+      ".venv",
+      "__pycache__",
+      "build",
+      "dist",
+      "node_modules",
+      "target",
+      "venv"
+    ],
+    "bytes_read": 408,
+    "complete": true,
+    "errors": [],
+    "inspected": [
+      {
+        "analyses": [
+          "text-patterns",
+          "sensitive-request-v1.2"
+        ],
+        "path": "README.md"
+      },
+      {
+        "analyses": [
+          "text-patterns",
+          "sensitive-request-v1.2"
+        ],
+        "path": "docs/maintainer-contact.txt"
+      }
+    ],
+    "limits": {
+      "depth": 64,
+      "entries": 10000,
+      "file_bytes": 1000000,
+      "findings": 10000,
+      "line_characters": 4096,
+      "sensitive_block_characters": 4096,
+      "sensitive_block_lines": 16,
+      "sensitive_correlations": 2000,
+      "sensitive_reference_characters": 256,
+      "sensitive_references_per_request": 2,
+      "sensitive_requests": 1000,
+      "sensitive_retained_characters": 32000000,
+      "total_bytes": 32000000
+    },
+    "skipped": [],
+    "text_extensions": [
+      "",
+      ".bash",
+      ".cfg",
+      ".envrc",
+      ".ini",
+      ".js",
+      ".json",
+      ".md",
+      ".mdc",
+      ".py",
+      ".sh",
+      ".toml",
+      ".ts",
+      ".txt",
+      ".yaml",
+      ".yml",
+      ".zsh"
+    ]
+  },
+  "suppressed_findings": [],
+  "target_requests": [],
+  "threshold": "medium",
+  "version": "0.1.14"
+}

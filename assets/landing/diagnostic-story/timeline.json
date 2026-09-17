@@ -1,0 +1,55 @@
+{
+  "schema": "azt.editorial-timeline.v1",
+  "duration_ms": 26000,
+  "timing": "Editorial pacing, not measured scanner duration",
+  "stages": [
+    {
+      "label": "Limited diagnostic request",
+      "start_ms": 0,
+      "hold_ms": 4800
+    },
+    {
+      "label": "Document changes in place",
+      "start_ms": 5500,
+      "hold_ms": 1900
+    },
+    {
+      "label": "Requested materials highlighted",
+      "start_ms": 8700,
+      "hold_ms": 1800
+    },
+    {
+      "label": "Recorded finding and possible consequence",
+      "start_ms": 11100,
+      "hold_ms": 6000
+    },
+    {
+      "label": "Useful decision and local record",
+      "start_ms": 17700,
+      "hold_ms": 6500
+    }
+  ],
+  "reset_ms": 1800,
+  "outputs": {
+    "desktop": {
+      "frames": 41,
+      "duration_ms": 26000,
+      "loop": "infinite",
+      "bytes": 622007,
+      "sha256": "3e2937740bb863cc97f219a83fe4ca94696e9e86520ef31cc5c988dad7389b4c"
+    },
+    "mobile": {
+      "frames": 41,
+      "duration_ms": 26000,
+      "loop": "infinite",
+      "bytes": 623253,
+      "sha256": "34bc3f0f4852aecff2a5d844c8810af28ba6f7803e6f742a567cdcc97ecad2a8"
+    }
+  },
+  "checks": [
+    "captured scan and comparison assertions",
+    "SVG text bounds at every frame",
+    "GIF durations and infinite looping",
+    "unmodified HTML export produced no remote requests"
+  ]
+}
