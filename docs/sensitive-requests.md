@@ -7,9 +7,11 @@ It explains what those materials **may** expose without collecting them to
 check whether credentials exist. This is repository intake, not runtime blocking.
 Sensitive-request review was introduced in 0.1.12 and its action/object handling
 was improved in the [published 0.1.13 release](https://github.com/ralfyishere/agent-zero-trust/releases/tag/v0.1.13).
-Try the [synthetic lab](../examples/sensitive-request/README.md). The unreleased
-0.1.14 candidate refines selected token meanings and reference observations as
-`sensitive-request-v1.2`; use a reviewed candidate build to test those changes.
+The [published 0.1.14 release](https://github.com/ralfyishere/agent-zero-trust/releases/tag/v0.1.14)
+refines selected token meanings and reference observations as
+`sensitive-request-v1.2`. Use the [current installation](../README.md#scan-your-project)
+for these improvements; the [synthetic lab](../examples/sensitive-request/README.md)
+also preserves its explicitly labeled historical reproduction.
 [Installed baseline/candidate measurements and reproduction](../evidence/sensitive-precision-0.1.14/README.md).
 
 ## Meaning and next step
@@ -52,7 +54,7 @@ Sentence/semicolon boundaries and selected action bullets also separate requests
 Selected contractions accept straight or curly apostrophes. These are bounded
 wording cases, not general English negation, syntax or intent understanding.
 
-The 0.1.14 candidate distinguishes selected token measurements from credential
+Since 0.1.14, AZT distinguishes selected token measurements from credential
 requests. Asking for a token count is not the same as asking for an API token.
 The matcher checks at most 64 adjacent characters around a bare `token`/`tokens`
 mention for selected count/budget/usage/total/limit phrases or parser/lexical/syntax
@@ -96,7 +98,7 @@ Missing/excluded/unsupported material stays unresolved. External links are not
 automatically whole-scan errors. Raw addresses/URLs are omitted, including
 userinfo, paths, query strings and fragments. Local paths may still be sensitive.
 
-In the 0.1.14 candidate, identical repeated reference targets are counted once
+Since 0.1.14, identical repeated reference targets are counted once
 within the two-reference request limit; repeating the same recipient within one
 contact block does not establish several recipients. Deduplication uses exact
 strings, not a reputation service or an assumption that different URL paths,

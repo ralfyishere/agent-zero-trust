@@ -7,8 +7,9 @@ job green. Green means the selected failure threshold was not reached within the
 reported scope—not safe, approved, no findings or attack blocked.
 
 This integration shipped with [0.1.13](https://github.com/ralfyishere/agent-zero-trust/releases/tag/v0.1.13).
-The example below still pins the exact reviewed Action implementation. Published
-0.1.12 retains its earlier Action behavior. The standalone scanner remains account-free and
+The current example pins the reviewed [0.1.14 source](https://github.com/ralfyishere/agent-zero-trust/commit/fce49dd727f1be4ba4407394a6b4f544e763ef20),
+including its sensitive-request precision improvements. Published 0.1.12 retains
+its earlier Action behavior. The standalone scanner remains account-free and
 does not require GitHub, Docker or a model.
 
 ## Explicit current-base to PR-head comparison
@@ -49,7 +50,7 @@ jobs:
           persist-credentials: false
           submodules: false
           lfs: false
-      - uses: ralfyishere/agent-zero-trust@69d16a0c2e352313a34872504e94e7a7d18b489a
+      - uses: ralfyishere/agent-zero-trust@fce49dd727f1be4ba4407394a6b4f544e763ef20 # v0.1.14 source
         with:
           base-path: snapshots/base
           path: snapshots/head
@@ -58,7 +59,9 @@ jobs:
           fail-on: high
 ```
 
-This pin identifies the reviewed Action implementation, not a package release.
+By default, the scanner, formatting helper and report validator all come from
+this pinned Action checkout. This source identity is not the hash of a PyPI wheel;
+the Action installs from its reviewed source rather than downloading that wheel.
 The base repository's PR ref makes its head commit available there; the example
 does not select additional repositories from target text. Missing/unavailable
 commits fail checkout instead of silently switching inputs. Do not use a branch

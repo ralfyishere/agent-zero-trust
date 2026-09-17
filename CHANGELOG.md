@@ -1,6 +1,6 @@
 # Release notes
 
-## 0.1.14 — unreleased review-precision candidate
+## 0.1.14 — sensitive-request precision and clearer review summaries
 
 - Refine selected token-measurement wording without treating credential-like
   token requests as harmless. Keep MEDIUM severity and the default HIGH threshold.
@@ -23,8 +23,12 @@
   benchmark, including the contextual analyzer and saved-report reader. Keep its
   admission results separate from the unchanged historical Docker experiment.
 
-This is source-only candidate work, not a published package or a new runtime
-trial. See [migration](docs/migration.md) and [analysis limits](docs/sensitive-requests.md).
+Published as [v0.1.14](https://github.com/ralfyishere/agent-zero-trust/releases/tag/v0.1.14)
+from `fce49dd727f1be4ba4407394a6b4f544e763ef20` in
+[release run 35176398216](https://github.com/ralfyishere/agent-zero-trust/actions/runs/35176398216).
+Historical candidate measurements keep their original artifact identities; this
+release adds no runtime trial. See [migration](docs/migration.md) and
+[analysis limits](docs/sensitive-requests.md).
 
 ## 0.1.13 — sensitive-request precision and GitHub review
 

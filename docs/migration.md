@@ -1,6 +1,6 @@
 # Migrating to 0.1.9 and later
 
-## 0.1.14 (unreleased candidate)
+## 0.1.14
 
 The analyzer method changes to `sensitive-request-v1.2`. Selected token
 measurements no longer imply credential disclosure. Repeated identical references
@@ -19,7 +19,9 @@ Method/engine identity changes reduce comparison confidence and invalidate an
 old optional snapshot-gate receipt. Review and explicitly re-admit; receipts are
 never silently refreshed. Ordinary scanning/comparison needs no hook. MEDIUM
 severity, default HIGH threshold, 0/1/2 scan exits and one-hop access are unchanged.
-No new runtime result or package publication is implied by this candidate.
+This [published release](https://github.com/ralfyishere/agent-zero-trust/releases/tag/v0.1.14)
+adds no new runtime result. Historical candidate and runtime artifacts retain
+their own source and byte identities.
 
 Human scan output now separates completeness, finding counts and threshold status;
 it no longer prints a standalone `DECISION: pass` or a `TRUST VERDICT` label.

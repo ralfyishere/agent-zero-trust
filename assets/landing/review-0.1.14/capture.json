@@ -1,0 +1,61 @@
+{
+  "schema": "azt.editorial-capture.v1",
+  "source": "fce49dd727f1be4ba4407394a6b4f544e763ef20",
+  "version": "0.1.14",
+  "release_run": "https://github.com/ralfyishere/agent-zero-trust/actions/runs/35176398216",
+  "wheel": {
+    "filename": "agent_zero_trust-0.1.14-py3-none-any.whl",
+    "sha256": "be250d871a1b3783423ac92e96238e5154beec4b358015c07371ddecdf98db68"
+  },
+  "environment": {
+    "system": "Darwin",
+    "python": "3.11.15"
+  },
+  "installed_identity": {
+    "version": "0.1.14",
+    "installed": true,
+    "module_sha256": "37417fbadd9c9d22f82b21bd39343974c5f7152be80d75535f6fd0a652934e1e"
+  },
+  "commands": [
+    {
+      "command": "scan",
+      "exit": 0
+    },
+    {
+      "command": "report",
+      "exit": 0
+    },
+    {
+      "command": "report",
+      "exit": 0
+    }
+  ],
+  "input_digest": "38dfd81aa603475373e88ad517808e0b015ee9b1e92c18ce885fb2397dffab1d",
+  "engine": {
+    "implementation_sha256": "fe63539ac4d3955e397471ebff0c987dafc3b50e883bba215339e9d1323f4b73",
+    "text_rules_sha256": "9ba6b8654c7f6fcb68f397d616d6a50284870b8fd335738404481a434beb9a25",
+    "version": "0.1.14"
+  },
+  "scope": "One known synthetic input. No target instructions executed, no diagnostics gathered, no destination contacted. Not a live-agent or containment test.",
+  "outputs": {
+    "scan.json": "78a090b9cda04c8dddfd77abf69ae97e26110563f313f2364dd3f1b30c0c2970",
+    "report.txt": "3961f44188822b857990e3f0ff8dc8117de26286dff875228a1627d1d346196e",
+    "report.html": "5c2436d4e4ddd1f1653ae207b614313ca1576843bd267e38d341134a12f02029",
+    "report-desktop.png": "2bb1ea121258d6457b0f3cade7c4b1d061f58556032c85eb3dfcc70b58ccd540",
+    "report-mobile.png": "3472deb184b2ca9a16618bb69205aaaad9007f4efa10a75c2aa5dfbcc2683378"
+  },
+  "fixture_sha256": "4a501f22ec405a398b66408b1c3fbba37a2713b6e46442ecf330768a5a941ffa",
+  "screenshots": {
+    "scope": "Unmodified HTML top summary through the threshold-not-approval statement; remainder in linked full report. No remote requests or whole-page overflow.",
+    "crops": [
+      {
+        "width": 1120,
+        "height": 296
+      },
+      {
+        "width": 390,
+        "height": 552
+      }
+    ]
+  }
+}

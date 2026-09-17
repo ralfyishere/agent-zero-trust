@@ -1,21 +1,21 @@
 # AZT · Agent Zero Trust
 
-**Know what changed. Before you delegate.**
+## Know what changed. Before you delegate.
 
-Your coding agent reads more than code. A README, setup guide or project
-instruction can ask it to run a command—or ask you to share sensitive information.
-AZT helps you **see what changed, understand what is being asked, and save a
-readable report before deciding what to trust**.
+Before your coding agent follows a project's instructions, see what they ask it
+to **run, share or trust**. AZT scans project material, flags supported concerns,
+compares changes and saves a readable local report—so you have something concrete
+to review before deciding what to do.
 
-For people building with AI, from their first app to a security review.
-Free. Offline after installation. No account, model API or telemetry.
+For **vibe coders, developers and security reviewers**. Free. Offline after
+installation. No account, model API or telemetry.
 
-[![PyPI](https://img.shields.io/pypi/v/agent-zero-trust?color=2979ff)](https://pypi.org/project/agent-zero-trust/)
+[![PyPI 0.1.14](https://img.shields.io/badge/PyPI-0.1.14-2979ff)](https://pypi.org/project/agent-zero-trust/0.1.14/)
 [![CI](https://github.com/ralfyishere/agent-zero-trust/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/ralfyishere/agent-zero-trust/actions/workflows/ci.yml)
 [![Python](https://img.shields.io/pypi/pyversions/agent-zero-trust?color=2979ff)](https://pypi.org/project/agent-zero-trust/)
 [![MIT license](https://img.shields.io/github/license/ralfyishere/agent-zero-trust?color=2979ff)](LICENSE)
 
-[Try it](#scan-your-project) · [Who it's for](#who-its-for) · [See the examples](#reproduce-the-demo) · [Use in GitHub](#bring-the-review-to-a-pull-request) · [Help build it](#help-make-the-next-review-better)
+**[Scan your project →](#scan-your-project)** · [Watch the examples](#reproduce-the-demo) · [Use in GitHub](#bring-the-review-to-a-pull-request) · [Contribute](#help-make-the-next-review-better)
 
 <picture>
   <source media="(prefers-reduced-motion: reduce) and (max-width: 600px)" srcset="https://raw.githubusercontent.com/ralfyishere/agent-zero-trust/7e3abdfb7a7c435fa7b66331ddf187804b23369d/assets/landing/sequence/mobile.png">
@@ -24,27 +24,12 @@ Free. Offline after installation. No account, model API or telemetry.
   <img src="https://raw.githubusercontent.com/ralfyishere/agent-zero-trust/7e3abdfb7a7c435fa7b66331ddf187804b23369d/assets/landing/sequence/desktop.gif" alt="Illustrated recorded CLI workflow, not an AZT graphical interface: an AGENTS.md instruction changes in place, is highlighted, and produces two findings. Guidance says to review the source before using it; the review can be exported locally. The target instruction is never executed.">
 </picture>
 
-[Animation](https://raw.githubusercontent.com/ralfyishere/agent-zero-trust/7e3abdfb7a7c435fa7b66331ddf187804b23369d/assets/landing/sequence/desktop.gif) · [Still image](assets/landing/sequence/desktop.png) · [Mobile still](assets/landing/sequence/mobile.png) · [Transcript and reproduction](examples/change-review/README.md)
-
-Illustrated demonstration of the [recorded CLI workflow](assets/landing/sequence/README.md),
-not a shipped graphical interface or live-agent test. Repeats every 22 seconds with a reset;
-pacing is editorial. No target instruction is executed.
+Illustrated recorded CLI workflow—not a graphical AZT app or live-agent test.
+[Reproduce it](examples/change-review/README.md) · [Motion-free view](assets/landing/sequence/desktop.png) · [Mobile still](assets/landing/sequence/mobile.png) · [Recording and timing](assets/landing/sequence/README.md)
 
 > I use AI to build, and I take its risks seriously. AZT is my contribution
 > to helping people use it with less blind trust.
 > — [Rafael (Ralph) Peña · Why I'm building this](#why-i-built-azt)
-
-## Who it's for
-
-| You are… | You want to know… | Start here |
-| --- | --- | --- |
-| **A vibe coder or AI-assisted builder** | “This starter project says to run something. What am I agreeing to?” | Scan the project, then read a warning in plain English. |
-| **A developer building an agent workflow** | “What changed in the instructions since we last reviewed them?” | Save two scans and compare. Export JSON for your own tooling. |
-| **A security reviewer or researcher** | “What supports this finding, and what did the scanner miss?” | Inspect the scope, rule guidance, policy provenance and reproducible cases. |
-| **An open-source maintainer** | “Does this PR add instructions our contributors should examine?” | Use the pinned Action to review explicit base/head snapshots. |
-
-**You don't need to speak security.** Start with: *What is this asking me to run,
-share or trust?* AZT gives you a place to look, not a decision to obey.
 
 <a id="run-a-scan"></a>
 
@@ -67,20 +52,19 @@ python3 -m venv "$AZT_REVIEW/venv"
 . "$AZT_REVIEW/venv/bin/activate"
 python -m pip --isolated install \
   --index-url https://pypi.org/simple --no-deps \
-  agent-zero-trust==0.1.13
+  agent-zero-trust==0.1.14
 azt --version
 azt scan "$AZT_PROJECT"
 ```
 
-Inspect only projects you are authorized to scan. AZT reads their contents;
-it never runs their instructions. Keep this activated terminal for later checks.
-Setup runs from the new review directory, not from the inspected project.
-`pwd -P` avoids temporary-path symlink aliases on macOS.
+Keep this activated terminal for later checks. AZT reads the selected project's
+contents; it never runs its instructions. Setup stays outside that project;
+`pwd -P` handles temporary-path aliases on macOS.
 
-Scan exits: **0** passes the selected threshold; **1** has findings meeting it;
-**2** means incomplete inspection or an error. A clean scan is not proof of safety.
-The default threshold is HIGH: a MEDIUM warning can be worth reviewing even when
-the exit code is 0. [What's in the released 0.1.13](https://github.com/ralfyishere/agent-zero-trust/releases/tag/v0.1.13).
+**Read the finding, not just the exit code.** A MEDIUM warning can deserve review
+even when the default HIGH threshold is not exceeded. Scan exits: **0** threshold
+not exceeded; **1** findings meet it; **2** incomplete inspection or error.
+[Released 0.1.14: what changed](https://github.com/ralfyishere/agent-zero-trust/releases/tag/v0.1.14).
 
 <details>
 <summary>Save a baseline, then compare after you edit</summary>
@@ -117,9 +101,10 @@ does not approve the change. [JSON/text exports and advanced syntax](docs/change
 
 ### 1. A setup instruction changes
 
-**This instruction asks your agent to download and run a remote script.**
-**Review the source before using it.** That is the reason for review—not a
-claim that the source is malicious.
+**Before following setup instructions:** the opening animation shows a project
+asking your agent to download and run a remote script. **Review the source before
+using it.** A documented installer may be legitimate; the finding is a reason to
+look closer, not a verdict about its author.
 
 [Run the four-case synthetic lab](examples/change-review/README.md#install-and-reproduce-version-0111)
 for the complete setup and scan → compare → explain → export commands. It uses
@@ -151,24 +136,24 @@ your actual keys**.
 
 [Motion-free view](assets/landing/sensitive/desktop.png) · [Mobile still](assets/landing/sensitive/mobile.png) · [Inputs, actual output and reproduction](assets/landing/sensitive/README.md)
 
-Illustrated CLI results, not a graphical AZT app, live agent or blocked upload.
-`request.sensitive_disclosure` is MEDIUM; default HIGH-threshold exit 0 does **not**
-mean there is nothing to review. Supported English requests can name shell
-history, environment dumps, tokens or private-key material. Those materials
-*may* contain sensitive information; AZT does not establish that secrets exist
-or were disclosed. [Try the sensitive-request lab](examples/sensitive-request/README.md).
+Illustrated recorded 0.1.13 CLI results, not a blocked upload. This MEDIUM finding
+remains visible below the default HIGH failure threshold. AZT reviews selected
+English requests; it does not establish that secrets exist or were disclosed.
+[Try the sensitive-request lab](examples/sensitive-request/README.md) · [Current matching and limits](docs/sensitive-requests.md).
 
 ### 3. Keep something you can actually review
 
 Export the scan or comparison as a local HTML report, readable text or JSON.
-The image below shows the top of an actual synthetic scan export—not a proposed
-dashboard. The [full local record](assets/landing/sensitive/report.html) carries
-the scope, finding and maintained guidance together.
+This is an **actual 0.1.14 local HTML export** for the synthetic API-key request.
+It separates inspection completion, the finding, the HIGH threshold and the next
+review step. No server or account is involved.
 
 <picture>
-  <source media="(max-width: 600px)" srcset="https://raw.githubusercontent.com/ralfyishere/agent-zero-trust/5e50626c0b5b6a0576b3c645581cfc04e16cf6dc/assets/landing/sensitive/report-mobile.png">
-  <img src="https://raw.githubusercontent.com/ralfyishere/agent-zero-trust/5e50626c0b5b6a0576b3c645581cfc04e16cf6dc/assets/landing/sensitive/report-desktop.png" alt="Top of the actual local HTML export for the synthetic sensitive-request scan, showing the request, uncertainty and next step. The full record includes scope and severity. This is a local file, not a hosted dashboard.">
+  <source media="(max-width: 600px)" srcset="assets/landing/review-0.1.14/report-mobile.png">
+  <img src="assets/landing/review-0.1.14/report-desktop.png" alt="Actual AZT 0.1.14 local report: inspection completed within declared scope; one MEDIUM finding; HIGH threshold not exceeded. Review the sensitive request before sharing. The report is a local file, not a hosted dashboard.">
 </picture>
+
+[Full report and exact reproduction](assets/landing/review-0.1.14/README.md) · [Readable text](assets/landing/review-0.1.14/report.txt) · [Earlier 0.1.13 capture](assets/landing/sensitive/README.md)
 
 Continue in the quickstart's activated terminal. Save a scan and export it with
 new filenames (a scan exit of 1 still produces a report; run without `set -e`):
@@ -196,20 +181,23 @@ Saved reports are snapshots, not automatic monitoring. Target `.azt-ignore`
 requests cannot silently suppress findings. Explicit operator exceptions remain
 visible and bound to reviewed content. [Migration and policy details](docs/migration.md).
 
-## When to reach for AZT
+<a id="when-to-reach-for-azt"></a>
 
-- **Before opening an unfamiliar project with a coding agent.** Review project
-  instructions, setup text and supported configuration before relying on them.
-- **After a template, dependency guide or contributor instruction changes.**
-  Compare saved scans to see which observations are new, remain or lost supporting
-  evidence. AZT is not a package-vulnerability database or automatic watcher.
-- **Before sharing “diagnostics” requested by a project.** Check whether the
-  request asks for broad environment/configuration material or narrowly relevant
-  information. An “official” label does not authorize disclosure.
-- **During a pull-request review.** Keep the instruction change and its review
-  context close together, without a bot posting comments or installing target code.
-- **When you find a miss or a false alarm.** Turn it into a minimal synthetic
-  example others can test, instead of sharing private files or real credentials.
+## Who it's for
+
+**Building with AI, including your first app?** Start with
+[a project scan](#scan-your-project). Ask: “What is this asking me to run or share?”
+You don't need security vocabulary to read the explanation.
+
+**Developing an agent workflow or maintaining a repository?**
+[Compare saved scans](docs/change-review.md) after an edit, or
+[review explicit PR snapshots](#bring-the-review-to-a-pull-request). Keep the
+surrounding instructions and supporting documents—not only changed lines—in view.
+
+**Working in security or research?** Inspect the
+[supported surfaces](docs/supported-agent-files.md), [known misses](COVERAGE.md)
+and [reproducible evidence](evidence/change-review/README.md). A useful correction
+includes both a concerning example and a legitimate control.
 
 ## Bring the review to a pull request
 
@@ -223,11 +211,9 @@ check stayed green—and the finding remained visible. **Green is not approval.*
 
 **[Copy the reviewed, pinned base/head workflow →](docs/github-action.md#explicit-current-base-to-pr-head-comparison)**
 
-Checkout happens separately from inspection. No PR comment bot or extra write
-permission is required. Summaries and logs follow your GitHub workflow's
-visibility; `job-summary: false` opts out of summary content. An ordinary PR
-workflow can itself be edited by a PR: this is review assistance, not an immutable
-security gate. [Inputs, outputs and trust boundary](docs/github-action.md).
+No PR comment bot or extra write permission is required. GitHub hosts the configured
+summaries and logs; `job-summary: false` opts out of summary content. This is review
+assistance, not an immutable merge gate. [Setup, inputs and trust boundary](docs/github-action.md).
 
 ## Why I built AZT
 
@@ -276,16 +262,12 @@ exposure, not approval of an unsafe configuration.
 
 ## Help make the next review better
 
-**You can contribute without being a security expert.** We need real questions,
-clear explanations and reproducible examples—not just more rules.
+**Help someone make a better decision.** Show us one confusing warning, one missed
+request, or one clearer explanation. You can contribute without being a security expert.
 
-| What we need | A useful first contribution |
-| --- | --- |
-| **First-run feedback** | Try a lab on supported Linux or macOS. Tell us the exact version, step and unexpected result. |
-| **Fewer false alarms** | Share a minimal legitimate example and why the request or command is necessary. Use fictional data. |
-| **Better coverage** | Pair one missed suspicious instruction with a benign control and a failing test. Keep known limits visible. |
-| **Clearer guidance** | Improve one explanation so someone new to AI-assisted coding can make a useful next decision. |
-| **Reproducible scrutiny** | Check the published examples, scopes and artifact identities. Corrections are contributions. |
+- **Try it:** follow a lab and tell us the version, step and unexpected result.
+- **Challenge it:** pair a missed request with a legitimate control, using fictional data.
+- **Explain it:** improve one rule's next step so a newcomer knows what to review.
 
 **[Find your first contribution →](docs/community.md)** · [Three scoped coding tasks](docs/change-review-contributions.md)
 
