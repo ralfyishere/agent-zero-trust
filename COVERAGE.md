@@ -31,7 +31,7 @@ Scan/review/changes stay at v2; earlier `sensitive-request-v1` records remain
 readable with reduced comparability across the method change. MEDIUM severity,
 the default HIGH threshold, one-hop limits and runtime evidence are unchanged.
 
-The unreleased 0.1.14 candidate uses `sensitive-request-v1.2` to distinguish
+The released 0.1.14 uses `sensitive-request-v1.2` to distinguish
 selected token measurements from credential requests, deduplicate repeated
 same-block recipients/reference targets and report an unsupported additional
 hop without calling every chain a cycle. Different contact blocks can still be
