@@ -35,7 +35,7 @@ from pathlib import Path
 import azt_intake
 import azt_gate
 
-__version__ = "0.1.14"
+__version__ = "0.1.15"
 
 SEV_ORDER = {"HIGH": 0, "MEDIUM": 1, "INFO": 2}
 
@@ -304,8 +304,8 @@ STRUCTURAL = [
 
 # --- scan orchestration ---------------------------------------------------------
 
-def scan_report(root, policy=None, fail_on="high"):
-    report = azt_intake.inspect(root, sys.modules[__name__], policy)
+def scan_report(root, policy=None, fail_on="high", capture=None):
+    report = azt_intake.inspect(root, sys.modules[__name__], policy, capture=capture)
     import azt_review
     report["engine"] = azt_review.engine_identity(sys.modules[__name__])
     threshold = {"high": 0, "medium": 1, "any": 2}[fail_on]
@@ -560,7 +560,11 @@ def main(argv=None):
     azt_safety.add_parser(sub)
     import azt_review
     azt_review.add_parsers(sub)
+    import azt_research
+    azt_research.add_parser(sub)
     args = ap.parse_args(argv)
+    if args.cmd == "research":
+        return azt_research.command(args)
     if args.cmd in ("changes", "explain", "report"):
         return azt_review.command(args)
     if args.cmd == "safety":

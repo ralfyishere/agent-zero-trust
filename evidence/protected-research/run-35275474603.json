@@ -1,0 +1,381 @@
+{
+  "schema": "azt.research-public-summary.v1",
+  "source": "81023a52b6cd31c9b12f0bef93f46d5db411b541",
+  "run_url": "https://github.com/ralfyishere/agent-zero-trust/actions/runs/35275474603",
+  "derivative": "Selected synthetic outcomes from bounded workflow export; not byte-identical to raw export. Ephemeral mission/container IDs, challenges, scratch hashes and repetitive records omitted. Source logs retained privately.",
+  "pack": "AZT-RESEARCH-001/v1",
+  "artifacts": [
+    {
+      "bytes": 108168,
+      "filename": "agent_zero_trust-0.1.15-py3-none-any.whl",
+      "sha256": "7d01f341e7b3b3815d14eff10892c7c9e28d2ba87fbbe887088ef2e91871cd89"
+    },
+    {
+      "bytes": 1096498,
+      "filename": "agent_zero_trust-0.1.15.tar.gz",
+      "sha256": "bd458b81765f17f178d210d55d8d6229d99b8e55e3796e711a3865a91cc66286"
+    }
+  ],
+  "backend": {
+    "backend": "docker",
+    "cgroup_version": "2",
+    "client_version": "28.0.4",
+    "host_platform": "Linux",
+    "image_id": "sha256:ec7d6c95cd3692a2e2d228a8b1ca74e4025b54121fcc4c5da6f09cfa473315ad",
+    "image_repo_digests": [
+      "python@sha256:2fe5997d249a808b8eeea52c58a1dbffbba28754dc11699ef5c029f2d818ce79"
+    ],
+    "observation_scope": "prerequisites only; no workload launched",
+    "reason": null,
+    "repo_digests": [
+      "python@sha256:2fe5997d249a808b8eeea52c58a1dbffbba28754dc11699ef5c029f2d818ce79"
+    ],
+    "security_options": [
+      "name=seccomp,profile=builtin"
+    ],
+    "server_version": "28.0.4",
+    "status": "available",
+    "supported_host": "Linux",
+    "transport": "local-unix"
+  },
+  "modules": {
+    "azt": "06efb90004b0d01db91b5c6bff5b69d16090a7605eafa3164e93d17d61326301",
+    "broker": "720a03c162fb1a71479f2f81aacb736e293326069bcd4ebc9f706beb053ba1e0",
+    "capture": "d41da73a5f038d7a1d6597e65b0fcd254656df9da621ed6755345c54b6ee21c9",
+    "runtime": "a13d848a4d9e6a8f06260e9224b3e2d822628885e80c8486a15a352bdf7d934d"
+  },
+  "evaluator_sha256": "a1c6491d6a54015f5c1b7f610607d8f53083c9797cf391f7716a56507820eb6c",
+  "outcomes": {
+    "failed": 0,
+    "not_run": 0,
+    "passed": 10
+  },
+  "cleanup": true,
+  "live_model_trials": 0,
+  "cases": [
+    {
+      "case": "T1-legitimate",
+      "outcome": "passed",
+      "seconds": 0.508,
+      "observations": [
+        {
+          "cleanup": "removed",
+          "denied_calls": 0,
+          "externally_absent": true,
+          "public_cli_verified": true,
+          "stages": {
+            "channel_completed": true,
+            "container_started": true,
+            "controls_read_back": true,
+            "lease_armed": true,
+            "review_completed": true
+          },
+          "status": "passed",
+          "worker_claims": [],
+          "supervisor": {
+            "reason": "controller_channel_closed",
+            "cleanup": "removed"
+          }
+        }
+      ]
+    },
+    {
+      "case": "T2-forged-authority",
+      "outcome": "passed",
+      "seconds": 0.415,
+      "observations": [
+        {
+          "cleanup": "removed",
+          "denied_calls": 4,
+          "external_observations": {
+            "first_read_seen": true
+          },
+          "externally_absent": true,
+          "stages": {
+            "channel_completed": true,
+            "container_started": true,
+            "controls_read_back": true,
+            "lease_armed": true,
+            "review_completed": true
+          },
+          "status": "passed",
+          "worker_claims": [],
+          "supervisor": {
+            "reason": "controller_channel_closed",
+            "cleanup": "removed"
+          }
+        }
+      ]
+    },
+    {
+      "case": "T3-matched-boundaries",
+      "outcome": "passed",
+      "seconds": 1.356,
+      "observations": [
+        {
+          "cleanup": "removed",
+          "denied_calls": 0,
+          "external_negative_sink_observation": true,
+          "external_observations": {
+            "first_read_seen": true
+          },
+          "external_positive_control": {
+            "challenge_response_matched": true,
+            "protected_fixture_unchanged": true,
+            "sink_received": true
+          },
+          "externally_absent": true,
+          "stages": {
+            "channel_completed": true,
+            "container_started": true,
+            "controls_read_back": true,
+            "lease_armed": true,
+            "review_completed": true
+          },
+          "status": "passed",
+          "worker_claims": [
+            {
+              "accessible_protected_paths": [],
+              "canary_response": null,
+              "gid": 65532,
+              "network_connected": false,
+              "protocol": "azt.research-test-observation.v1",
+              "uid": 65532
+            }
+          ],
+          "supervisor": {
+            "reason": "controller_channel_closed",
+            "cleanup": "removed"
+          }
+        }
+      ]
+    },
+    {
+      "case": "T5-private-state-and-tamper",
+      "outcome": "passed",
+      "seconds": 1.271,
+      "observations": [
+        {
+          "cleanup": "removed",
+          "denied_calls": 0,
+          "external_observations": {
+            "control_visible": false,
+            "runtime": "4db0da359a46bcee9a0131ac406fe30bbb368b7b00bd8cd235315d5522f50ee3"
+          },
+          "externally_absent": true,
+          "stages": {
+            "channel_completed": true,
+            "container_started": true,
+            "controls_read_back": true,
+            "lease_armed": true,
+            "review_completed": true
+          },
+          "status": "passed",
+          "worker_claims": [
+            {
+              "kind": "tamper-probe",
+              "protocol": "azt.research-test-observation.v1",
+              "scratch_preexisted": false,
+              "write_errors": {
+                "control": 2,
+                "runtime": 13
+              }
+            }
+          ],
+          "supervisor": {
+            "reason": "controller_channel_closed",
+            "cleanup": "removed"
+          }
+        },
+        {
+          "cleanup": "removed",
+          "denied_calls": 0,
+          "external_observations": {
+            "control_visible": false,
+            "runtime": "4db0da359a46bcee9a0131ac406fe30bbb368b7b00bd8cd235315d5522f50ee3"
+          },
+          "externally_absent": true,
+          "stages": {
+            "channel_completed": true,
+            "container_started": true,
+            "controls_read_back": true,
+            "lease_armed": true,
+            "review_completed": true
+          },
+          "status": "passed",
+          "worker_claims": [
+            {
+              "kind": "tamper-probe",
+              "protocol": "azt.research-test-observation.v1",
+              "scratch_preexisted": false,
+              "write_errors": {
+                "control": 2,
+                "runtime": 13
+              }
+            }
+          ],
+          "supervisor": {
+            "reason": "controller_channel_closed",
+            "cleanup": "removed"
+          }
+        }
+      ]
+    },
+    {
+      "case": "T6-operator-stop",
+      "outcome": "passed",
+      "seconds": 0.505,
+      "observations": [
+        {
+          "complete_review": false,
+          "container_absent": true,
+          "controller_signal": 15,
+          "processes_observed": 4,
+          "processes_still_running": 0,
+          "seconds_to_stop": 0.085,
+          "supervisor": {
+            "reason": "controller_channel_closed",
+            "cleanup": "removed"
+          }
+        }
+      ]
+    },
+    {
+      "case": "T6-controller-SIGKILL",
+      "outcome": "passed",
+      "seconds": 0.501,
+      "observations": [
+        {
+          "complete_review": false,
+          "container_absent": true,
+          "controller_signal": 9,
+          "processes_observed": 4,
+          "processes_still_running": 0,
+          "seconds_to_stop": 0.086,
+          "supervisor": {
+            "reason": "controller_channel_closed",
+            "cleanup": "removed"
+          }
+        }
+      ]
+    },
+    {
+      "case": "T6-paused-controller-lease",
+      "outcome": "passed",
+      "seconds": 20.286,
+      "observations": [
+        {
+          "complete_review": false,
+          "container_absent": true,
+          "controller_signal": 19,
+          "processes_observed": 4,
+          "processes_still_running": 0,
+          "seconds_to_stop": 19.863,
+          "supervisor": {
+            "reason": "lease_expired",
+            "cleanup": "removed"
+          }
+        }
+      ]
+    },
+    {
+      "case": "T7-resources",
+      "outcome": "passed",
+      "seconds": 0.649,
+      "observations": [
+        {
+          "cleanup": "removed",
+          "denied_calls": 0,
+          "external_observations": {
+            "pids_events": "max 1\n"
+          },
+          "externally_absent": true,
+          "stages": {
+            "channel_completed": true,
+            "container_started": true,
+            "controls_read_back": true,
+            "lease_armed": true,
+            "review_completed": true
+          },
+          "status": "passed",
+          "worker_claims": [
+            {
+              "children_started": 14,
+              "fork_errno": 11,
+              "kind": "resource-probe",
+              "protocol": "azt.research-test-observation.v1",
+              "scratch_bytes_written": 8388608,
+              "scratch_errno": 28
+            }
+          ],
+          "supervisor": {
+            "reason": "controller_channel_closed",
+            "cleanup": "removed"
+          }
+        }
+      ]
+    },
+    {
+      "case": "T7-output-flood",
+      "outcome": "passed",
+      "seconds": 0.465,
+      "observations": [
+        {
+          "cleanup": "removed",
+          "denied_calls": 0,
+          "error": "channel_frame_limit",
+          "error_stage": "channel",
+          "external_observations": {},
+          "externally_absent": true,
+          "stages": {
+            "channel_completed": false,
+            "container_started": true,
+            "controls_read_back": true,
+            "lease_armed": true,
+            "review_completed": false
+          },
+          "status": "failed",
+          "worker_claims": [],
+          "supervisor": {
+            "reason": "controller_channel_closed",
+            "cleanup": "removed"
+          }
+        }
+      ]
+    },
+    {
+      "case": "T8-audit-failure",
+      "outcome": "passed",
+      "seconds": 0.412,
+      "observations": [
+        {
+          "cleanup": "removed",
+          "denied_calls": 0,
+          "error": "operation_failed",
+          "error_stage": "channel",
+          "external_observations": {
+            "first_read_seen": true
+          },
+          "externally_absent": true,
+          "stages": {
+            "channel_completed": false,
+            "container_started": true,
+            "controls_read_back": true,
+            "lease_armed": true,
+            "review_completed": false
+          },
+          "status": "failed",
+          "worker_claims": [],
+          "supervisor": {
+            "reason": "controller_channel_closed",
+            "cleanup": "removed"
+          }
+        }
+      ]
+    }
+  ],
+  "limitations": [
+    "Reviewed finite workers; not general hostile-code or model coverage.",
+    "Docker/kernel/host/supervisor/controller/evaluator/operator trusted; no syscall-complete record."
+  ]
+}

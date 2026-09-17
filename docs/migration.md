@@ -1,5 +1,21 @@
 # Migrating to 0.1.9 and later
 
+## 0.1.15 source candidate
+
+Research registration/review/run/case records are separate v1 envelopes; existing
+scan/review/changes v2 remain supported. Old binaries do not understand `research`.
+No change to default HIGH threshold, MEDIUM request severity, scan exits, the
+Action, or FS-001 protocol is intended. `research review/export/case` are
+informational, not admission; incomplete review exits 2. `research run` requires
+a new private directory and the declared native-Linux backend, otherwise fails
+closed. See [captured-source limits](protected-research.md).
+
+The new CLI/intake adapter changes implementation identity. An existing optional
+snapshot receipt must be explicitly re-admitted; no automatic refresh occurs.
+Captured inputs preserve byte/manifest identities without claiming atomic
+filesystem capture or original-source authentication. Pending cases stay local
+and untrusted. Candidate artifacts are not the published 0.1.14 package.
+
 ## 0.1.14
 
 The analyzer method changes to `sensitive-request-v1.2`. Selected token

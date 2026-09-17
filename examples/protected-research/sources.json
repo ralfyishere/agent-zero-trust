@@ -1,0 +1,8 @@
+{
+  "schema": "azt.research-sources.v1",
+  "sources": [
+    {"id":"limited","kind":"markdown","root":"captures","path":"limited.md","method":"operator-supplied-text"},
+    {"id":"diagnostics","kind":"markdown","root":"captures","path":"diagnostics.md","method":"operator-supplied-text"},
+    {"id":"peer","kind":"message","root":"captures","path":"peer.json","method":"saved-message"}
+  ]
+}

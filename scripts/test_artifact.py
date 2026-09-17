@@ -90,7 +90,10 @@ def main():
                        "azt_resources/scan-v2.schema.json", "azt_resources/review-v2.schema.json",
                        "azt_resources/changes-v2.schema.json", "examples/sensitive-request/challenge-v1.json",
                        "scripts/sensitive_request_lab.py", "scripts/action_review.py",
-                       "examples/sensitive-request/precision-v1.json", "scripts/evaluate_precision.py"):
+                       "examples/sensitive-request/precision-v1.json", "scripts/evaluate_precision.py",
+                       "azt_research.py", "azt_research_broker.py", "azt_research_runtime.py", "azt_research_worker.py",
+                       "examples/protected-research/sources.json", "scripts/research_lab.py",
+                       "scripts/test_research_integration.py", "packs/AZT-RESEARCH-001/v1/expectations.json"):
             assert (source / needed).is_file(), "sdist missing " + needed
         assert not (source / ".azt-local").exists(), "private continuity state must not ship"
         result = subprocess.run([sys.executable, "test_azt.py"], cwd=source,
@@ -151,9 +154,10 @@ def main():
         run([python, "-I", "-m", "unittest", "discover", "-s", root / "tests", "-p", "test_review.py", "-q"])
         run([python, "-I", "-m", "unittest", "discover", "-s", root / "tests", "-p", "test_action_review.py", "-q"])
         for test in ('test_sensitive.py', 'test_sensitive_review.py', 'test_sensitive_associations.py',
-                     'test_sensitive_precision.py', 'test_review_summary.py', 'test_review_bounds.py'):
+                     'test_sensitive_precision.py', 'test_review_summary.py', 'test_review_bounds.py',
+                     'test_research.py', 'test_research_runtime.py'):
             run([python, "-I", "-m", "unittest", "discover", "-s", root / "tests", "-p", test, "-q"])
-        for resource in ("review-v1", "changes-v1", "guidance-v1", "scan-v2", "review-v2", "changes-v2"):
+        for resource in ("review-v1", "changes-v1", "guidance-v1", "scan-v2", "review-v2", "changes-v2", "research-sources-v1"):
             run([python, "-I", "-c", "from importlib.resources import files; import json; json.loads(files('azt_resources').joinpath('"+resource+".schema.json').read_text())"])
         run([python, "-I", root / "scripts/change_review_lab.py", "--cli", cli, "--output", work / "lab"])
         print("REVIEW ARTIFACT PASS: installed review regressions, catalog/schemas, four-case scan/compare/explain/HTML/JSON lab")
@@ -162,6 +166,8 @@ def main():
         run([python, root / "scripts/evaluate_associations.py", "--python", python, "--output", work / "associations.json"])
         run([python, root / "scripts/evaluate_precision.py", "--python", python, "--output", work / "precision.json"])
         print("SENSITIVE ARTIFACT PASS: installed analysis/dependency/exception regressions; 5 development + 8 reviewer-authored inputs; no runtime trials")
+        run([python, '-I', root/'scripts/research_lab.py', '--cli', cli, '--output', work/'research lab'])
+        print('RESEARCH ARTIFACT PASS: installed capture/broker/protocol tests and offline lab; no Docker boundary trial')
         print("ARTIFACT PASS: clean offline wheel install; installed import; help/version; "
               "deterministic JSON; benign=0; malicious=1 with net.pipe_shell; invalid target=2")
     return 0

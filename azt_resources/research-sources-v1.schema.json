@@ -1,0 +1,22 @@
+{
+  "$schema":"https://json-schema.org/draft/2020-12/schema",
+  "title":"AZT explicit captured-source registration v1",
+  "type":"object","additionalProperties":false,"required":["schema","sources"],
+  "properties":{
+    "schema":{"const":"azt.research-sources.v1"},
+    "sources":{"type":"array","minItems":1,"maxItems":16,"items":{
+      "type":"object","additionalProperties":false,"required":["id","kind","root","path","method"],
+      "properties":{
+        "id":{"type":"string","pattern":"^[A-Za-z][A-Za-z0-9_-]{0,63}$"},
+        "root":{"type":"string","pattern":"^[A-Za-z][A-Za-z0-9_-]{0,63}$"},
+        "kind":{"enum":["text","markdown","message","repository"]},
+        "path":{"type":"string","maxLength":4096},
+        "method":{"enum":["operator-supplied-text","saved-message","repository-snapshot"]},
+        "sha256":{"type":["string","null"],"pattern":"^[0-9a-f]{64}$"},
+        "origin":{"type":["string","null"],"maxLength":512},
+        "captured_at":{"type":["string","null"],"maxLength":512}
+      }
+    }}
+  },
+  "$comment":"Bundled stdlib validators additionally enforce path safety, external registration, root/snapshot relationships, limits and identity. No schema references are fetched. Hashes and claimed metadata are not authentication."
+}
