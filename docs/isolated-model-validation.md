@@ -1,4 +1,11 @@
-# One disposable live-model validation — test branch only
+# Disposable model-service diagnostic — test branch only
+
+**Current local preparation selects startup/readiness only.** It has not been
+run on Linux. The test-branch workflow explicitly passes `--startup-only`; it
+does not request model weights, preload, inference, task sources, investigations
+or network probes. The historical full experiment below remains a separate,
+uncompleted measurement. A future full-model attempt needs separate selection
+and authorization; startup success will not automatically advance to it.
 
 This is the explicitly authorized continuation of the 0.1.16 source experiment,
 not a package release, production deployment or protection guarantee. The product
@@ -104,3 +111,88 @@ These follow-up changes have offline regression coverage, **not a new Linux or
 live-model result**. The next approved run must establish startup, utility,
 matched controls and cleanup under the unchanged restrictions. Nothing here
 authorizes a retry or represents a completed protected model integration.
+
+## Second attempt and local-only diagnostic hardening
+
+[Run 35367305211](https://github.com/ralfyishere/agent-zero-trust/actions/runs/35367305211)
+tested `3911d6981f0ed81f4f42a313cecc1b0314cb4fb5`. Its 46 scanner checks,
+343 unit tests and installed wheel/source-distribution checks passed. The
+**download-service start acknowledgement failed** before a model pull request,
+preload, network control or either live investigation. The retained 257-byte
+stderr identity was unclassified; its hash cannot reconstruct the error or
+establish the underlying cause. Zero live-model sessions ran. Both cleanup
+passes verified the recorded container, model volume and two newly pulled images
+absent through successful daemon listings. The separate cleanup job step passed;
+the experiment and its evidence-export step correctly remained non-success.
+These are setup/cleanup observations, not a model or isolation result.
+
+The local diagnostic hardening changes this test helper, tests and this document;
+the startup-only selection below also updates the test-branch workflow:
+
+- Startup diagnostics use a versioned fixed-vocabulary projection of at most
+  8 KiB of daemon stderr. Ordered markers retain known operational layers and
+  OS error phrases without copying arbitrary text, paths, recipients, labels or
+  arguments. Truncation is explicit. Unmatched content remains unknown; these
+  hints are not a root-cause determination or an anonymized raw transcript.
+- A failed start receives one read-only, two-second `container inspect` request
+  for selected state fields. Status/running/OOM/exit code and the same projection
+  of `State.Error` are separate from the start acknowledgement. A current state
+  is not proof of no prior execution. No `exec`, restart, container-log request,
+  config/environment export or new authority is introduced. Missing/malformed
+  state remains unavailable, and collection failure cannot replace the original
+  error or prevent cleanup. See [Docker inspect](https://docs.docker.com/reference/cli/docker/container/inspect/)
+  and the tested daemon's [state fields](https://github.com/moby/moby/blob/v28.0.4/api/types/container/container.go).
+- Generated resource names are recorded **before** create calls. If a create
+  reply is lost, cleanup resolves the exact name with matching daemon label/name
+  and ID; it does not guess an ID or broadly prune. A ledger-write failure before
+  creation prevents that operation. Per-resource ownership verification failure
+  skips that removal, records failure, and still attempts other exact resources.
+  Successful daemon readback is still required to claim absence.
+
+Offline synthetic regressions exercise these failure paths; they do not run
+Docker or a model and do not retroactively strengthen either historical run.
+The image family/digests, workload/probe/rubric, permissions, resource limits,
+deadline, cloud disable and network restrictions are unchanged. No additional
+remote attempt is implied or authorized by this document. Live validation
+remains blocked pending a separately authorized run and actual observations.
+
+## Startup-only diagnostic (prepared, not executed)
+
+The next diagnostic reuses the **same download-service configuration**, including
+the bridge network, UID/GID, fixed images, tmpfs/volume, entrypoint, resource bounds
+and independent container deadlines. It does not weaken a failing restriction or
+substitute another backend. Only the two already pinned images and existing build
+tools are prepared; **no model-weight download is requested**. The bridge-enabled
+setup is not a no-network inference profile. No claim of zero network activity is
+made merely because the controller issues no model requests.
+
+The controller follows image preparation → backend check → empty model volume →
+service start → fixed relay start → configuration readback → bounded
+`GET /api/version` readiness → exact-resource cleanup. The usual relay's fixed
+readiness route is reused; no host HTTP listener or task worker is created.
+This is a maintainer diagnostic, not a new product command:
+
+```sh
+# Only within the reviewed disposable GitHub Linux job, never a personal host.
+python -I scripts/test_live_model.py --startup-only --output /new/private-output
+```
+
+`azt.model-startup-diagnostic.v1` labels this distinct scope. Its stages record
+controller progress; configuration readback is not a tested isolation boundary.
+Validated readiness exports only the expected version, not arbitrary service
+response text. Model/session counters remain zero and cases remain empty. Exit
+0 / status `passed` means **only this startup diagnostic and resource cleanup
+completed**, not that a live-model investigation or network control passed.
+Failure returns 2, keeps completed stages, and cannot skip cleanup. A readiness
+failure after start gets one bounded State readback before removal. An unfamiliar
+daemon error can still remain unresolved; the fixed-vocabulary projection is not
+a root-cause guarantee. This diagnostic also requires successful readback of
+new-image removal for a pass; any retained image is reported and leaves the
+diagnostic non-success even though eventual disposable-VM teardown is a backstop.
+
+The workflow retains manual exact-SHA selection, its standard runner and finite
+timeout, no secrets/artifact uploads, and separate `always()` cleanup/export.
+Offline mocked regressions verify orchestration, no fallthrough into model work,
+failure stages, safe output and cleanup failure semantics. They do not establish
+that Docker started or the selected image became ready. No further run is
+authorized by these documentation or workflow edits.

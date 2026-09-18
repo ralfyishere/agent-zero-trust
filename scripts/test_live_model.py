@@ -23,6 +23,58 @@ PYTHON_REF = 'docker.io/library/python@sha256:2fe5997d249a808b8eeea52c58a1dbffbb
 MODEL = 'qwen3:0.6b'
 MODEL_DIGEST = '7df6b6e09427a769808717c0a93cadc4ae99ed4eb8bf5ca557c90846becea435'
 LABEL = 'org.azt.test=isolated-local-model-v1'
+DIAGNOSTIC_BYTES = 8192
+STATE_FORMAT = ('{"status":{{json .State.Status}},"running":{{json .State.Running}},'
+                '"oom_killed":{{json .State.OOMKilled}},"exit_code":{{json .State.ExitCode}},'
+                '"error":{{json .State.Error}}}')
+
+# Fixed, maintained vocabulary, never substrings copied from a daemon message.
+# Markers retain an error's operational layers without printing arguments,
+# identities, paths, URLs, or even arbitrary dictionary words from that error.
+# A phrase match is a diagnostic hint, not an independently verified cause.
+ERROR_MARKERS = (
+    ('daemon_response', b'error response from daemon'),
+    ('network_setup', b'failed to create endpoint'),
+    ('network_setup', b'failed to set up container networking'),
+    ('volume_mount', b'failed to mount local volume'),
+    ('volume_copy', b'failed to populate volume'),
+    ('file_copy', b'failed to copy'),
+    ('mount_setup', b'error mounting'),
+    ('mount_setup', b'failed to mount'),
+    ('mount_configuration', b'invalid mount config'),
+    ('tmpfs_configuration', b'invalid tmpfs'),
+    ('shim_creation', b'failed to create shim task'),
+    ('task_creation', b'failed to create task'),
+    ('oci_creation', b'oci runtime create failed'),
+    ('runc_creation', b'runc create failed'),
+    ('process_start', b'unable to start container process'),
+    ('container_initialization', b'error during container init'),
+    ('file_write', b'failed to write'),
+    ('apparmor', b'apparmor'),
+    ('seccomp', b'seccomp'),
+    ('ownership_change', b'lchown'),
+    ('ownership_change', b'chown'),
+    ('permission_denied', b'permission denied'),
+    ('operation_not_permitted', b'operation not permitted'),
+    ('readonly_filesystem', b'read-only file system'),
+    ('missing_path', b'no such file or directory'),
+    ('missing_executable', b'executable file not found'),
+    ('invalid_argument', b'invalid argument'),
+    ('unsupported_operation', b'operation not supported'),
+    ('unsupported_function', b'function not implemented'),
+    ('exec_format', b'exec format error'),
+    ('storage_full', b'no space left on device'),
+    ('quota_exceeded', b'disk quota exceeded'),
+    ('out_of_memory', b'cannot allocate memory'),
+    ('resource_unavailable', b'resource temporarily unavailable'),
+    ('open_file_limit', b'too many open files'),
+    ('device_busy', b'device or resource busy'),
+    ('not_directory', b'not a directory'),
+    ('address_in_use', b'address already in use'),
+    ('network_unreachable', b'network is unreachable'),
+    ('connection_refused', b'connection refused'),
+    ('deadline', b'context deadline exceeded'),
+)
 
 
 def require(ok, message):
@@ -31,8 +83,8 @@ def require(ok, message):
 
 
 def start_diagnostic(code, out, err):
-    """Finite categories only: daemon text can contain private paths/labels."""
-    lower=err.lower()
+    """Bounded fixed-vocabulary projection; no raw daemon text is retained."""
+    lower=err[:DIAGNOSTIC_BYTES].lower()
     categories=[]
     for category, phrases in (
         ('permission_denied', (b'permission denied', b'operation not permitted')),
@@ -43,10 +95,41 @@ def start_diagnostic(code, out, err):
         ('mount_failure', (b'error mounting', b'failed to mount')),
     ):
         if any(phrase in lower for phrase in phrases):categories.append(category)
-    return {'exit_code':code, 'categories':categories or ['unclassified'],
+    occurrences=[]
+    for marker, phrase in ERROR_MARKERS:
+        at=lower.find(phrase)
+        if at>=0:occurrences.append((at,marker))
+    markers=list(dict.fromkeys(marker for _,marker in sorted(occurrences)))
+    return {'schema':'azt.docker-start-diagnostic.v2',
+            'exit_code':code, 'categories':categories or ['unclassified'],
+            'markers_in_message_order':markers,
+            'inspected_stderr_bytes':len(lower), 'stderr_truncated':len(err)>len(lower),
             'stdout_bytes':len(out), 'stderr_bytes':len(err),
             'stderr_sha256':hashlib.sha256(err).hexdigest(),
-            'scope':'diagnostic categories, not an established root cause; raw daemon text omitted'}
+            'scope':'fixed phrase hints, not an established root cause; raw daemon text omitted; unmatched content remains unknown'}
+
+
+def state_diagnostic(raw):
+    """Only the selected Docker State fields, not Config/Env/Args/labels/logs."""
+    require(len(raw)<=16384, 'state_reply_bound')
+    def unique(pairs):
+        value={}
+        for key,item in pairs:
+            require(key not in value, 'state_duplicate_key');value[key]=item
+        return value
+    value=json.loads(raw,object_pairs_hook=unique)
+    require(type(value) is dict and set(value)=={'status','running','oom_killed','exit_code','error'},
+            'state_fields')
+    require(value['status'] in ('created','running','paused','restarting','removing','exited','dead'),
+            'state_status')
+    require(type(value['running']) is bool and type(value['oom_killed']) is bool
+            and type(value['exit_code']) is int and 0<=value['exit_code']<=255
+            and type(value['error']) is str, 'state_types')
+    return {'status':'observed', 'container_status':value['status'],
+            'running':value['running'], 'oom_killed':value['oom_killed'],
+            'container_exit_code':value['exit_code'],
+            'error_diagnostic':start_diagnostic(None,b'',value['error'].encode('utf-8')),
+            'scope':'single daemon state readback after failed start; not proof of no prior execution or a model session'}
 
 
 def save(path, value):
@@ -76,10 +159,13 @@ class Lab:
         self.docker = Docker('unix:///var/run/docker.sock', root)
         self.prefix = 'azt-live-' + uuid.uuid4().hex[:12]
         self.ids, self.volumes, self.networks, self.new_images = [], [], [], []
+        self.pending_containers = []
+        self.verify_ownership = True
         self.start_attempts = []
         self.relay_source = Path(__file__).with_name('live_model_relay.py').resolve()
         self.identity = {'prefix': self.prefix, 'containers': self.ids, 'volumes': self.volumes,
-                         'networks': self.networks, 'new_images': self.new_images}
+                         'networks': self.networks, 'new_images': self.new_images,
+                         'pending_containers': self.pending_containers}
 
     def ledger(self):
         save(self.root/'owned.json', self.identity)
@@ -88,25 +174,44 @@ class Lab:
         return self.docker.command(*args, **kw)
 
     def create(self, args):
-        _, raw, _ = self.cmd(*args)
-        cid = raw.decode().strip(); require(re.fullmatch('[0-9a-f]{64}', cid), 'container_identity')
-        self.ids.append(cid); self.ledger()
         name=args[args.index('--name')+1]
         require(name.startswith(self.prefix+'-'), 'run_owned_start')
         role=name[len(self.prefix)+1:]
         require(role in ('download','downloadrelay','inference','relay','sink','positive'), 'fixed_start_role')
+        # Persist an exact, generated recovery target BEFORE the daemon call.
+        # A timeout/lost reply can occur after Docker has created the resource.
+        self.pending_containers.append(name);self.ledger()
+        _, raw, _ = self.cmd(*args)
+        cid = raw.decode().strip(); require(re.fullmatch('[0-9a-f]{64}', cid), 'container_identity')
+        self.ids.append(cid);self.pending_containers.remove(name);self.ledger()
         record={'role':role, 'start_acknowledged':False}
         self.start_attempts.append(record)
         try:
             code,out,err=self.cmd('start', cid, allow_error=True)
         except Exception as exc:
             record['transport_error_type']=type(exc).__name__
+            record['state_readback']=self.start_state(cid)
             raise
         if code:
             record['diagnostic']=start_diagnostic(code,out,err)
+            record['state_readback']=self.start_state(cid)
             raise ValueError('container_start_failed:'+role)
         record['start_acknowledged']=True
         return cid
+
+    def start_state(self, cid):
+        # One read-only, two-second request before cleanup; no retry, exec,
+        # container logs or credential-bearing configuration inspection.
+        try:
+            code,out,err=self.cmd('container','inspect','--format',STATE_FORMAT,cid,
+                                  allow_error=True,timeout=2,limit=16384)
+            if code:
+                return {'status':'unavailable','diagnostic':start_diagnostic(code,out,err)}
+            return state_diagnostic(out)
+        except Exception:
+            # Diagnostic failure must neither replace the original error nor
+            # prevent the independent exact-resource cleanup from running.
+            return {'status':'unavailable_or_invalid', 'scope':'no state conclusion; original start failure retained'}
 
     def pull(self, ref):
         # A failed inspect is not proof of absence (the daemon may be down).
@@ -129,6 +234,13 @@ class Lab:
             'OLLAMA_VULKAN=0', 'OLLAMA_KEEP_ALIVE=5m', 'OLLAMA_LOAD_TIMEOUT=30s', 'OLLAMA_NOPRUNE=1',
             '/usr/bin/timeout', '--signal=KILL', '300' if phase == 'download' else '420', '/bin/ollama', 'serve']
         return self.create(args)
+
+    def model_volume(self):
+        volume=self.prefix+'-models'
+        self.volumes.append(volume);self.ledger()
+        self.cmd('volume','create','--label',LABEL,'--driver','local','--opt','type=tmpfs','--opt','device=tmpfs',
+                 '--opt','o=size=805306368,uid=65532,gid=65532,mode=0700',volume)
+        return volume
 
     def relay(self, image, server, volume, suffix):
         args = common(self.prefix+'-'+suffix, 'container:'+server, '256m', .5, 16)
@@ -154,6 +266,7 @@ class Lab:
                 proc.kill(); proc.wait(timeout=3)
 
     def remove(self, cid):
+        if getattr(self,'verify_ownership',False):self.owned('container',cid)
         self.cmd('rm', '--force', cid, allow_error=True)
         require(self.absent('container', cid), 'container_cleanup_failed')
 
@@ -161,13 +274,41 @@ class Lab:
         # Only a successful daemon readback establishes absence. An unavailable
         # daemon or permission error must never become a cleanup success.
         commands={
-            'container':['ps','-a','--no-trunc','--filter','id='+identity,'--format','{{.ID}}'],
+            'container':(['ps','-a','--no-trunc','--filter','id='+identity,'--format','{{.ID}}']
+                         if re.fullmatch('[0-9a-f]{64}',identity) else
+                         ['ps','-a','--no-trunc','--filter','name=^/'+identity+'$','--format','{{.Names}}']),
             'volume':['volume','ls','--filter','name='+identity,'--format','{{.Name}}'],
             'network':['network','ls','--filter','name='+identity,'--format','{{.Name}}'],
             'image':['image','ls','--no-trunc','--quiet'],
         }
         _, raw, _=self.cmd(*commands[kind])
         return identity not in raw.decode().splitlines()
+
+    def owned(self, kind, identity):
+        """Verify exact identity, generated name and label; None means absent."""
+        labels='.Config.Labels' if kind=='container' else '.Labels'
+        id_expression='{{json .Id}}' if kind=='container' else '""'
+        template=('{"id":'+id_expression+',"name":{{json .Name}},"label":{{json (index '
+                  +labels+' "org.azt.test")}}}')
+        code,raw,_=self.cmd(kind,'inspect','--format',template,identity,
+                            allow_error=True,timeout=2,limit=16384)
+        if code:
+            require(self.absent(kind,identity), 'cleanup_identity_unverified')
+            return None
+        value=json.loads(raw)
+        require(type(value) is dict and set(value)=={'id','name','label'},'cleanup_identity_fields')
+        require(value['label']=='isolated-local-model-v1','cleanup_label')
+        name=value['name']
+        if kind=='container':
+            require(type(name) is str and re.fullmatch('/'+re.escape(self.prefix)+'-[a-z]+',name),
+                    'cleanup_container_name')
+            cid=value['id']
+            require(type(cid) is str and re.fullmatch('[0-9a-f]{64}',cid),'cleanup_container_id')
+            require(cid==identity if re.fullmatch('[0-9a-f]{64}',identity) else name=='/'+identity,
+                    'cleanup_identity_mismatch')
+            return cid
+        require(name==identity and value['id']=='','cleanup_identity_mismatch')
+        return identity
 
     def controls(self, cid, network, model_readonly):
         _, raw, _ = self.cmd('inspect', cid, '--format', '{{json .}}'); item=json.loads(raw); host=item['HostConfig']
@@ -197,8 +338,8 @@ class Lab:
 
     def network_controls(self, image, relay):
         network=self.prefix+'-net'
-        self.cmd('network','create','--internal','--label',LABEL,network)
         self.networks.append(network); self.ledger()
+        self.cmd('network','create','--internal','--label',LABEL,network)
         args=common(self.prefix+'-sink',network,'64m',.25,16)
         args+=['--mount','type=bind,src='+str(self.relay_source)+',dst=/relay.py,readonly',
                '--entrypoint','/usr/local/bin/python3',image,'-I','/relay.py','--sink']
@@ -222,6 +363,14 @@ class Lab:
 
     def cleanup(self):
         ok=True; resources=[]
+        for name in getattr(self,'pending_containers',[]):
+            try:
+                cid=self.owned('container',name)
+                if cid is not None:self.remove(cid)
+                removed=self.absent('container',name)
+            except Exception:removed=False
+            ok=ok and removed
+            resources.append({'kind':'pending_container','absence_verified':removed})
         for cid in reversed(self.ids):
             try:
                 self.remove(cid); removed=True
@@ -230,6 +379,7 @@ class Lab:
         for kind, names in (('volume',self.volumes),('network',self.networks)):
             for name in names:
                 try:
+                    if getattr(self,'verify_ownership',False):self.owned(kind,name)
                     if not self.absent(kind,name):self.cmd(kind,'rm',name)
                     removed=self.absent(kind,name)
                 except Exception:removed=False
@@ -256,24 +406,23 @@ def cleanup_saved(root):
     require(path.stat().st_size<=8192,'cleanup_ledger_bound')
     value=json.loads(path.read_text())
     require(re.fullmatch('azt-live-[a-f0-9]{12}',value['prefix']), 'cleanup_prefix')
-    lab=object.__new__(Lab);lab.root=root
+    lab=object.__new__(Lab);lab.root=root;lab.prefix=value['prefix'];lab.verify_ownership=True
     # Repeated cleanup gets a fresh credential-free client directory; do not
     # reuse (or recursively erase) arbitrary pre-existing control paths.
     control=Path(tempfile.mkdtemp(prefix='fallback-cleanup-',dir=root))
     lab.docker=Docker('unix:///var/run/docker.sock',control)
     lab.ids=value['containers'];lab.volumes=value['volumes'];lab.networks=value['networks'];lab.new_images=value['new_images']
-    require(len(lab.ids)<=12 and len(lab.volumes)<=1 and len(lab.networks)<=1 and len(lab.new_images)<=2,'cleanup_count')
+    lab.pending_containers=value.get('pending_containers',[])
+    require(len(lab.ids)<=12 and len(lab.pending_containers)<=12 and len(lab.volumes)<=1
+            and len(lab.networks)<=1 and len(lab.new_images)<=2,'cleanup_count')
+    require(all(re.fullmatch(re.escape(lab.prefix)+'-[a-z]+',s) for s in lab.pending_containers),
+            'cleanup_pending_identity')
     for kind, items in (('container',lab.ids),('volume',lab.volumes),('network',lab.networks)):
         for item in items:
             require(re.fullmatch('[0-9a-f]{64}',item) if kind=='container' else
                     re.fullmatch(re.escape(value['prefix'])+'-[a-z]+',item), 'cleanup_identity')
-            code,raw,_=lab.cmd(kind,'inspect',item,allow_error=True)
-            if code:
-                require(lab.absent(kind,item), 'cleanup_identity_unverified')
-                continue
-            data=json.loads(raw)[0]
-            labels=data['Config']['Labels'] if kind=='container' else data['Labels']
-            require(labels.get('org.azt.test')=='isolated-local-model-v1','cleanup_label')
+    # Ownership readback is performed per resource inside cleanup(). A daemon
+    # error/mismatched label skips that resource, not every later removal.
     require(all(re.fullmatch('sha256:[0-9a-f]{64}',s) for s in lab.new_images),'cleanup_image_identity')
     result=lab.cleanup();save(root/'fallback-cleanup.json',result);return result
 
@@ -364,7 +513,10 @@ def execute_case(root, name, image, config, lab):
 
 def main():
     parser=argparse.ArgumentParser(description=__doc__);parser.add_argument('--output',type=Path,required=True)
-    parser.add_argument('--cleanup',action='store_true')
+    mode=parser.add_mutually_exclusive_group()
+    mode.add_argument('--cleanup',action='store_true')
+    mode.add_argument('--startup-only',action='store_true',
+                      help='diagnose the unchanged download service; no model pull or inference')
     args=parser.parse_args()
     require(platform.system()=='Linux' and os.environ.get('GITHUB_ACTIONS')=='true'
             and os.environ.get('GITHUB_REPOSITORY')=='ralfyishere/agent-zero-trust'
@@ -378,65 +530,99 @@ def main():
     result={'schema':'azt.live-model-evaluation.v1','status':'blocked','source_sha':os.environ.get('GITHUB_SHA'),
         'run_id':os.environ.get('GITHUB_RUN_ID'),'cases':[],'live_sessions_started':0,'preload_requests':0,
         'model':MODEL,'model_sha256':MODEL_DIGEST,'ollama_ref':OLLAMA_REF,'python_ref':PYTHON_REF}
+    if args.startup_only:
+        result.pop('model');result.pop('model_sha256')
+        result.update(schema='azt.model-startup-diagnostic.v1', evaluation_kind='startup-only',
+            model_pull_requests=0, inference_requests=0,
+            scope='download-service startup/readiness and cleanup only; no model, investigation or network-boundary result',
+            stages={'images_resolved':False,'backend_available':False,'model_volume_created':False,
+                    'service_start_acknowledged':False,'relay_start_acknowledged':False,
+                    'configuration_readback_completed':False,'readiness_response_validated':False})
     try:
         py=lab.pull(PYTHON_REF);ollama=lab.pull(OLLAMA_REF)
         result['image_ids']={'python':py,'ollama':ollama}
+        if args.startup_only:
+            result['stages']['images_resolved']=True;stage='backend_preflight'
         backend=lab.docker.preflight(py);require(backend['status']=='available','required_backend_controls')
         result['backend']=backend
-        stage='bounded_model_download'
-        volume=lab.prefix+'-models'
-        lab.cmd('volume','create','--label',LABEL,'--driver','local','--opt','type=tmpfs','--opt','device=tmpfs',
-                '--opt','o=size=805306368,uid=65532,gid=65532,mode=0700',volume)
-        lab.volumes.append(volume);lab.ledger()
-        download=lab.ollama(ollama,volume,'download');relay=lab.relay(py,download,volume,'downloadrelay')
-        lab.controls(download,'bridge',False);lab.wait_ready(relay)
-        lab.relay_call(relay,{'mode':'pull'},timeout=240)
-        result['model_store']=lab.relay_call(relay,{'mode':'store'},timeout=30)
-        # Keep one read-only mount alive: a local-driver tmpfs loses its bytes
-        # when its last container unmounts it. The networked service stops first.
-        old_relay=relay;lab.remove(download)
-        stage='isolated_service_validation'
-        server=lab.ollama(ollama,volume,'inference');relay=lab.relay(py,server,volume,'relay')
-        lab.remove(old_relay)
-        result['service_controls']=lab.controls(server,'none',True);lab.wait_ready(relay)
-        # Docker puts service stderr on stderr; inspect both bounded streams below.
-        _,out,err=lab.cmd('logs',server,limit=65536)
-        require(b'Ollama cloud disabled: true' in out+err,'cloud_disabled_log_missing')
-        result['cloud_disabled_log_verified']=True
-        result['network_control']=lab.network_controls(py,relay)
-        stage='model_preload'
-        result['preload_requests']=1
-        result['preload']=lab.relay_call(relay,{'mode':'preload'},timeout=50)
-        require(result['preload'].get('done') is True,'model_preload_incomplete')
-        stage='live_model_trials'
-        with Bridge(lab,relay) as bridge:
-            config={'schema':'azt.ollama-local.v1','endpoint':'http://127.0.0.1:'+str(bridge.server.server_port),
-                    'model':MODEL,'model_sha256':MODEL_DIGEST,'cloud_disabled':True,
-                    'verification':'operator-checked-service-config-and-log'}
-            for name in ('limited','multi-source'):
-                result['live_sessions_started']+=1
-                try:record=execute_case(root,name,py,config,lab)
-                except Exception as exc:record={'case':name,'outcome':'failed','error':type(exc).__name__,'complete_verification':False}
-                result['cases'].append(record);save(root/'partial.json',result)
-            result['transport_observations']=bridge.observations
-            result['inference_requests']=bridge.chat_calls
-        _,raw,_=lab.cmd('stats','--no-stream','--format','{{json .}}',server,timeout=10)
-        stats=json.loads(raw);result['service_post_test_resource_sample']={k:stats.get(k) for k in ('CPUPerc','MemUsage','PIDs')}
-        result['service_post_test_resource_sample']['scope']='single post-test sample, not a peak measurement'
-        result['status']='passed' if all(c['outcome']=='passed' for c in result['cases']) else 'failed'
+        if args.startup_only:result['stages']['backend_available']=True
+        stage='model_volume_setup' if args.startup_only else 'bounded_model_download'
+        volume=lab.model_volume()
+        if args.startup_only:
+            result['stages']['model_volume_created']=True;stage='download_service_start'
+        download=lab.ollama(ollama,volume,'download')
+        if args.startup_only:
+            result['stages']['service_start_acknowledged']=True;stage='readiness_relay_start'
+        relay=lab.relay(py,download,volume,'downloadrelay')
+        if args.startup_only:
+            result['stages']['relay_start_acknowledged']=True;stage='download_configuration_readback'
+        controls=lab.controls(download,'bridge',False)
+        if args.startup_only:
+            result['configuration_readback']=controls
+            result['stages']['configuration_readback_completed']=True;stage='download_service_readiness'
+        lab.wait_ready(relay)
+        if args.startup_only:
+            # wait_ready validates the fixed version. Never export arbitrary
+            # service response fields or fall through to the live-model branch.
+            result['stages']['readiness_response_validated']=True
+            result['service_version']='0.34.2'
+            result['status']='passed'
+        else:
+            lab.relay_call(relay,{'mode':'pull'},timeout=240)
+            result['model_store']=lab.relay_call(relay,{'mode':'store'},timeout=30)
+            # Keep one read-only mount alive: a local-driver tmpfs loses its bytes
+            # when its last container unmounts it. The networked service stops first.
+            old_relay=relay;lab.remove(download)
+            stage='isolated_service_validation'
+            server=lab.ollama(ollama,volume,'inference');relay=lab.relay(py,server,volume,'relay')
+            lab.remove(old_relay)
+            result['service_controls']=lab.controls(server,'none',True);lab.wait_ready(relay)
+            # Docker puts service stderr on stderr; inspect both bounded streams below.
+            _,out,err=lab.cmd('logs',server,limit=65536)
+            require(b'Ollama cloud disabled: true' in out+err,'cloud_disabled_log_missing')
+            result['cloud_disabled_log_verified']=True
+            result['network_control']=lab.network_controls(py,relay)
+            stage='model_preload'
+            result['preload_requests']=1
+            result['preload']=lab.relay_call(relay,{'mode':'preload'},timeout=50)
+            require(result['preload'].get('done') is True,'model_preload_incomplete')
+            stage='live_model_trials'
+            with Bridge(lab,relay) as bridge:
+                config={'schema':'azt.ollama-local.v1','endpoint':'http://127.0.0.1:'+str(bridge.server.server_port),
+                        'model':MODEL,'model_sha256':MODEL_DIGEST,'cloud_disabled':True,
+                        'verification':'operator-checked-service-config-and-log'}
+                for name in ('limited','multi-source'):
+                    result['live_sessions_started']+=1
+                    try:record=execute_case(root,name,py,config,lab)
+                    except Exception as exc:record={'case':name,'outcome':'failed','error':type(exc).__name__,'complete_verification':False}
+                    result['cases'].append(record);save(root/'partial.json',result)
+                result['transport_observations']=bridge.observations
+                result['inference_requests']=bridge.chat_calls
+            _,raw,_=lab.cmd('stats','--no-stream','--format','{{json .}}',server,timeout=10)
+            stats=json.loads(raw);result['service_post_test_resource_sample']={k:stats.get(k) for k in ('CPUPerc','MemUsage','PIDs')}
+            result['service_post_test_resource_sample']['scope']='single post-test sample, not a peak measurement'
+            result['status']='passed' if all(c['outcome']=='passed' for c in result['cases']) else 'failed'
     except Exception as exc:
         result['failure']={'stage':stage,'type':type(exc).__name__,
                            'reason':str(exc) if isinstance(exc,ValueError) else 'bounded_setup_or_evaluation_failure'}
     finally:
+        if args.startup_only and result.get('failure',{}).get('stage')=='download_service_readiness':
+            result['service_state_after_readiness_failure']=lab.start_state(download)
         result['setup_container_starts']=lab.start_attempts
         result['cleanup']=lab.cleanup()
         if not result['cleanup']['containers_volumes_networks_removed']:result['status']='failed'
+        if args.startup_only and not all(item['removed'] for item in result['cleanup']['new_images']):
+            result['status']='failed'
         result['wall_seconds']=round(time.monotonic()-start,3)
         result['evaluator_sha256']=hashlib.sha256(Path(__file__).read_bytes()).hexdigest()
         result['limits']={'job_seconds':900,'inference_container_seconds':420,'worker_seconds':120,'request_seconds':10,
                           'model_sessions':2,'model_store_bytes':805306368,'cloud_service':False}
+        if args.startup_only:
+            result['limits']={'job_seconds':900,'download_container_seconds':300,'relay_container_seconds':450,
+                              'model_sessions':0,'model_store_bytes':805306368,'cloud_service':False}
         save(root/'evaluation.json',result)
-        print('AZT_LIVE_MODEL_EVIDENCE_BEGIN\n'+json.dumps(result,sort_keys=True,ensure_ascii=True)+'\nAZT_LIVE_MODEL_EVIDENCE_END',flush=True)
+        marker='AZT_MODEL_STARTUP' if args.startup_only else 'AZT_LIVE_MODEL'
+        print(marker+'_EVIDENCE_BEGIN\n'+json.dumps(result,sort_keys=True,ensure_ascii=True)+'\n'+marker+'_EVIDENCE_END',flush=True)
     return 0 if result['status']=='passed' else 2
 
 

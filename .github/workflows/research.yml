@@ -1,4 +1,4 @@
-name: Explicit isolated local-model validation
+name: Explicit model-service startup diagnostic
 
 # Test-branch-only continuation of the existing exact-SHA dispatch route.
 # No PR, scheduled or automatic push execution. No publication or model on Mac.
@@ -54,11 +54,11 @@ jobs:
           "$RUNNER_TEMP/research-build/bin/python" scripts/release_candidate.py --output "$RUNNER_TEMP/research-build-record"
           python3 -m venv "$RUNNER_TEMP/research-installed"
           "$RUNNER_TEMP/research-installed/bin/python" -m pip --isolated --no-cache-dir install --no-index --no-deps "$RUNNER_TEMP/research-build-record/dist"/*.whl
-      - name: Explicit isolated image and model setup, then two synthetic live sessions
+      - name: Image preparation and startup-readiness only — no model pull or inference
         timeout-minutes: 10
         run: |
           cd "$RUNNER_TEMP"
-          timeout --signal=TERM --kill-after=10s 540s "$RUNNER_TEMP/research-installed/bin/python" -I "$GITHUB_WORKSPACE/scripts/test_live_model.py" --output "$RUNNER_TEMP/azt-live-evidence"
+          timeout --signal=TERM --kill-after=10s 540s "$RUNNER_TEMP/research-installed/bin/python" -I "$GITHUB_WORKSPACE/scripts/test_live_model.py" --startup-only --output "$RUNNER_TEMP/azt-live-evidence"
       - name: Exact-resource cleanup, even after failure
         if: always()
         timeout-minutes: 1
@@ -72,7 +72,7 @@ jobs:
         run: |
           python3 -I "$GITHUB_WORKSPACE/scripts/research_ci_evidence.py" --evidence "$RUNNER_TEMP/azt-live-evidence/evaluation.json" --dist "$RUNNER_TEMP/research-build-record/dist"
       # Explicit downloads: pinned Official Python linux/amd64 image, pinned
-      # upstream Ollama0.34.2 linux/amd64 image, fixed qwen3:0.6b model (~523MB).
-      # Image/model digests and every model blob are checked. No source text is
-      # supplied until download service is removed and inference has network none.
+      # upstream Ollama0.34.2 linux/amd64 image. No model weights are requested.
+      # Diagnose the unchanged download-service profile, then clean up. No task
+      # sources, model preload, inference, investigation or network probe runs.
       # No artifacts/caches, OIDC, application secrets, public ports or write token.
