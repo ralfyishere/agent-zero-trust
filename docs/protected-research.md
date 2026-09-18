@@ -230,6 +230,12 @@ passed native-Linux cases at the exact candidate source, including public-CLI
 completion, controller death and paused-controller lease expiry. These results
 do not establish a live-model or general hostile-program profile.
 
+The [0.1.16 reliability evidence](../evidence/research-reliability/README.md)
+separately records the v2 pack: 13 passed cases, including delayed preparation,
+larger source paging and the unchanged stop/resource assertions. Its first failed
+attempt remains visible. The exact tested source and new artifacts are recorded;
+later documentation is not a new runtime experiment.
+
 Raw controller records are not signed and are not independently authenticated.
 The worker cannot access their store in this profile; the trusted host operator
 can. Exported/redacted reports are derivatives, not original source bytes.

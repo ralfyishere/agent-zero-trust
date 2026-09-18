@@ -85,4 +85,44 @@ change the worker, supervisor, required assertions, resources or stop bound.
 This summary is a selected derivative of bounded synthetic workflow output, not
 a byte-identical raw export or independent audit. Private logs and checkpoints
 are not published. Historical v1 research and FS-001 records remain unchanged.
-The corrected evaluator still requires its own actual verification before merge.
+The subsequent verification below tests the corrected evaluator; it does not
+rewrite this failed attempt.
+
+## Corrected evaluator — actual Linux verification
+
+[Run 35308844187](https://github.com/ralfyishere/agent-zero-trust/actions/runs/35308844187)
+tested source `988faef305189b0b2c20db74d46a35bf1f26a22e` and
+tree `f1773437dcf5c6139aa9045c72b5369e855b8480`.
+**13 passed, 0 failed, 0 not run; cleanup passed; 0 live-model trials.**
+The [selected machine-readable record](run-35308844187.json) includes every case,
+timings, source/module/evaluator hashes, backend and immutable image identity.
+It omits run-local container/mission IDs, detailed worker records and private logs.
+Its raw-export-line digest identifies the original input to this derivative;
+it neither authenticates that input nor proves log completeness.
+
+The complete legitimate review passed without unnecessary denials. The larger
+source review and a 22-second setup delay also completed. Matched generated-file
+and test-owned network controls passed. Four externally observed processes were
+gone after both operator stop (0.086 s) and controller SIGKILL (0.084 s); pausing
+the controller exercised the independent finite lease (19.851 s). These are
+observations on this runner, not universal shutdown timing guarantees. Expired
+preparation is a controller precondition check, not an exercised OS denial.
+
+The hosted build tested these **new** distributions, without borrowing local hashes:
+
+| Artifact | SHA-256 |
+|---|---|
+| `agent_zero_trust-0.1.16-py3-none-any.whl` | `6095c412bc8bbdf552356b03107569eec1fcb394c0fd6aac23eba130a38c9f6c` |
+| `agent_zero_trust-0.1.16.tar.gz` | `d9868ee2d886ed32dda9f6da1ac579b945ec06e891146c692dc42d58df9b7c67` |
+
+Clean-source local and hosted checks passed: scanner suite, **307 unit tests**,
+installed wheel/extracted-sdist verification and bundled offline labs. Ordinary
+PR CI also passed on Python 3.9 and 3.12. The local fresh-user README sequence
+installed published 0.1.15 into a separate environment using paths with spaces;
+benign and MEDIUM scans returned 0, then comparison, explanation and local HTML
+export succeeded. No Docker or model was used on that macOS host.
+
+Only finite reviewed workers ran inside disposable Linux isolation. Docker,
+kernel, host, image, supervisor, controller and evaluator remain trusted. The
+runtime outcome does not validate an Ollama integration or live-model behavior.
+This evidence/documentation follow-up is separate from the tested code commit.

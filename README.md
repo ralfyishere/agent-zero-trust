@@ -259,13 +259,18 @@ continuous authorization or general containment is provided.
 
 [Change-review evidence and methodology](evidence/change-review/README.md) · [Rule guidance and matching](docs/change-review.md) · [Coverage and known misses](COVERAGE.md) · [Supported files](docs/supported-agent-files.md) · [Release notes](CHANGELOG.md)
 
-### Optional: snapshot gate and experimental access check
+### Experimental Protected Research
 
 Available since 0.1.15: [review registered local captures and explore the
 experimental protected reference-worker lab](docs/protected-research.md). Ordinary
 scanning needs neither Docker nor that profile. The unreleased 0.1.16 source
 candidate improves request associations, bounded paging and runtime preparation;
 the installation above still uses the published package.
+
+[Exact reliability evidence](evidence/research-reliability/README.md) ·
+[Offline example and optional Linux prerequisites](docs/protected-research.md)
+
+### Optional: snapshot gate and experimental access check
 
 The [snapshot gate](docs/migration.md) is an opt-in workflow aid; edits require
 operator re-admission. A same-user hook or signing key is not a sandbox.
