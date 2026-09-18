@@ -1,11 +1,14 @@
-# Disposable model-service diagnostic — test branch only
+# Disposable local-model trial — test branch only
 
-**Current local preparation selects startup/readiness only.** It has not been
-run on Linux. The test-branch workflow explicitly passes `--startup-only`; it
-does not request model weights, preload, inference, task sources, investigations
-or network probes. The historical full experiment below remains a separate,
-uncompleted measurement. A future full-model attempt needs separate selection
-and authorization; startup success will not automatically advance to it.
+**Current selection is one bounded full-model trial, not yet measured.** The
+startup-only diagnostic passed in [run 35376037563](https://github.com/ralfyishere/agent-zero-trust/actions/runs/35376037563)
+at `7179cc5848f105145862ad3526a3684dd5345510`: service/relay starts, fixed-version
+readiness and both cleanup passes completed. No model work ran in that diagnostic.
+The separately authorized test-branch selection now uses the existing full
+experiment below: fixed model preparation, matched network control, one preload
+and at most two synthetic investigations. This is not an automatic progression
+from startup success or a claim that the model trial has passed. No retry follows
+without a new test decision.
 
 This is the explicitly authorized continuation of the 0.1.16 source experiment,
 not a package release, production deployment or protection guarantee. The product
@@ -222,3 +225,21 @@ access, model selection, nor resource/lease limits. Log size is a rotation
 threshold, **not a hard disk quota**. Offline argument regressions cover all fixed
 container roles. A new Linux startup result is still required; none is implied
 by the local fix or the successful offline tests. No automatic retry follows.
+
+## Verified startup; separately selected model trial
+
+The subsequent [startup-only run 35376037563](https://github.com/ralfyishere/agent-zero-trust/actions/runs/35376037563)
+tested `7179cc5848f105145862ad3526a3684dd5345510` and passed in 44.807 seconds
+(diagnostic wall time). All seven startup stages completed; service version
+`0.34.2` was validated. Both cleanup passes verified two containers, one empty
+model volume and both newly downloaded images absent. The build also passed
+46 scanner checks, 365 unit tests without skips, and installed wheel/source-
+distribution tests. Earlier failed runs remain separate historical results.
+
+This verifies the logger correction and bridge-network **startup profile**,
+not model utility, isolated inference or network prevention. All model counters
+were zero. The new selection removes only the workflow's `--startup-only` flag;
+the helper, model/image identities, prompts, task fixtures, assertions, isolation,
+timeouts and cleanup are unchanged. A finite model trial must establish its own
+outcomes and artifacts. Setup failure is not a tested denial; model refusal or
+incomplete citation coverage is not successful legitimate-task completion.
