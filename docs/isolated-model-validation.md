@@ -72,5 +72,35 @@ Primary references reviewed September18,2026:
 - [Official model metadata](https://ollama.com/library/qwen3:0.6b).
 - [Public standard runner resources/cost](https://docs.github.com/en/actions/reference/runners/github-hosted-runners).
 
-Before execution this document records the design, **not passing results**.
-The actual run record must establish setup, outcomes and cleanup independently.
+## Preserved first attempt and pending correction
+
+[Run 35348679506](https://github.com/ralfyishere/agent-zero-trust/actions/runs/35348679506)
+tested source `33ed1ac5f2118c234db432ae8ae57cece20f8ff3`. Its offline build,
+333 unit tests, scanner checks and installed wheel/source-distribution checks
+passed. The live setup then stopped at **Docker container startup** during the
+download stage. No model preload, investigation or network-control case ran.
+The retained error did not distinguish service from relay startup or establish
+the underlying daemon error. This is **blocked live validation**, not a passing
+denial, a model-quality result or evidence of model isolation.
+
+Both cleanup passes reported removal of recorded resources and the two pulled
+images. Those original observations are preserved, not rewritten as results of
+the correction below. No model was installed on a personal machine.
+
+The local follow-up prepares fixed-role startup progress and finite diagnostic
+categories; it omits raw daemon messages, paths and labels. Unknown errors remain
+unclassified. These categories assist diagnosis, not prove a root cause. It also
+requires a **successful daemon listing** to establish cleanup absence: failed
+lookup is not missing-resource evidence. Repeated fallback cleanup uses a new
+private client directory, and image cleanup cannot abort remaining evidence
+handling. Existing images are not selected for deletion. No broad prune is used.
+
+Cleanup and evidence export are separate `always()` workflow steps. An experiment
+failure stays non-success even when cleanup succeeds; a cleanup failure cannot
+prevent the evidence-export step from being attempted. The original raw run and
+its artifact identities stay separate from any subsequent build.
+
+These follow-up changes have offline regression coverage, **not a new Linux or
+live-model result**. The next approved run must establish startup, utility,
+matched controls and cleanup under the unchanged restrictions. Nothing here
+authorizes a retry or represents a completed protected model integration.

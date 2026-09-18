@@ -59,13 +59,17 @@ jobs:
         run: |
           cd "$RUNNER_TEMP"
           timeout --signal=TERM --kill-after=10s 540s "$RUNNER_TEMP/research-installed/bin/python" -I "$GITHUB_WORKSPACE/scripts/test_live_model.py" --output "$RUNNER_TEMP/azt-live-evidence"
-      - name: Exact-resource cleanup and sanitized evidence, even after failure
+      - name: Exact-resource cleanup, even after failure
         if: always()
         timeout-minutes: 1
         run: |
           if test -x "$RUNNER_TEMP/research-installed/bin/python"; then
             "$RUNNER_TEMP/research-installed/bin/python" -I "$GITHUB_WORKSPACE/scripts/test_live_model.py" --cleanup --output "$RUNNER_TEMP/azt-live-evidence"
           fi
+      - name: Export sanitized evidence and preserve experiment failure
+        if: always()
+        timeout-minutes: 1
+        run: |
           python3 -I "$GITHUB_WORKSPACE/scripts/research_ci_evidence.py" --evidence "$RUNNER_TEMP/azt-live-evidence/evaluation.json" --dist "$RUNNER_TEMP/research-build-record/dist"
       # Explicit downloads: pinned Official Python linux/amd64 image, pinned
       # upstream Ollama0.34.2 linux/amd64 image, fixed qwen3:0.6b model (~523MB).

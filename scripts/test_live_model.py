@@ -13,6 +13,7 @@ import platform
 import re
 import subprocess
 import sys
+import tempfile
 import threading
 import time
 import uuid
@@ -27,6 +28,25 @@ LABEL = 'org.azt.test=isolated-local-model-v1'
 def require(ok, message):
     if not ok:
         raise ValueError(message)
+
+
+def start_diagnostic(code, out, err):
+    """Finite categories only: daemon text can contain private paths/labels."""
+    lower=err.lower()
+    categories=[]
+    for category, phrases in (
+        ('permission_denied', (b'permission denied', b'operation not permitted')),
+        ('readonly_filesystem', (b'read-only file system',)),
+        ('missing_path_or_executable', (b'no such file or directory', b'executable file not found')),
+        ('storage_limit', (b'no space left on device', b'disk quota exceeded')),
+        ('resource_unavailable', (b'cannot allocate memory', b'resource temporarily unavailable')),
+        ('mount_failure', (b'error mounting', b'failed to mount')),
+    ):
+        if any(phrase in lower for phrase in phrases):categories.append(category)
+    return {'exit_code':code, 'categories':categories or ['unclassified'],
+            'stdout_bytes':len(out), 'stderr_bytes':len(err),
+            'stderr_sha256':hashlib.sha256(err).hexdigest(),
+            'scope':'diagnostic categories, not an established root cause; raw daemon text omitted'}
 
 
 def save(path, value):
@@ -56,6 +76,7 @@ class Lab:
         self.docker = Docker('unix:///var/run/docker.sock', root)
         self.prefix = 'azt-live-' + uuid.uuid4().hex[:12]
         self.ids, self.volumes, self.networks, self.new_images = [], [], [], []
+        self.start_attempts = []
         self.relay_source = Path(__file__).with_name('live_model_relay.py').resolve()
         self.identity = {'prefix': self.prefix, 'containers': self.ids, 'volumes': self.volumes,
                          'networks': self.networks, 'new_images': self.new_images}
@@ -70,16 +91,31 @@ class Lab:
         _, raw, _ = self.cmd(*args)
         cid = raw.decode().strip(); require(re.fullmatch('[0-9a-f]{64}', cid), 'container_identity')
         self.ids.append(cid); self.ledger()
-        self.cmd('start', cid)
+        name=args[args.index('--name')+1]
+        require(name.startswith(self.prefix+'-'), 'run_owned_start')
+        role=name[len(self.prefix)+1:]
+        require(role in ('download','downloadrelay','inference','relay','sink','positive'), 'fixed_start_role')
+        record={'role':role, 'start_acknowledged':False}
+        self.start_attempts.append(record)
+        try:
+            code,out,err=self.cmd('start', cid, allow_error=True)
+        except Exception as exc:
+            record['transport_error_type']=type(exc).__name__
+            raise
+        if code:
+            record['diagnostic']=start_diagnostic(code,out,err)
+            raise ValueError('container_start_failed:'+role)
+        record['start_acknowledged']=True
         return cid
 
     def pull(self, ref):
-        code, _, _ = self.cmd('image', 'inspect', ref, allow_error=True)
+        # A failed inspect is not proof of absence (the daemon may be down).
+        _, before, _ = self.cmd('image', 'ls', '--no-trunc', '--quiet')
         self.cmd('pull', '--platform', 'linux/amd64', ref, timeout=180, limit=65536)
         _, raw, _ = self.cmd('image', 'inspect', ref, '--format', '{{json .}}')
         item = json.loads(raw); require(item['Architecture'] == 'amd64' and item['Os'] == 'linux', 'image_platform')
         require(not item['Config'].get('Volumes'), 'image_anonymous_volume')
-        if code:
+        if item['Id'] not in before.decode().splitlines():
             self.new_images.append(item['Id']); self.ledger()
         return item['Id']
 
@@ -119,8 +155,19 @@ class Lab:
 
     def remove(self, cid):
         self.cmd('rm', '--force', cid, allow_error=True)
-        _, raw, _ = self.cmd('ps', '-a', '--no-trunc', '--filter', 'id='+cid, '--format', '{{.ID}}')
-        require(cid not in raw.decode().splitlines(), 'container_cleanup_failed')
+        require(self.absent('container', cid), 'container_cleanup_failed')
+
+    def absent(self, kind, identity):
+        # Only a successful daemon readback establishes absence. An unavailable
+        # daemon or permission error must never become a cleanup success.
+        commands={
+            'container':['ps','-a','--no-trunc','--filter','id='+identity,'--format','{{.ID}}'],
+            'volume':['volume','ls','--filter','name='+identity,'--format','{{.Name}}'],
+            'network':['network','ls','--filter','name='+identity,'--format','{{.Name}}'],
+            'image':['image','ls','--no-trunc','--quiet'],
+        }
+        _, raw, _=self.cmd(*commands[kind])
+        return identity not in raw.decode().splitlines()
 
     def controls(self, cid, network, model_readonly):
         _, raw, _ = self.cmd('inspect', cid, '--format', '{{json .}}'); item=json.loads(raw); host=item['HostConfig']
@@ -174,32 +221,29 @@ class Lab:
                 'isolated_interfaces':['lo'],'scope':'one generated challenge to a test-owned sink; not universal traffic instrumentation'}
 
     def cleanup(self):
-        ok=True
+        ok=True; resources=[]
         for cid in reversed(self.ids):
-            try:self.remove(cid)
-            except Exception:ok=False
-        for name in self.volumes:
             try:
-                code, _, _=self.cmd('volume','inspect',name,allow_error=True)
-                if code:continue
-                self.cmd('volume','rm',name)
-                code, _, _=self.cmd('volume','inspect',name,allow_error=True); require(code!=0,'volume_remains')
-            except Exception:ok=False
-        for name in self.networks:
-            try:
-                code, _, _=self.cmd('network','inspect',name,allow_error=True)
-                if code:continue
-                self.cmd('network','rm',name)
-                code, _, _=self.cmd('network','inspect',name,allow_error=True); require(code!=0,'network_remains')
-            except Exception:ok=False
+                self.remove(cid); removed=True
+            except Exception:removed=False;ok=False
+            resources.append({'kind':'container','absence_verified':removed})
+        for kind, names in (('volume',self.volumes),('network',self.networks)):
+            for name in names:
+                try:
+                    if not self.absent(kind,name):self.cmd(kind,'rm',name)
+                    removed=self.absent(kind,name)
+                except Exception:removed=False
+                ok=ok and removed
+                resources.append({'kind':kind,'absence_verified':removed})
         image_results=[]
         for image in self.new_images:
-            code, _, _=self.cmd('image','inspect',image,allow_error=True)
-            if code:
-                image_results.append({'image':image,'removed':True});continue
-            code, _, _=self.cmd('image','rm',image,allow_error=True)
-            image_results.append({'image':image,'removed':code==0})
+            try:
+                if not self.absent('image',image):self.cmd('image','rm',image,allow_error=True)
+                removed=self.absent('image',image)
+            except Exception:removed=False
+            image_results.append({'image':image,'removed':removed})
         return {'containers_volumes_networks_removed':ok,'new_images':image_results,
+                'resource_readbacks':resources,
                 'remaining_image_backstop':'disposable hosted VM destruction; never host prune',
                 'host_service_installed':False}
 
@@ -213,7 +257,9 @@ def cleanup_saved(root):
     value=json.loads(path.read_text())
     require(re.fullmatch('azt-live-[a-f0-9]{12}',value['prefix']), 'cleanup_prefix')
     lab=object.__new__(Lab);lab.root=root
-    control=root/'fallback-cleanup';control.mkdir(mode=0o700)
+    # Repeated cleanup gets a fresh credential-free client directory; do not
+    # reuse (or recursively erase) arbitrary pre-existing control paths.
+    control=Path(tempfile.mkdtemp(prefix='fallback-cleanup-',dir=root))
     lab.docker=Docker('unix:///var/run/docker.sock',control)
     lab.ids=value['containers'];lab.volumes=value['volumes'];lab.networks=value['networks'];lab.new_images=value['new_images']
     require(len(lab.ids)<=12 and len(lab.volumes)<=1 and len(lab.networks)<=1 and len(lab.new_images)<=2,'cleanup_count')
@@ -222,7 +268,9 @@ def cleanup_saved(root):
             require(re.fullmatch('[0-9a-f]{64}',item) if kind=='container' else
                     re.fullmatch(re.escape(value['prefix'])+'-[a-z]+',item), 'cleanup_identity')
             code,raw,_=lab.cmd(kind,'inspect',item,allow_error=True)
-            if code:continue
+            if code:
+                require(lab.absent(kind,item), 'cleanup_identity_unverified')
+                continue
             data=json.loads(raw)[0]
             labels=data['Config']['Labels'] if kind=='container' else data['Labels']
             require(labels.get('org.azt.test')=='isolated-local-model-v1','cleanup_label')
@@ -380,6 +428,7 @@ def main():
         result['failure']={'stage':stage,'type':type(exc).__name__,
                            'reason':str(exc) if isinstance(exc,ValueError) else 'bounded_setup_or_evaluation_failure'}
     finally:
+        result['setup_container_starts']=lab.start_attempts
         result['cleanup']=lab.cleanup()
         if not result['cleanup']['containers_volumes_networks_removed']:result['status']='failed'
         result['wall_seconds']=round(time.monotonic()-start,3)
