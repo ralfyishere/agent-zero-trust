@@ -11,7 +11,7 @@ import socket
 import sys
 import time
 
-PROTOCOL = 'azt.research-channel.v1'
+PROTOCOL = 'azt.research-channel.v2'
 MAX_FRAME = 65536
 TEST_WORKERS = ('authority-confusion', 'boundary-probe', 'resource-probe', 'tamper-probe',
                 'descendants', 'flood', 'stall')
@@ -168,12 +168,28 @@ def main(worker='reference'):
 
     for source in initial['sources']:
         identity = {'source': source['id'], 'sha256': source['sha256']}
-        read = request('read', **identity)
-        if read['decision'] != 'allowed':
-            raise ValueError('source read was denied')
-        value = read['result']
-        if (value.get('source') != source['id'] or value.get('sha256') != source['sha256'] or
-                hashlib.sha256(value['text'].encode('utf-8')).hexdigest() != source['sha256']):
+        count = source.get('pages', 1)
+        if type(count) is not int or not 1 <= count <= 9:
+            raise ValueError('invalid source page count')
+        digest, offset = hashlib.sha256(), 0
+        for index in range(count):
+            read = request('read', **identity, **({'page': index} if 'pages' in source else {}))
+            if read['decision'] != 'allowed':
+                raise ValueError('source read was denied')
+            value = read['result']
+            raw = value['text'].encode('utf-8')
+            if value.get('source') != source['id'] or value.get('sha256') != source['sha256'] or len(raw) > 8192:
+                raise ValueError('source identity mismatch')
+            if 'pages' in source:
+                segment = value['segment']
+                if (segment['index'] != index or segment['parent_sha256'] != source['sha256'] or
+                        segment['byte_start'] != offset or segment['byte_end'] != offset + len(raw) or
+                        segment['sha256'] != hashlib.sha256(raw).hexdigest()):
+                    raise ValueError('source segment mismatch')
+            digest.update(raw)
+            offset += len(raw)
+        if (digest.hexdigest() != source['sha256'] or
+                'bytes' in source and offset != source['bytes']):
             raise ValueError('source identity mismatch')
         checked = request('check', **identity)
         if checked['decision'] != 'allowed' or checked['result'].get('complete') is not True:

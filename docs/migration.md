@@ -1,6 +1,28 @@
 # Migrating to 0.1.9 and later
 
+## 0.1.16 candidate (not published)
+
+Analyzer method `sensitive-request-v1.3` adds selected exclusions, modal passives
+and explicitly named intermediate report objects. Scan/review/changes remain v2;
+new readers recognize prior methods, while old binaries may reject the new
+method. Saved observations are not reinterpreted. Severity/default HIGH and
+0/1/2 scan exits do not change. Optional snapshot admission requires explicit
+operator re-admission after the engine identity changes.
+
+The research envelope remains v1 with explicitly supported old/new capture
+settings. Candidate admitted documents may be 64 KiB instead of 8 KiB, with the
+same 1 MiB total and bounded pages; older readers may reject those new settings.
+Use matched channel/policy v2 worker and controller code. The broker constructor
+now freezes a **preparing, inactive** mission; only its controller activates it
+once after the independent supervisor is armed. No channel operation can renew
+or activate authority. Local unit calls to `activate` are not an OS boundary.
+The 60-second setup budget is separate from the unchanged maximum active lease.
+No historical runtime result establishes this changed profile's behavior.
+
 ## 0.1.15 source candidate
+
+Publication note: [v0.1.15 is now published](https://github.com/ralfyishere/agent-zero-trust/releases/tag/v0.1.15).
+The section below records its original candidate migration and scope.
 
 Research registration/review/run/case records are separate v1 envelopes; existing
 scan/review/changes v2 remain supported. Old binaries do not understand `research`.

@@ -19,10 +19,10 @@ import tempfile
 import time
 import uuid
 
-PROTOCOL = 'azt.research-channel.v1'
+PROTOCOL = 'azt.research-channel.v2'
 MAX_FRAME = 65536
 MAX_CHANNEL = 8 * 1024 * 1024
-MAX_REQUESTS = 512
+MAX_REQUESTS = 640
 ENV = {'PATH': '/usr/local/bin:/usr/bin:/bin', 'LC_ALL': 'C'}
 TEST_WORKERS = ('authority-confusion', 'boundary-probe', 'resource-probe', 'tamper-probe',
                 'descendants', 'flood', 'stall')
@@ -359,6 +359,19 @@ def _run_test_worker(broker, image, endpoint, worker, test_context=None, lease_s
 
 def _run(broker, image, endpoint, worker, lease_seconds, control_dir, test_context):
     from azt_docker import Docker, IntakeError
+    from azt_research import ResearchError
+    # Reuse the existing backend without changing FS-001 behavior. Every setup
+    # command consumes one cumulative preparation deadline; cleanup does not.
+    class PreparedDocker(Docker):
+        preparing = True
+
+        def command(self, *args, timeout=10, **kwargs):
+            if self.preparing:
+                timeout = min(timeout, broker.preparation_remaining())
+            result = super().command(*args, timeout=timeout, **kwargs)
+            if self.preparing:
+                broker.preparation_remaining()
+            return result
     if type(lease_seconds) is not int or not 2 <= lease_seconds <= 30:
         raise ResearchRuntimeError('lease_must_be_2_to_30_seconds')
     if not isinstance(image, str) or not re.fullmatch(
@@ -380,7 +393,7 @@ def _run(broker, image, endpoint, worker, lease_seconds, control_dir, test_conte
         'mission': broker.mission_id, 'run': broker.run_id,
         'worker': worker, 'worker_sha256': hashlib.sha256(bundled).hexdigest(),
         'container_id': None, 'stages': {'controls_read_back': False, 'lease_armed': False,
-        'container_started': False, 'channel_completed': False, 'review_completed': False},
+        'broker_activated': False, 'container_started': False, 'channel_completed': False, 'review_completed': False},
         'requests_observed': 0, 'channel_bytes': 0, 'stderr_bytes': 0,
         'test_observations': [], 'cleanup': 'not_created', 'lease_seconds': lease_seconds,
         'limitations': ['Docker/kernel, host supervisor and operator are trusted.',
@@ -390,7 +403,8 @@ def _run(broker, image, endpoint, worker, lease_seconds, control_dir, test_conte
     docker, container, supervisor, life, attached, name = None, None, None, None, None, None
     stage = 'preflight'
     try:
-        docker = Docker(endpoint, control)
+        broker.preparation_remaining()
+        docker = PreparedDocker(endpoint, control)
         backend = docker.preflight(image)
         report['backend'] = backend
         if backend['status'] != 'available':
@@ -417,9 +431,14 @@ def _run(broker, image, endpoint, worker, lease_seconds, control_dir, test_conte
         report['controls'] = inspect_controls(docker, container, runtime, image_id, worker)
         report['stages']['controls_read_back'] = True
         stage = 'arm_lease'
+        broker.preparation_remaining()
         deadline = time.monotonic() + lease_seconds
         supervisor, life = arm_lease(docker.prefix, container, control, deadline)
         report['stages']['lease_armed'] = True
+        stage = 'activate'
+        broker.activate(lease_seconds, deadline=deadline)
+        docker.preparing = False
+        report['stages']['broker_activated'] = True
         _write_record(control / 'session.json', {'container_id': container,
             'supervisor_pid': supervisor.pid, 'lease_seconds': lease_seconds,
             'mission': broker.mission_id, 'run': broker.run_id})
@@ -447,8 +466,12 @@ def _run(broker, image, endpoint, worker, lease_seconds, control_dir, test_conte
     except (OSError, ValueError, KeyError, TypeError, RecursionError, subprocess.SubprocessError, IntakeError) as exc:
         report['status'] = 'blocked' if stage == 'preflight' else 'failed'
         report['error_stage'] = stage
-        report['error'] = str(exc) if isinstance(exc, ResearchRuntimeError) else 'operation_failed'
+        controlled = {'preparation_deadline', 'mission_not_preparing', 'invalid_active_deadline', 'invalid_active_lease'}
+        report['error'] = (str(exc) if isinstance(exc, ResearchRuntimeError) or
+                           isinstance(exc, ResearchError) and str(exc) in controlled else 'operation_failed')
     finally:
+        if docker is not None:
+            docker.preparing = False
         try:
             broker.revoke()
         except Exception:

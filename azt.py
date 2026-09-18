@@ -35,7 +35,7 @@ from pathlib import Path
 import azt_intake
 import azt_gate
 
-__version__ = "0.1.15"
+__version__ = "0.1.16"
 
 SEV_ORDER = {"HIGH": 0, "MEDIUM": 1, "INFO": 2}
 
@@ -553,7 +553,7 @@ def main(argv=None):
         parser.add_argument("--policy", help="explicit operator policy JSON outside the workspace")
         parser.add_argument("--state-dir", help="private external operator state directory (required for gate operations)")
         parser.add_argument("--fail-on", choices=["high", "medium", "any"], default="high")
-    doctor = sub.add_parser("doctor", help="report runtime prerequisites; containment integration is not yet available")
+    doctor = sub.add_parser("doctor", help="legacy bubblewrap prerequisites only; see research --help for the separate Docker experiment")
     doctor.add_argument("--backend", default="bubblewrap")
     doctor.add_argument("--json", action="store_true")
     import azt_safety

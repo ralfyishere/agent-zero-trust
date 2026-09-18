@@ -1,24 +1,26 @@
-# Protected Research v1 — experimental source candidate
+# Captured-source research — optional and experimental
 
 Review selected captured material without treating its instructions or claimed
 roles as permission. The existing offline scanner remains the main product.
-This **unreleased 0.1.15 source candidate** adds a local capture adapter and an
-optional, fixed reference-worker experiment. It does not fetch websites or run
+The [published 0.1.15 release](https://github.com/ralfyishere/agent-zero-trust/releases/tag/v0.1.15)
+provides a local capture adapter and an optional fixed reference-worker experiment.
+The unreleased **0.1.16 source candidate** adds the paging/preparation changes
+identified below. Neither profile fetches websites or runs
 a model, repository program, plugin, or live coding agent.
 
 ## Start without Docker
 
-Install this reviewed source into an environment **outside** the selected inputs.
-Installation may need the declared build tools; the commands below operate offline.
-Released `agent-zero-trust==0.1.14` does not provide these candidate commands.
+Install into an environment **outside** the selected inputs. Installation downloads
+the published package; review/export operate offline. Use an explicitly reviewed
+AZT checkout for the inert example files, not a target-selected installer.
 
 ```sh
 # Use absolute paths; these examples deliberately accommodate spaces.
 AZT_SOURCE="/absolute/path/to/reviewed AZT checkout"
-AZT_ENV="/absolute/path/to/tools/azt candidate"
+AZT_ENV="/absolute/path/to/tools/azt research"
 AZT_REPORTS="/absolute/path/to/private reports"
 python3 -m venv "$AZT_ENV"
-"$AZT_ENV/bin/python" -m pip install "$AZT_SOURCE"
+"$AZT_ENV/bin/python" -m pip --isolated install --index-url https://pypi.org/simple --no-deps agent-zero-trust==0.1.15
 mkdir -m 700 "$AZT_REPORTS"
 cd "$AZT_REPORTS"
 "$AZT_ENV/bin/python" -I -m azt research review \
@@ -36,6 +38,11 @@ broad request names shell history and environment variables: MEDIUM review is
 appropriate; it does not prove those materials contain credentials. The saved
 peer message's claimed owner/system role grants no authority. Guidance comes
 from AZT's maintained catalog, not from the suspect instruction.
+
+To evaluate unreleased 0.1.16, install its locally built, reviewed wheel instead
+of the published-package command above:
+`"$AZT_ENV/bin/python" -m pip --isolated install --no-index --no-deps /absolute/path/to/agent_zero_trust-0.1.16-py3-none-any.whl`.
+See [build verification](publication.md). A source merge is not publication.
 
 `research review` exits **0 for completed inspection within its declared scope,
 2 for incomplete/invalid work**. It is informational even when findings exist.
@@ -78,13 +85,25 @@ the registered path and original byte hash; runtime mission document descriptors
 map opaque channel IDs back to that registration and logical path.
 
 Bounds: 64 KiB registration, 16 registrations including at most two repositories,
-128 retained text documents, 8 KiB per retained document, 1 MiB retained/attempted
-capture budget, 4 MiB report/export. Repository intake also retains its existing
+128 retained text documents, **64 KiB per document in the 0.1.16 candidate**
+(published 0.1.15: 8 KiB), 1 MiB retained/attempted capture budget, 4 MiB
+report/export. Saved JSON messages additionally allow at most 6 × 64 KiB + 512
+serialized bytes for escaping; decoded UTF-8 content must still fit 64 KiB.
+Repository intake also retains its existing
 10,000-entry/32 MiB total-read budget **per repository**; at most two such scans
 occur. JSON uses existing nesting/item/string bounds. Unsupported or oversized
 sources are partial/omitted, never silently clean; other selected sources can
 still be inspected. Read bytes are frozen before their analysis and mission use;
 this does not claim an atomic whole-filesystem snapshot.
+
+Candidate paging happens **after full admitted-byte inspection**, not before
+detection. A `read` selects a registered source/hash and deterministic page index;
+each result binds parent hash, segment hash/ID, zero-based half-open UTF-8 byte
+offsets and one-based inclusive lines. Pages are at most 8 KiB and split only at
+codepoint boundaries. They do not erase existing detector windows or join sources.
+The worker checks every segment and the reconstructed parent digest. A complete
+review needs all pages and checks, not just the first response. Replays consume
+budgets and cannot substitute a different page under an old request ID.
 
 ## Optional protected reference worker
 
@@ -127,7 +146,11 @@ The broker checks every request against the current mission/run, source hash,
 lease/state and cumulative budget. Unknown operations, role/authority fields,
 unknown sources, invalid evidence references and conflicting replay IDs fail.
 Identical replay returns its prior bounded response without repeating effects;
-denials and retries consume the 512-call/8 MiB channel budget. A fresh controller
+denials and retries consume the candidate's 640-call/8 MiB channel budget
+(0.1.15: 512 calls). The bounded maximum document/byte combination can need up to
+256 page reads plus 128 checks and 128 observation proposals; 640 leaves finite
+denial/control headroom, without raising response, storage or worker resources.
+A fresh controller
 creates new random mission/run identities and never resumes old authorization.
 `read` returns frozen registered text; `check` returns the existing scan result;
 `observe` accepts a bounded source-linked proposal, not factual truth; `review`
@@ -146,6 +169,15 @@ and bundled worker, 8 MiB scratch, 4 MiB tmp, 1 MiB shm, 128 MiB memory+swap,
 No original target, controller store, host home, Docker socket, credentials or
 shared cache is mounted. Sources arrive only through the controller channel.
 
+The candidate broker starts in `preparing`, with **no worker authority** and a
+separate cumulative 60-second preparation budget. Backend commands consume that
+budget; audit failure, expiry or cancellation cannot activate the mission.
+After preparation and supervisor readiness, the trusted controller activates the
+broker against the supervisor's existing absolute deadline. There is no activation
+or renewal operation in the worker protocol. Readiness/start overhead consumes
+the maximum active lease; it does not silently create a second lease. Cleanup
+retains its own bounded deadline even when preparation or authority has expired.
+
 The independent supervisor is armed **before** start and has a maximum 30-second
 lease (normal profile 20 seconds), followed by a bounded 5-second removal call.
 Controller pipe loss initiates removal immediately. The harness tests an
@@ -153,6 +185,36 @@ eight-second controller-stop observation bound. This is not a universal timing
 guarantee on a stalled or compromised host/daemon. Host kernel, Docker daemon,
 approved image, supervisor, controller, evaluator, policy store and operator are
 trusted. Killing/compromising that supervisor or host is outside this profile.
+
+The candidate channel/policy are v2; use matching bundled worker/controller
+versions. Existing `research-review.v1` exports remain readable with explicitly
+recognized v1/v2 capture settings. No old event stream is reclassified as a new
+activation or paging result. Snapshot-gate users must explicitly re-admit changed
+engine inputs; research review never refreshes admission.
+
+### Maintainer integration selection
+
+After this workflow revision is merged, select a reviewed branch and its exact
+full commit using the existing Actions workflow:
+
+```sh
+gh workflow run research.yml --repo ralfyishere/agent-zero-trust \
+  --ref REVIEWED_BRANCH -f source_sha=FULL_REVIEWED_COMMIT
+```
+
+Only the named repository's maintainer can pass the workflow's actor/repository/
+source selection checks. An incorrect SHA is not tested as if it were correct.
+The [workflow](../.github/workflows/research.yml) is nonpublishing, has a 15-minute
+ceiling, and runs only standard ephemeral Linux resources and synthetic fixtures.
+It explicitly resolves then pulls one approved Official Python image by digest
+using an empty registry configuration. The product itself never pulls an image.
+Before that revision reaches main, the selected `feat/research-reliability`
+bootstrap branch uses an explicitly marked `[azt-research-once]` push; ordinary
+PR pushes do not run it. This temporary route exists because GitHub requires
+`workflow_dispatch` on the default branch. Every selected run still needs operator
+authorization/budget. A marker or actor name is not an independent permission
+system, and a rerun is a new test decision. Never run these workers on a personal
+host or route around an unavailable required control.
 
 ## Evidence and limits
 

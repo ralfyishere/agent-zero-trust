@@ -7,7 +7,7 @@ import re
 from pathlib import PurePosixPath
 
 RULE = "request.sensitive_disclosure"
-SETTINGS = {"method": "sensitive-request-v1.2", "block_characters": 4096,
+SETTINGS = {"method": "sensitive-request-v1.3", "block_characters": 4096,
             "block_lines": 16, "references_per_request": 2,
             "reference_characters": 256, "requests": 1000,
             "retained_characters": 32000000, "correlations": 2000}
@@ -53,6 +53,30 @@ TOKEN_CREDENTIAL_VALUE = re.compile(
     r"\b(?:including|and|plus|along\s+with)\s+(?:(?:the|your|its|their|a)\s+)?"
     r"(?:(?:complete|full|actual|raw)\s+)?(?:credential|authentication|access|secret)\s+"
     r"(?:values?|contents?)\b", re.I)
+PASSIVE_REQUEST = re.compile(
+    r"^\s*(?P<subject>[^;.!?]{1,160}?)\s+"
+    r"(?P<modal>must|should|mustn't|shouldn't)\s+"
+    r"(?P<negative>(?:not|never)\s+)?be\s+"
+    r"(?P<action>sent|shared|uploaded|submitted|attached|pasted|emailed|forwarded|posted|transmitted|provided)\b",
+    re.I)
+PASSIVE_ACTIONS = dict(zip(
+    ('sent', 'shared', 'uploaded', 'submitted', 'attached', 'pasted', 'emailed',
+     'forwarded', 'posted', 'transmitted', 'provided'),
+    ('send', 'share', 'upload', 'submit', 'attach', 'paste', 'email', 'forward',
+     'post', 'transmit', 'provide')))
+ARTIFACT_NAME = r'(?:[a-z][a-z-]{0,31}\s+){0,2}(?:report|ticket|file|document|note)\b'
+ARTIFACT_INTO = re.compile(r'\binto\s+(?:a|an|the|this)\s+(' + ARTIFACT_NAME + ')', re.I)
+ARTIFACT_SHARED = re.compile(r'^\s*(?:the|this|that|same)\s+(' + ARTIFACT_NAME + ')', re.I)
+
+
+def grammar_view(text):
+    """Mask explicit references/addresses without changing character offsets."""
+    view = list(text)
+    for match in list(LINK.finditer(text)) + list(ADDRESS.finditer(text)):
+        view[match.start():match.end()] = ' ' * (match.end() - match.start())
+    for match in BARE.finditer(text):
+        view[match.start(1):match.end(1)] = ' ' * len(match.group(1))
+    return ''.join(view)
 
 
 def information_classes(text):
@@ -89,6 +113,13 @@ def blocks(text):
     """
     chunk, size, start = [], 0, 1
     for line_no, line in enumerate(text.splitlines(), 1):
+        if len(line) > SETTINGS['block_characters']:
+            if chunk:
+                yield start, line_no - 1, '\n'.join(chunk)
+                chunk, size = [], 0
+            for offset in range(0, len(line), SETTINGS['block_characters']):
+                yield line_no, line_no, line[offset:offset + SETTINGS['block_characters']]
+            continue
         if not line.strip() or len(chunk) >= SETTINGS["block_lines"] or size + len(line) + 1 > SETTINGS["block_characters"]:
             if chunk:
                 yield start, line_no - 1, "\n".join(chunk)
@@ -116,26 +147,24 @@ def positive(text):
     text = re.sub(r'\n[ \t]*[-*+][ \t]+(?=(?:(?:do not|never|don\x27t)\s+)?(?:send|share|upload|submit|attach|paste|email|forward|post|transmit|provide|gather|collect|copy|capture|bundle|include|export|dump)\b)', '; ', text, flags=re.I)
     normalized = re.sub(r"[\t\r\n ]+", " ", text)
     # Split on grammar, never on a word inside an explicit reference/address.
-    boundary_view = list(normalized)
-    for match in list(LINK.finditer(normalized)) + list(ADDRESS.finditer(normalized)):
-        boundary_view[match.start():match.end()] = ' ' * (match.end()-match.start())
-    for match in BARE.finditer(normalized):
-        boundary_view[match.start(1):match.end(1)] = ' ' * len(match.group(1))
-    cuts = list(re.finditer(r"(?<=[.!?;])\s+|\b(?:but|however|instead|yet)\b\s*,?", ''.join(boundary_view), re.I))
+    cuts = list(re.finditer(r"(?<=[.!?;])\s+|\b(?:but|however|instead|yet)\b\s*,?", grammar_view(normalized), re.I))
     starts = [0] + [m.end() for m in cuts]
     ends = [m.start() for m in cuts] + [len(normalized)]
     for start, end in zip(starts, ends):
         clause = normalized[start:end]
         if re.search(r"\b(?:warning|unsafe|dangerous)\b", clause, re.I) and re.search(r"\b(?:do not follow|never follow|do not execute|not an instruction)\b", clause, re.I):
             continue
+        # Selected modal passives explicitly associate the preceding subject
+        # with a request. Past-tense descriptions are not made into imperatives.
+        # Rewrite only this analysis view; support still points to original text.
+        passive = PASSIVE_REQUEST.match(clause)
+        if passive and not (SHARE.search(passive['subject']) or COLLECT.search(passive['subject'])):
+            verb = PASSIVE_ACTIONS[passive['action'].lower()]
+            negative = passive['negative'] or passive['modal'].lower().endswith("n't")
+            clause = ('do not ' if negative else '') + verb + ' ' + passive['subject'] + clause[passive.end():]
         # Reference labels/addresses may contain action words. They are data,
         # not new imperatives that may cut a supported Markdown link in half.
-        action_view = list(clause)
-        for match in list(LINK.finditer(clause)) + list(ADDRESS.finditer(clause)):
-            action_view[match.start():match.end()] = ' ' * (match.end()-match.start())
-        for match in BARE.finditer(clause):
-            action_view[match.start(1):match.end(1)] = ' ' * len(match.group(1))
-        action_view = ''.join(action_view)
+        action_view = grammar_view(clause)
         actions = sorted(list(SHARE.finditer(action_view)) + list(COLLECT.finditer(action_view)), key=lambda m: m.start())
         # 'environment dump' / 'diagnostics bundle' are subjects, not imperatives.
         actions = [m for m in actions if not (m.group().lower() in ('dump', 'bundle', 'copy') and
@@ -154,8 +183,13 @@ def positive(text):
             span = clause[action.start():end]
             # A following negated action belongs to the next span; a direct
             # excluded noun phrase also cannot become this action's subject.
-            span = re.split(r"\b(?:do\s+not|don't|mustn't|shouldn't|must\s+not|should\s+not|never|excluding|except)\b", span, maxsplit=1, flags=re.I)[0]
-            if not prohibited:
+            excluded = re.search(r"\b(?:do\s+not|don't|mustn't|shouldn't|must\s+not|should\s+not|never|excluding|except|without)\b", grammar_view(span), re.I)
+            if excluded:
+                span = span[:excluded.start()]
+            # 'Send no keys' excludes these objects, not a later affirmative
+            # action. Unlike 'do not send ... and upload', no is a quantifier.
+            no_objects = re.match(r'\s+no\b(?!\s+(?:more|less|fewer)\b)', clause[action.end():end], re.I)
+            if not prohibited and not no_objects:
                 if not index:
                     # Preserve only explicit reference/address evidence before
                     # the action, not unrelated preceding sensitive nouns.
@@ -222,23 +256,39 @@ def addresses(text):
 
 
 def request_classes(text, refs):
-    """Require a local action/subject relation, or explicit bundle anaphora.
+    """Require an action/subject relation or bounded, explicit object reference.
 
     A separate local read followed by a version-only sharing request is not
     evidence that the configuration was requested for sharing.
     """
     clauses = re.split(r'(?<=[.!?;])\s+|\bbut\b|\band\s+(?=(?:send|share|upload|submit|attach|paste|email|forward|post|transmit|provide)\b)', text, flags=re.I)
     disclosed, collected = set(), set()
+    artifacts = {}
     onward_bundle = False
     for clause in clauses:
         subject_view = ADDRESS.sub(' ', clause)
         classes = information_classes(subject_view)
         if SHARE.search(clause) and not local_share(clause):
             disclosed.update(classes)
+            action = SHARE.search(clause)
+            shared = ARTIFACT_SHARED.match(clause[action.end():])
+            if shared:
+                name = ' '.join(shared[1].lower().split())
+                matches = [value for key, value in artifacts.items()
+                           if key == name or (' ' not in name and key.split()[-1] == name)]
+                if len(matches) == 1:
+                    disclosed.update(matches[0])
             if re.search(r'\b(?:them|it|both|these|the\s+(?:(?:complete|full|entire)\s+)?(?:diagnostics\s+)?(?:bundle|diagnostics|details|results|material|values))\b', clause, re.I):
                 onward_bundle = True
         if COLLECT.search(clause):
             collected.update(classes)
+            # Bind only explicitly named containers, in order and inside this
+            # block. Register benign objects too, so 'the report' is not guessed
+            # when two differently named reports occur. No filesystem lookup.
+            container = ARTIFACT_INTO.search(clause)
+            if container:
+                name = ' '.join(container[1].lower().split())
+                artifacts.setdefault(name, set()).update(classes)
     # Bullet semicolons can separate subjects from their include directive.
     # Only explicit include/bundle scaffolding enables this bounded list case.
     if re.search(r'\b(?:bundle|diagnostics)\b[^.]{0,80}\binclude\s*:', text, re.I):

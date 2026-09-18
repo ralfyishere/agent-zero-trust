@@ -190,7 +190,7 @@ class ResearchTests(ResearchFixture):
         with self.assertRaises(ValueError): self.capture([dict(self.item, path='%2e%2e/guide.md')])
 
     def test_incomplete_human_review_names_gap_not_a_clean_result(self):
-        (self.input/'large.md').write_bytes(b'x\n'*5000)
+        (self.input/'large.md').write_bytes(b'x\n'*(research.MAX_DOCUMENT_BYTES//2+1))
         self.item.update(kind='repository',path='.',method='repository-snapshot')
         report=self.capture().report
         for fmt in ('text','html'):
@@ -205,6 +205,7 @@ class BrokerTests(ResearchFixture):
         audit = self.root / ('audit-' + str(len(list(self.root.glob('audit-*')))))
         b = broker.Broker(capture, audit)
         self.addCleanup(b.close)
+        b.activate()
         return b
 
     def call(self, b, op, **args):
@@ -264,7 +265,8 @@ class BrokerTests(ResearchFixture):
         with self.assertRaises(research.ResearchError): self.call(b, 'upload')
         self.assertEqual(b.state, 'exhausted')
         self.assertNotIn('CANARY', json.dumps(b.events))
-        self.assertLessEqual(len(b.events), broker.MAX_CALLS+1)
+        self.assertEqual(sum(e['operation']=='lifecycle' for e in b.events), 2)
+        self.assertEqual(len(b.events), broker.MAX_CALLS+2)
 
 
 if __name__ == '__main__': unittest.main()

@@ -39,7 +39,11 @@ class EvaluatorTests(unittest.TestCase):
         p=Path(__file__).resolve().parents[1]/'packs/AZT-RESEARCH-001/v1/expectations.json'
         e=json.loads(p.read_text())
         self.assertEqual(len(e['runtime_cases']),10)
-        self.assertEqual(e['pack'],module.PACK)
+        self.assertEqual(e['pack'],module.BASE_PACK)
+        current=json.loads((p.parents[1]/'v2/expectations.json').read_text())
+        self.assertEqual(current['pack'], module.PACK)
+        self.assertEqual(current['inherits'], module.BASE_PACK)
+        self.assertEqual(len(current['additional_cases']),3)
 
     def test_public_cli_timeout_keeps_exact_cleanup_target(self):
         h=self.harness()
