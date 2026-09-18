@@ -5,7 +5,7 @@ import unittest
 import tempfile
 import subprocess
 import json
-from unittest.mock import Mock, patch
+from unittest.mock import Mock, patch, mock_open
 
 spec=importlib.util.spec_from_file_location('research_evaluator',Path(__file__).resolve().parents[1]/'scripts/test_research_integration.py')
 module=importlib.util.module_from_spec(spec)
@@ -57,3 +57,22 @@ class EvaluatorTests(unittest.TestCase):
             h.docker.command.return_value=(0,b'',b'')
             self.assertTrue(h.cleanup())
             self.assertEqual(h.docker.command.call_args.args,('rm','--force','a'*64))
+
+    def test_removed_container_can_precede_durable_lease_record(self):
+        record={'schema':'azt.research-lease.v1','container_id':'a'*64,
+                'reason':'controller_channel_closed','cleanup':'removed'}
+        raw=(json.dumps(record)+'\n').encode()
+        opened=mock_open(read_data=raw)
+        path=Mock()
+        # Exercise both a not-created record and a partially written frame.
+        partial=mock_open(read_data=b'{')
+        path.open.side_effect=[FileNotFoundError(),partial(),opened()]
+        with patch.object(module.time,'monotonic',return_value=1), patch.object(module.time,'sleep'):
+            self.assertEqual(module.await_lease_record(path,deadline=2),record)
+        self.assertEqual(path.open.call_count,3)
+
+    def test_missing_lease_record_does_not_extend_stop_bound_or_pass(self):
+        path=Mock(); path.open.side_effect=FileNotFoundError()
+        with patch.object(module.time,'monotonic',side_effect=[1,1,2]), patch.object(module.time,'sleep'):
+            with self.assertRaisesRegex(AssertionError,'original stop bound'):
+                module.await_lease_record(path,deadline=2)

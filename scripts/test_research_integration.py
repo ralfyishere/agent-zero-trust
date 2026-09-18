@@ -58,6 +58,22 @@ def save(path, value):
     path.write_bytes(raw)
 
 
+def await_lease_record(path, deadline):
+    """Removal and durable supervisor output are separate observations.
+
+    Docker can acknowledge absence before the supervisor's remove command
+    returns and writes its record. Wait only inside the original stop bound;
+    missing/partial output is not cleanup evidence or a reason to extend it.
+    """
+    while time.monotonic() < deadline:
+        try:
+            with path.open('rb') as stream:
+                return runtime.decode_frame(stream.read(runtime.MAX_FRAME+1))
+        except (FileNotFoundError, runtime.ResearchRuntimeError):
+            time.sleep(min(.02, max(0, deadline-time.monotonic())))
+    raise AssertionError('supervisor lease record unavailable within original stop bound')
+
+
 def fixture(root):
     inputs = root / 'captured sources'
     inputs.mkdir()
@@ -363,6 +379,8 @@ class Harness:
                         if len(pids)>=4: break
                 time.sleep(.05)
             demand(container and len(pids)>=4, 'externally observed worker and descendants before stop')
+            self.partial={'stage':'controller_signal','container_id':container,
+                          'processes_observed':len(pids),'controller_signal':int(sig)}
             started=time.monotonic(); proc.send_signal(sig)
             paused=sig==signal.SIGSTOP
             if paused:
@@ -375,6 +393,7 @@ class Harness:
             bound=28 if paused else 8
             while time.monotonic()-started<bound and not self.absent(container): time.sleep(.05)
             demand(self.absent(container), 'container removed within selected stop bound')
+            self.partial.update(stage='descendant_observation',container_absent=True)
             running=[]
             for pid in pids:
                 try:
@@ -382,9 +401,11 @@ class Harness:
                 except FileNotFoundError:
                     pass
             demand(not running, 'externally observed descendants stopped')
-            lease=json.loads((directory/'runtime'/'lease-result.json').read_text())
+            self.partial.update(stage='lease_record',processes_still_running=len(running))
+            lease=await_lease_record(directory/'runtime'/'lease-result.json', started+bound)
             demand(lease['cleanup']=='removed' and lease['reason']==('lease_expired' if paused else 'controller_channel_closed') and
-                   time.monotonic()-started<=bound, 'independent supervisor used expected trigger and removal bound')
+                   lease['container_id']==container and time.monotonic()-started<=bound,
+                   'independent supervisor used expected trigger and removal bound')
             return {'controller_signal':int(sig),'processes_observed':len(pids),'processes_still_running':len(running),
                 'container_absent':True,'seconds_to_stop':round(time.monotonic()-started,3),'lease':lease,
                 'complete_review':False,'observation':'host /proc and Docker, outside evaluated worker'}
