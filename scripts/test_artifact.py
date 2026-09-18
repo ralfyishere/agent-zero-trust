@@ -91,7 +91,9 @@ def main():
                        "azt_resources/changes-v2.schema.json", "examples/sensitive-request/challenge-v1.json",
                        "scripts/sensitive_request_lab.py", "scripts/action_review.py",
                        "examples/sensitive-request/precision-v1.json", "scripts/evaluate_precision.py",
-                       "azt_research.py", "azt_research_broker.py", "azt_research_runtime.py", "azt_research_worker.py",
+                       "azt_research.py", "azt_research_broker.py", "azt_research_runtime.py", "azt_research_worker.py", "azt_investigator.py",
+                       "scripts/test_investigator_integration.py", "scripts/investigator_test_service.py",
+                       "examples/protected-research/investigator/expected-v1.json",
                        "examples/protected-research/sources.json", "scripts/research_lab.py",
                        "scripts/test_research_integration.py", "packs/AZT-RESEARCH-001/v1/expectations.json"):
             assert (source / needed).is_file(), "sdist missing " + needed
@@ -156,9 +158,9 @@ def main():
         for test in ('test_sensitive.py', 'test_sensitive_review.py', 'test_sensitive_associations.py',
                      'test_sensitive_precision.py', 'test_review_summary.py', 'test_review_bounds.py',
                      'test_sensitive_reliability.py', 'test_research.py', 'test_research_runtime.py',
-                     'test_research_reliability.py'):
+                     'test_research_reliability.py', 'test_investigator.py'):
             run([python, "-I", "-m", "unittest", "discover", "-s", root / "tests", "-p", test, "-q"])
-        for resource in ("review-v1", "changes-v1", "guidance-v1", "scan-v2", "review-v2", "changes-v2", "research-sources-v1"):
+        for resource in ("review-v1", "changes-v1", "guidance-v1", "scan-v2", "review-v2", "changes-v2", "research-sources-v1", "ollama-local-v1"):
             run([python, "-I", "-c", "from importlib.resources import files; import json; json.loads(files('azt_resources').joinpath('"+resource+".schema.json').read_text())"])
         run([python, "-I", root / "scripts/change_review_lab.py", "--cli", cli, "--output", work / "lab"])
         print("REVIEW ARTIFACT PASS: installed review regressions, catalog/schemas, four-case scan/compare/explain/HTML/JSON lab")
@@ -168,6 +170,16 @@ def main():
         run([python, root / "scripts/evaluate_precision.py", "--python", python, "--output", work / "precision.json"])
         print("SENSITIVE ARTIFACT PASS: installed analysis/dependency/exception regressions; 5 development + 8 reviewer-authored inputs; no runtime trials")
         run([python, '-I', root/'scripts/research_lab.py', '--cli', cli, '--output', work/'research lab'])
+        assert '--inference-config' in run([python, '-I', '-m', 'azt', 'research', 'investigate', '--help'])
+        imported = run([python, '-I', '-c', 'import azt_investigator; print(azt_investigator.__file__)']).strip()
+        assert environment.resolve() in Path(imported).resolve().parents
+        lab=root/'examples/protected-research/investigator'
+        run([python,'-I','-m','azt','research','review','--manifest',lab/'sources.json',
+             '--root','captures='+str(lab/'captures'),'--output',work/'investigator static review.json'])
+        captured=json.loads((work/'investigator static review.json').read_text())
+        assert captured['complete'] and captured['captured_documents']==3
+        run([python,'-I','-m','azt','research','export','--input',work/'investigator static review.json',
+             '--format','html','--output',work/'investigator static review.html'])
         print('RESEARCH ARTIFACT PASS: installed capture/broker/protocol tests and offline lab; no Docker boundary trial')
         print("ARTIFACT PASS: clean offline wheel install; installed import; help/version; "
               "deterministic JSON; benign=0; malicious=1 with net.pipe_shell; invalid target=2")

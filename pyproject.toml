@@ -25,7 +25,7 @@ Issues = "https://github.com/ralfyishere/agent-zero-trust/issues"
 azt = "azt:main"
 
 [tool.setuptools]
-py-modules = ["azt", "azt_intake", "azt_gate", "azt_runtime", "azt_config", "azt_docker", "azt_safety", "azt_safety_pack", "azt_review", "azt_sensitive", "azt_research", "azt_research_broker", "azt_research_runtime", "azt_research_worker"]
+py-modules = ["azt", "azt_intake", "azt_gate", "azt_runtime", "azt_config", "azt_docker", "azt_safety", "azt_safety_pack", "azt_review", "azt_sensitive", "azt_research", "azt_research_broker", "azt_research_runtime", "azt_research_worker", "azt_investigator"]
 packages = ["azt_resources"]
 
 [tool.setuptools.package-data]

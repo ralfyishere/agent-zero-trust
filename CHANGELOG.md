@@ -2,6 +2,12 @@
 
 ## 0.1.16 — research reliability (unreleased candidate)
 
+- Add an explicit experimental `research investigate` loop using a registered
+  local-only Ollama service, fixed isolated planner and the existing broker.
+  Source-linked hypotheses remain unverified and separate from static findings;
+  no shell, upload or permission tool is added. Live-model validation is blocked
+  pending an authorized prepared Linux service, not replaced by scripted results.
+
 - Correct selected `without` / `no` exclusions, modal passive disclosure
   requests, and explicit collection-into-report followed by sharing that report.
   Preserve MEDIUM severity, default HIGH threshold, local controls and uncertainty.

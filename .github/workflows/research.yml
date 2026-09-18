@@ -76,15 +76,17 @@ jobs:
           image_id=$(docker --config "$RUNNER_TEMP/research-registry" --host unix:///var/run/docker.sock image inspect "docker.io/library/python@$digest" --format '{{.Id}}')
           printf 'AZT_RESEARCH_IMAGE=%s\n' "$image_id" >> "$GITHUB_ENV"
       - name: Execute installed synthetic research suite
-        timeout-minutes: 5
+        timeout-minutes: 6
         run: |
           cd "$RUNNER_TEMP"
           "$RUNNER_TEMP/research-installed/bin/python" -I "$GITHUB_WORKSPACE/scripts/test_research_integration.py" --image "$AZT_RESEARCH_IMAGE" --output "$RUNNER_TEMP/research-evidence"
+          "$RUNNER_TEMP/research-installed/bin/python" -I "$GITHUB_WORKSPACE/scripts/test_investigator_integration.py" --image "$AZT_RESEARCH_IMAGE" --output "$RUNNER_TEMP/investigator-evidence"
       - name: Export bounded sanitized evidence to log, even on failure
         if: always()
         timeout-minutes: 1
         run: |
           python3 -I scripts/research_ci_evidence.py --evidence "$RUNNER_TEMP/research-evidence/evaluation.json" --dist "$RUNNER_TEMP/research-dist"
+          python3 -I scripts/research_ci_evidence.py --evidence "$RUNNER_TEMP/investigator-evidence/evaluation.json" --dist "$RUNNER_TEMP/research-dist"
       # No package publication, artifacts, caches, secrets, OIDC or write token.
       # All workers have independent leases; test network/sink have finite life.
       # Standard public runner/logs incur no additional Actions minutes/storage:

@@ -1,0 +1,8 @@
+{
+  "schema": "azt.research-sources.v1",
+  "sources": [
+    {"id":"guide","kind":"markdown","root":"captures","path":"guide.md","method":"operator-supplied-text"},
+    {"id":"support","kind":"markdown","root":"captures","path":"support.md","method":"operator-supplied-text"},
+    {"id":"peer","kind":"message","root":"captures","path":"peer.json","method":"saved-message"}
+  ]
+}

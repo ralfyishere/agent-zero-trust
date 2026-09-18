@@ -122,7 +122,7 @@ def tamper_probe(context):
 
 
 def main(worker='reference'):
-    if worker != 'reference' and worker not in TEST_WORKERS:
+    if worker not in ('reference', 'investigator') and worker not in TEST_WORKERS:
         raise ValueError('unknown bundled worker')
     initial = receive()
     if initial.get('protocol') != PROTOCOL:
@@ -140,6 +140,24 @@ def main(worker='reference'):
             raise ValueError('invalid broker response')
         return response
 
+    if worker == 'investigator':
+        # The controller owns endpoint/model/context/tool catalog. This fixed
+        # loop neither executes model text nor manufactures a successful review.
+        for _ in range(24):
+            inferred = request('infer')
+            if inferred['decision'] != 'allowed':
+                raise ValueError('inference failed or unavailable')
+            proposals = inferred['result']['proposals']
+            if not isinstance(proposals, list) or len(proposals) > 4:
+                raise ValueError('invalid proposal batch')
+            for proposal in proposals:
+                if (set(proposal) != {'operation','arguments'} or not isinstance(proposal['arguments'],dict) or
+                        set(proposal['arguments']) & {'id','mission','run','operation'}):
+                    raise ValueError('invalid proposal fields')
+                reply = request(proposal['operation'], **proposal['arguments'])
+                if proposal['operation'] == 'review' and reply['decision'] == 'allowed' and reply['result'].get('completed'):
+                    return 0
+        raise ValueError('model turn limit without completed review')
     if worker == 'authority-confusion':
         # The broker must reject these even for a benign source. No network or
         # privilege operation is implemented by this worker request protocol.

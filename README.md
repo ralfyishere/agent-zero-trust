@@ -270,6 +270,10 @@ the installation above still uses the published package.
 [Exact reliability evidence](evidence/research-reliability/README.md) ·
 [Offline example and optional Linux prerequisites](docs/protected-research.md)
 
+The same unreleased candidate includes an [optional local-model investigator](docs/controlled-investigator.md).
+Its controlled tool loop is experimental; live-model validation needs an assigned
+local-only Linux service. The everyday scanner remains model-free.
+
 ### Optional: snapshot gate and experimental access check
 
 The [snapshot gate](docs/migration.md) is an opt-in workflow aid; edits require

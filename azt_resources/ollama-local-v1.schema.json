@@ -1,0 +1,16 @@
+{
+  "$schema":"https://json-schema.org/draft/2020-12/schema",
+  "title":"Operator-selected local inference registration (not authentication)",
+  "type":"object",
+  "additionalProperties":false,
+  "required":["schema","endpoint","model","model_sha256","cloud_disabled","verification"],
+  "properties":{
+    "schema":{"const":"azt.ollama-local.v1"},
+    "endpoint":{"type":"string","pattern":"^http://127\\.0\\.0\\.1:[0-9]{4,5}/?$"},
+    "model":{"type":"string","minLength":1,"maxLength":96},
+    "model_sha256":{"type":"string","pattern":"^[0-9a-f]{64}$"},
+    "cloud_disabled":{"const":true},
+    "verification":{"const":"operator-checked-service-config-and-log"}
+  },
+  "$comment":"The stdlib validator additionally constrains ports and model syntax. No remote schema is resolved. These fields attest operator inspection; they do not enforce inference-service egress."
+}
