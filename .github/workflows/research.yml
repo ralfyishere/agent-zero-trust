@@ -1,17 +1,14 @@
-name: AZT-RESEARCH-001 reviewed integration
+name: Explicit isolated local-model validation
 
-# workflow_dispatch becomes available once this revision is on main. The one
-# selected bootstrap branch supports testing that change before merging it.
-# A marker is an intentional test selection, not an authorization mechanism.
+# Test-branch-only continuation of the existing exact-SHA dispatch route.
+# No PR, scheduled or automatic push execution. No publication or model on Mac.
 on:
   workflow_dispatch:
     inputs:
       source_sha:
-        description: Exact reviewed commit on the selected branch (40 hex characters)
+        description: Exact reviewed commit on test/isolated-local-model
         required: true
         type: string
-  push:
-    branches: [feat/research-reliability]
 permissions:
   contents: read
 concurrency:
@@ -22,19 +19,15 @@ jobs:
     if: >-
       github.repository == 'ralfyishere/agent-zero-trust' &&
       github.event.repository.private == false &&
-      github.actor == 'ralfyishere' &&
-      github.triggering_actor == 'ralfyishere' &&
-      github.run_attempt == 1 &&
-      ((github.event_name == 'workflow_dispatch' && startsWith(github.ref, 'refs/heads/') &&
-        inputs.source_sha == github.sha) ||
-       (github.event_name == 'push' && github.event.deleted == false &&
-        contains(github.event.head_commit.message, '[azt-research-once]')))
+      github.actor == 'ralfyishere' && github.triggering_actor == 'ralfyishere' &&
+      github.run_attempt == 1 && github.event_name == 'workflow_dispatch' &&
+      github.ref == 'refs/heads/test/isolated-local-model' && inputs.source_sha == github.sha
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
       - name: Verify explicit selection before checking out execution code
         env:
-          EXPECTED_SOURCE: ${{ github.event_name == 'workflow_dispatch' && inputs.source_sha || github.sha }}
+          EXPECTED_SOURCE: ${{ inputs.source_sha }}
         run: |
           python3 -I - <<'PY'
           import os, re
@@ -55,39 +48,27 @@ jobs:
         run: |
           python3 -m venv "$RUNNER_TEMP/research-build"
           "$RUNNER_TEMP/research-build/bin/python" -m pip --isolated --disable-pip-version-check --no-cache-dir --timeout 20 --retries 1 install --only-binary=:all: --no-deps setuptools==83.0.0 wheel==0.47.0 packaging==26.0
-      - name: Build and test the exact candidate
+      - name: Build and test exact candidate without Docker or model execution
         timeout-minutes: 3
         run: |
-          export AZT_RESEARCH_DIST="$RUNNER_TEMP/research-dist"
-          "$RUNNER_TEMP/research-build/bin/python" -c 'import os,setuptools.build_meta as b; b.build_wheel(os.environ["AZT_RESEARCH_DIST"]); b.build_sdist(os.environ["AZT_RESEARCH_DIST"])'
-          python3 test_azt.py
-          python3 -m unittest discover -s tests -q
-          python3 scripts/test_artifact.py "$AZT_RESEARCH_DIST"
+          "$RUNNER_TEMP/research-build/bin/python" scripts/release_candidate.py --output "$RUNNER_TEMP/research-build-record"
           python3 -m venv "$RUNNER_TEMP/research-installed"
-          "$RUNNER_TEMP/research-installed/bin/python" -m pip --isolated install --no-index --no-deps "$AZT_RESEARCH_DIST"/*.whl
-      - name: Resolve then explicitly pull one official Python image by digest
-        timeout-minutes: 3
-        run: |
-          mkdir -m 700 "$RUNNER_TEMP/research-registry"
-          docker --config "$RUNNER_TEMP/research-registry" --host unix:///var/run/docker.sock manifest inspect docker.io/library/python:3.12-slim > "$RUNNER_TEMP/research-image-index.json"
-          digest=$(python3 -c 'import json,os,re; d=json.load(open(os.environ["RUNNER_TEMP"]+"/research-image-index.json")); x=[m["digest"] for m in d["manifests"] if m["platform"].get("os")=="linux" and m["platform"].get("architecture")=="amd64"]; assert len(x)==1 and re.fullmatch("sha256:[0-9a-f]{64}",x[0]); print(x[0])')
-          printf 'Resolved approved image: docker.io/library/python@%s\n' "$digest"
-          timeout 120s docker --config "$RUNNER_TEMP/research-registry" --host unix:///var/run/docker.sock pull --platform linux/amd64 "docker.io/library/python@$digest"
-          image_id=$(docker --config "$RUNNER_TEMP/research-registry" --host unix:///var/run/docker.sock image inspect "docker.io/library/python@$digest" --format '{{.Id}}')
-          printf 'AZT_RESEARCH_IMAGE=%s\n' "$image_id" >> "$GITHUB_ENV"
-      - name: Execute installed synthetic research suite
-        timeout-minutes: 6
+          "$RUNNER_TEMP/research-installed/bin/python" -m pip --isolated --no-cache-dir install --no-index --no-deps "$RUNNER_TEMP/research-build-record/dist"/*.whl
+      - name: Explicit isolated image and model setup, then two synthetic live sessions
+        timeout-minutes: 10
         run: |
           cd "$RUNNER_TEMP"
-          "$RUNNER_TEMP/research-installed/bin/python" -I "$GITHUB_WORKSPACE/scripts/test_research_integration.py" --image "$AZT_RESEARCH_IMAGE" --output "$RUNNER_TEMP/research-evidence"
-          "$RUNNER_TEMP/research-installed/bin/python" -I "$GITHUB_WORKSPACE/scripts/test_investigator_integration.py" --image "$AZT_RESEARCH_IMAGE" --output "$RUNNER_TEMP/investigator-evidence"
-      - name: Export bounded sanitized evidence to log, even on failure
+          timeout --signal=TERM --kill-after=10s 540s "$RUNNER_TEMP/research-installed/bin/python" -I "$GITHUB_WORKSPACE/scripts/test_live_model.py" --output "$RUNNER_TEMP/azt-live-evidence"
+      - name: Exact-resource cleanup and sanitized evidence, even after failure
         if: always()
         timeout-minutes: 1
         run: |
-          python3 -I scripts/research_ci_evidence.py --evidence "$RUNNER_TEMP/research-evidence/evaluation.json" --dist "$RUNNER_TEMP/research-dist"
-          python3 -I scripts/research_ci_evidence.py --evidence "$RUNNER_TEMP/investigator-evidence/evaluation.json" --dist "$RUNNER_TEMP/research-dist"
-      # No package publication, artifacts, caches, secrets, OIDC or write token.
-      # All workers have independent leases; test network/sink have finite life.
-      # Standard public runner/logs incur no additional Actions minutes/storage:
-      # https://docs.github.com/en/billing/concepts/product-billing/github-actions
+          if test -x "$RUNNER_TEMP/research-installed/bin/python"; then
+            "$RUNNER_TEMP/research-installed/bin/python" -I "$GITHUB_WORKSPACE/scripts/test_live_model.py" --cleanup --output "$RUNNER_TEMP/azt-live-evidence"
+          fi
+          python3 -I "$GITHUB_WORKSPACE/scripts/research_ci_evidence.py" --evidence "$RUNNER_TEMP/azt-live-evidence/evaluation.json" --dist "$RUNNER_TEMP/research-build-record/dist"
+      # Explicit downloads: pinned Official Python linux/amd64 image, pinned
+      # upstream Ollama0.34.2 linux/amd64 image, fixed qwen3:0.6b model (~523MB).
+      # Image/model digests and every model blob are checked. No source text is
+      # supplied until download service is removed and inference has network none.
+      # No artifacts/caches, OIDC, application secrets, public ports or write token.
