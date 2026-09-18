@@ -20,12 +20,15 @@ MANIFEST_SCHEMA = 'azt.research-sources.v1'
 MAX_MANIFEST = 65536
 MAX_SOURCES = 16
 MAX_DOCUMENTS = 128
-MAX_DOCUMENT_BYTES = 8192
+MAX_DOCUMENT_BYTES = 65536
+MAX_MESSAGE_BYTES = 6 * MAX_DOCUMENT_BYTES + 512
+PAGE_BYTES = 8192
 MAX_CAPTURE_BYTES = 1024 * 1024
 MAX_OUTPUT = 4 * 1024 * 1024
 SETTINGS = {'sources': MAX_SOURCES, 'documents': MAX_DOCUMENTS,
             'document_bytes': MAX_DOCUMENT_BYTES, 'captured_bytes': MAX_CAPTURE_BYTES,
-            'method': 'captured-source-v1', 'repository_sources': 2}
+            'method': 'captured-source-v2', 'repository_sources': 2}
+LEGACY_SETTINGS = dict(SETTINGS, document_bytes=8192, method='captured-source-v1')
 NOTICE = ('Captured local material, not authenticated original sources. No network fetch, '
           'diagnostic collection, target execution, admission or permission is issued. '
           'Raw text, origin values and claimed roles are omitted from exports; local paths may remain sensitive.')
@@ -135,6 +138,36 @@ class Capture:
         self.bytes += len(raw)
 
 
+def pages(text, parent_sha256):
+    """Deterministic UTF-8 byte pages of frozen text, not detector windows.
+
+    Offsets are zero-based half-open bytes; lines are one-based inclusive.
+    Split only on UTF-8 codepoint boundaries. Page identity binds the parent
+    digest and offsets. Scan relationships are computed on full admitted bytes
+    before this presentation/channel segmentation, never separately per page.
+    """
+    raw = text.encode('utf-8')
+    require(len(raw) <= MAX_DOCUMENT_BYTES and hashlib.sha256(raw).hexdigest() == parent_sha256,
+            'invalid frozen page source')
+    result, start, line = [], 0, 1
+    while start < len(raw) or not result:
+        end = min(start + PAGE_BYTES, len(raw))
+        while end < len(raw) and raw[end] & 0xC0 == 0x80:
+            end -= 1
+        part = raw[start:end]
+        content = part.decode('utf-8')
+        identity = {'parent_sha256': parent_sha256, 'byte_start': start, 'byte_end': end}
+        result.append(dict(identity, id='p-' + intake.digest(identity), index=len(result),
+                           sha256=hashlib.sha256(part).hexdigest(), text=content,
+                           start_line=line, end_line=line + content.count('\n') - int(content.endswith('\n'))))
+        result[-1]['end_line'] = max(line, result[-1]['end_line'])
+        line += content.count('\n')
+        start = end
+        if start == len(raw):
+            break
+    return result
+
+
 def inspect_sources(manifest, roots, fail_on='high'):
     import azt
     value, roots, registration_sha = registration(manifest, roots)
@@ -162,17 +195,20 @@ def inspect_sources(manifest, roots, fail_on='high'):
             else:
                 suffixes = {'text': ('.txt',), 'markdown': ('.md', '.mdc'), 'message': ('.json',)}
                 require(path.suffix.lower() in suffixes[item['kind']], 'unsupported source format; no conversion attempted')
-                raw = read_local(path, MAX_DOCUMENT_BYTES)
+                raw = read_local(path, MAX_MESSAGE_BYTES if item['kind'] == 'message' else MAX_DOCUMENT_BYTES)
                 source['byte_sha256'] = hashlib.sha256(raw).hexdigest()
                 require(item.get('sha256') is None or item['sha256'] == source['byte_sha256'], 'registered source bytes changed')
                 if item['kind'] == 'message':
-                    message = review.parse(raw)
+                    # Only saved capture content gets the larger string bound;
+                    # report readers retain their existing strict 8192 bound.
+                    message = review.parse(raw, string_limit=MAX_DOCUMENT_BYTES)
                     review.obj(message, ['schema', 'role', 'content'])
                     require(message['schema'] == 'azt.saved-message.v1', 'unsupported saved-message schema')
                     require(isinstance(message['role'], str) and len(message['role']) <= 128, 'invalid claimed role')
                     require(isinstance(message['content'], str), 'invalid saved message content')
                     source['claimed_role_sha256'] = intake.digest(message['role'])
                     raw = message['content'].encode('utf-8')
+                require(len(raw) <= MAX_DOCUMENT_BYTES, 'research document byte limit exceeded')
                 raw.decode('utf-8')
                 # The existing engine inspects frozen bytes. Each standalone capture
                 # gets its own root: unrelated sources are never a conversation.
@@ -225,7 +261,7 @@ def validate_report(value):
         review.sha(value[key])
     require(value['mode'] == 'captured-local' and value['threshold'] in ('high', 'medium', 'any'), 'invalid research mode')
     require(type(value['complete']) is bool, 'invalid completeness')
-    require(value['settings'] == SETTINGS, 'unsupported research analysis settings')
+    require(value['settings'] in (SETTINGS, LEGACY_SETTINGS), 'unsupported research analysis settings')
     review.obj(value['engine'], ['version', 'implementation_sha256', 'text_rules_sha256'])
     review.string(value['engine']['version'])
     review.sha(value['engine']['implementation_sha256']); review.sha(value['engine']['text_rules_sha256'])

@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "agent-zero-trust"
-version = "0.1.15"
+version = "0.1.16"
 description = "Offline repository inspection for coding-agent instructions: scan, compare, explain, and export a local review."
 readme = "README.md"
 requires-python = ">=3.9"

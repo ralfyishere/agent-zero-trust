@@ -48,10 +48,10 @@ def runtime_doctor(backend="bubblewrap"):
         "checks": [],
         "controls": {name: "not_verified" for name in REQUIRED_CONTROLS},
         "limitations": [
-            "No AZT runtime profile has completed real Linux integration tests.",
+            "This legacy bubblewrap diagnostic does not assess the separate Docker research or FS-001 profiles.",
             "Executable presence does not establish its version, provenance, or behavior.",
             "Controller visibility does not establish cgroup delegation or effective limits.",
-            "No process was launched; run, inspect, and kill are not available.",
+            "This diagnostic launches no process and grants no runtime authority. See research --help for the separate experimental profile.",
         ],
     }
     if backend != "bubblewrap":

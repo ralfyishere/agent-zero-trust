@@ -11,7 +11,7 @@ import unittest
 
 
 ROOT = Path(__file__).resolve().parent.parent
-RELEASED_VERSION = "0.1.14"
+RELEASED_VERSION = "0.1.15"
 
 
 class DocumentationTests(unittest.TestCase):

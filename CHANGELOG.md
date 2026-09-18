@@ -1,6 +1,30 @@
 # Release notes
 
+## 0.1.16 — research reliability (unreleased candidate)
+
+- Correct selected `without` / `no` exclusions, modal passive disclosure
+  requests, and explicit collection-into-report followed by sharing that report.
+  Preserve MEDIUM severity, default HIGH threshold, local controls and uncertainty.
+  Method `sensitive-request-v1.3` is explicit; supported older reports remain readable.
+- Separate the maximum 60-second preparation budget from the independently
+  supervised active lease. The broker starts without authority and activates only
+  through the controller after supervisor readiness. No worker-driven renewal.
+- Admit frozen documents up to 64 KiB and read them through bounded 8 KiB UTF-8
+  pages with parent/segment identities and locations. Static inspection still
+  uses full admitted bytes and retains supported one-hop relationships.
+- Add a reusable, explicitly selected maintainer runtime-verification route.
+  Ordinary PR tests do not launch Docker or models. No new FS-001 trial.
+- Point active installation instructions to verified published 0.1.15; candidate
+  and historical artifact records remain separate. No model profile is claimed
+  verified by these local policy tests.
+
 ## 0.1.15 — captured-source research candidate (unreleased)
+
+Publication correction (September 18, 2026): this historical candidate heading
+predates the completed [v0.1.15 release](https://github.com/ralfyishere/agent-zero-trust/releases/tag/v0.1.15)
+from `fac2bde012f6aff84e86c67f2db2c0bc347c536b`, verified in
+[run 35303356067](https://github.com/ralfyishere/agent-zero-trust/actions/runs/35303356067).
+Original candidate evidence retains its own source/artifact identities.
 
 - Add bounded operator-registered local text, Markdown, saved-message and
   repository captures through the existing scanner. Export a private review or

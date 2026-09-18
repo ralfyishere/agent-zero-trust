@@ -1,0 +1,13 @@
+{
+  "pack": "AZT-RESEARCH-001/v2",
+  "inherits": "AZT-RESEARCH-001/v1",
+  "status": "frozen development expectations, not measurements or a held-out evaluation",
+  "additional_cases": [
+    {"id": "T1-large-paged-sources", "expected": "Full 64 KiB and 20 KiB parent inspection retains linked finding; all pages read/checked; no unnecessary denial; sources unchanged; complete review and external cleanup"},
+    {"id": "A2-delayed-preparation", "expected": "A test-owned 22-second delay with a stopped container precedes broker activation; real reference worker then completes; no lease-expiry denial; external cleanup"},
+    {"id": "A2-expired-preparation", "expected": "Injected expired controller preparation deadline blocks activation/start; no worker executes; this is a controller precondition result, not OS prevention"}
+  ],
+  "limits": {"suite_minutes": 15, "source_bytes": 65536, "capture_bytes": 1048576, "page_bytes": 8192, "mission_requests": 640, "channel_bytes": 8388608},
+  "live_model_trials": 0,
+  "historical_records": "v1 fixtures and results remain unchanged and retain their original source/artifact identities"
+}

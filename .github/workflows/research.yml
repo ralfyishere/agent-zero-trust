@@ -1,10 +1,17 @@
 name: AZT-RESEARCH-001 reviewed integration
 
-# Push works for a new workflow on the selected branch. A marker expresses the
-# operator's selected test event, not cryptographic authorization or policy.
+# workflow_dispatch becomes available once this revision is on main. The one
+# selected bootstrap branch supports testing that change before merging it.
+# A marker is an intentional test selection, not an authorization mechanism.
 on:
+  workflow_dispatch:
+    inputs:
+      source_sha:
+        description: Exact reviewed commit on the selected branch (40 hex characters)
+        required: true
+        type: string
   push:
-    branches: [feat/protected-research]
+    branches: [feat/research-reliability]
 permissions:
   contents: read
 concurrency:
@@ -15,12 +22,29 @@ jobs:
     if: >-
       github.repository == 'ralfyishere/agent-zero-trust' &&
       github.event.repository.private == false &&
-      github.event.deleted == false &&
+      github.actor == 'ralfyishere' &&
+      github.triggering_actor == 'ralfyishere' &&
       github.run_attempt == 1 &&
-      contains(github.event.head_commit.message, '[azt-research-once]')
+      ((github.event_name == 'workflow_dispatch' && startsWith(github.ref, 'refs/heads/') &&
+        inputs.source_sha == github.sha) ||
+       (github.event_name == 'push' && github.event.deleted == false &&
+        contains(github.event.head_commit.message, '[azt-research-once]')))
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
+      - name: Verify explicit selection before checking out execution code
+        env:
+          EXPECTED_SOURCE: ${{ github.event_name == 'workflow_dispatch' && inputs.source_sha || github.sha }}
+        run: |
+          python3 -I - <<'PY'
+          import os, re
+          expected = os.environ['EXPECTED_SOURCE']
+          assert re.fullmatch('[0-9a-f]{40}', expected)
+          assert expected == os.environ['GITHUB_SHA']
+          assert os.environ['GITHUB_REPOSITORY'] == 'ralfyishere/agent-zero-trust'
+          assert os.environ['GITHUB_ACTOR'] == os.environ['GITHUB_TRIGGERING_ACTOR'] == 'ralfyishere'
+          print('Selected reviewed source:', expected)
+          PY
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           ref: ${{ github.sha }}

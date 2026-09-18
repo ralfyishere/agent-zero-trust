@@ -13,29 +13,36 @@ import time
 
 import azt_intake as intake
 import azt_review as review
-from azt_research import ResearchError, require, identifier
+from azt_research import ResearchError, require, identifier, pages, PAGE_BYTES
 
-PROTOCOL = 'azt.research-channel.v1'
-MAX_CALLS = 512
+PROTOCOL = 'azt.research-channel.v2'
+MAX_CALLS = 640
 MAX_RESPONSE = 65536
 MAX_TOTAL_RESPONSE = 8 * 1024 * 1024
 MAX_OBSERVATIONS = 128
 LEASE_SECONDS = 20
-POLICY = {'schema': 'azt.research-policy.v1', 'operations': ['read', 'check', 'observe', 'review'],
+PREPARATION_SECONDS = 60
+POLICY = {'schema': 'azt.research-policy.v2', 'operations': ['read', 'check', 'observe', 'review'],
           'requests': MAX_CALLS, 'response_bytes': MAX_RESPONSE, 'total_response_bytes': MAX_TOTAL_RESPONSE,
           'observations': MAX_OBSERVATIONS, 'lease_seconds': LEASE_SECONDS,
+          'preparation_seconds': PREPARATION_SECONDS, 'activation': 'controller-after-supervisor-readiness',
+          'read_page_bytes': PAGE_BYTES,
           'delegation': False, 'network': False, 'arbitrary_paths': False}
 
 
 class Broker:
     def __init__(self, capture, audit_path, clock=time.monotonic):
         self._documents = copy.deepcopy(capture.documents)
+        self._pages = {key: pages(d['text'], d['sha256']) for key, d in self._documents.items()}
+        self._read_pages = {key: set() for key in self._documents}
         self._report = copy.deepcopy(capture.report)
         self.mission_id = 'm-' + secrets.token_hex(16)
         self.run_id = 'r-' + secrets.token_hex(16)
         self.clock = clock
-        self.deadline = clock() + LEASE_SECONDS
-        self.state = 'active'
+        self.created_at = clock()
+        self.prepare_deadline = self.created_at + PREPARATION_SECONDS
+        self.deadline = self.activated_at = None
+        self.state = 'preparing'
         self.completed = False
         self.review_completed = False
         self.calls = self.response_bytes = 0
@@ -54,18 +61,45 @@ class Broker:
         finally:
             os.close(parent)
         try:
-            self._record('lifecycle', 'started', 'mission_frozen')
+            self._record('lifecycle', 'preparing', 'mission_frozen_no_worker_authority')
         except BaseException:
             self.close()
             raise
 
     def source_descriptors(self):
-        return [{'id': d['id'], 'sha256': d['sha256']} for d in self._documents.values()]
+        return [{'id': d['id'], 'sha256': d['sha256'], 'bytes': len(d['text'].encode('utf-8')),
+                 'pages': len(self._pages[d['id']])} for d in self._documents.values()]
+
+    def preparation_remaining(self):
+        require(self.state == 'preparing', 'mission_not_preparing')
+        left = self.prepare_deadline - self.clock()
+        if left <= 0:
+            self.state = 'expired'
+            raise ResearchError('preparation_deadline')
+        return left
+
+    def activate(self, lease_seconds=LEASE_SECONDS, deadline=None):
+        """Trusted controller transition, never a channel operation or renewal.
+
+        The runtime supplies its already-armed supervisor's exact deadline.
+        Readiness/start overhead consumes that maximum lease, not a fresh one.
+        Unit callers without a backend exercise policy only.
+        """
+        self.preparation_remaining()
+        require(type(lease_seconds) is int and 2 <= lease_seconds <= 30, 'invalid_active_lease')
+        now = self.clock()
+        limit = now + lease_seconds if deadline is None else deadline
+        require(type(limit) in (int, float) and now < limit <= now + lease_seconds,
+                'invalid_active_deadline')
+        self.deadline = limit
+        self._record('lifecycle', 'activated', 'controller_activated_finite_lease')
+        self.activated_at = now
+        self.state = 'active'
 
     def _record(self, operation, decision, reason, source=None, request_sha256=None):
         event = {'sequence': len(self.events), 'mission': self.mission_id, 'run': self.run_id,
                  'policy_sha256': self.policy_sha256, 'input_sha256': self._report['input_sha256'],
-                 'elapsed_ms': max(0, int((self.clock() - (self.deadline - LEASE_SECONDS)) * 1000)),
+                 'elapsed_ms': max(0, int((self.clock() - self.created_at) * 1000)),
                  'operation': operation, 'decision': decision, 'reason': reason,
                  'source': source, 'request_sha256': request_sha256,
                  'scope': 'controller broker observation; not proof of worker intent or direct OS actions'}
@@ -80,7 +114,7 @@ class Broker:
         self.events.append(event)
 
     def revoke(self):
-        if self.state == 'active':
+        if self.state in ('active', 'preparing'):
             self.state = 'revoked'
             self.completed = False
             self._record('lifecycle', 'revoked', 'operator_or_controller_stop')
@@ -95,6 +129,8 @@ class Broker:
                 'controller_sha256': self.controller_sha256,
                 'input_sha256': self._report['input_sha256'], 'state': self.state,
                 'completed': self.completed, 'calls': self.calls, 'response_bytes': self.response_bytes,
+                'activation_ms': None if self.activated_at is None else int((self.activated_at-self.created_at)*1000),
+                'active_budget_ms': None if self.activated_at is None else int((self.deadline-self.activated_at)*1000),
                 'review_completed_before_revocation': self.review_completed,
                 'checked_sources': len(self._checked), 'read_sources': len(self._read),
                 'documents': [{k:d[k] for k in ('id','registration','path','sha256')} for d in self._documents.values()],
@@ -126,6 +162,7 @@ class Broker:
             operation = op
             fields = {'id', 'mission', 'run', 'operation'}
             if op in ('read', 'check'): fields |= {'source', 'sha256'}
+            if op == 'read' and 'page' in request: fields.add('page')
             if op == 'observe': fields.add('observation')
             require(set(request) == fields, 'unexpected_authority_or_argument_fields')
             fingerprint = intake.digest(request)
@@ -142,7 +179,12 @@ class Broker:
                 require(request['sha256'] == d['sha256'], 'source_identity_mismatch')
                 require(hashlib.sha256(d['text'].encode()).hexdigest() == d['sha256'], 'frozen_source_identity_mismatch')
                 if op == 'read':
-                    result = {'text': d['text'], 'source': source, 'sha256': d['sha256']}
+                    page = request.get('page', 0)
+                    require('page' in request or len(self._pages[source]) == 1, 'paged_read_required')
+                    require(type(page) is int and 0 <= page < len(self._pages[source]), 'invalid_page')
+                    result = {'source': source, 'sha256': d['sha256'],
+                              'text': self._pages[source][page]['text'],
+                              'segment': {k: v for k, v in self._pages[source][page].items() if k != 'text'}}
                 else:
                     require(d['check'] is not None, 'inspection_not_available')
                     result = copy.deepcopy(d['check'])
@@ -168,7 +210,10 @@ class Broker:
             self._response_budget(response)
             # Audit must succeed BEFORE returning data/committing execution state.
             self._record(operation, 'executed', 'within_frozen_mission', source, fingerprint)
-            if op == 'read': self._read.add(source)
+            if op == 'read':
+                self._read_pages[source].add(page)
+                if len(self._read_pages[source]) == len(self._pages[source]):
+                    self._read.add(source)
             elif op == 'check': self._checked.add(source)
             elif op == 'observe': self.observations.append(copy.deepcopy(request['observation']))
             else:
@@ -185,6 +230,7 @@ class Broker:
             if reason not in {'invalid_request', 'request_too_large', 'mission_not_active', 'lease_expired',
                               'mission_or_run_mismatch', 'operation_not_permitted', 'unexpected_authority_or_argument_fields',
                               'conflicting_request_id', 'unknown_source', 'source_identity_mismatch', 'frozen_source_identity_mismatch',
+                              'paged_read_required', 'invalid_page',
                               'inspection_not_available', 'observation_requires_checked_source',
                               'observation_not_supported_by_checked_evidence', 'observation_budget_exhausted',
                               'review_sources_not_completed', 'inspection_incomplete'}:

@@ -10,7 +10,7 @@ to review before deciding what to do.
 For **vibe coders, developers and security reviewers**. Free. Offline after
 installation. No account, model API or telemetry.
 
-[![PyPI 0.1.14](https://img.shields.io/badge/PyPI-0.1.14-2979ff)](https://pypi.org/project/agent-zero-trust/0.1.14/)
+[![PyPI 0.1.15](https://img.shields.io/badge/PyPI-0.1.15-2979ff)](https://pypi.org/project/agent-zero-trust/0.1.15/)
 [![CI](https://github.com/ralfyishere/agent-zero-trust/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/ralfyishere/agent-zero-trust/actions/workflows/ci.yml)
 [![Python](https://img.shields.io/pypi/pyversions/agent-zero-trust?color=2979ff)](https://pypi.org/project/agent-zero-trust/)
 [![MIT license](https://img.shields.io/github/license/ralfyishere/agent-zero-trust?color=2979ff)](LICENSE)
@@ -53,7 +53,7 @@ python3 -m venv "$AZT_REVIEW/venv"
 . "$AZT_REVIEW/venv/bin/activate"
 python -m pip --isolated install \
   --index-url https://pypi.org/simple --no-deps \
-  agent-zero-trust==0.1.14
+  agent-zero-trust==0.1.15
 azt --version
 azt scan "$AZT_PROJECT"
 ```
@@ -65,7 +65,7 @@ contents; it never runs its instructions. Setup stays outside that project;
 **Read the finding, not just the exit code.** A MEDIUM warning can deserve review
 even when the default HIGH threshold is not exceeded. Scan exits: **0** threshold
 not exceeded; **1** findings meet it; **2** incomplete inspection or error.
-[Released 0.1.14: what changed](https://github.com/ralfyishere/agent-zero-trust/releases/tag/v0.1.14).
+[Released 0.1.15: what changed](https://github.com/ralfyishere/agent-zero-trust/releases/tag/v0.1.15).
 
 <details>
 <summary>Save a baseline, then compare after you edit</summary>
@@ -259,11 +259,18 @@ continuous authorization or general containment is provided.
 
 [Change-review evidence and methodology](evidence/change-review/README.md) · [Rule guidance and matching](docs/change-review.md) · [Coverage and known misses](COVERAGE.md) · [Supported files](docs/supported-agent-files.md) · [Release notes](CHANGELOG.md)
 
-### Optional: snapshot gate and experimental access check
+### Experimental Protected Research
 
-In the unreleased source candidate: [review registered local captures and try the
-optional protected reference-worker lab](docs/protected-research.md). Ordinary
-scanning needs neither Docker nor that experimental profile.
+Available since 0.1.15: [review registered local captures and explore the
+experimental protected reference-worker lab](docs/protected-research.md). Ordinary
+scanning needs neither Docker nor that profile. The unreleased 0.1.16 source
+candidate improves request associations, bounded paging and runtime preparation;
+the installation above still uses the published package.
+
+[Exact reliability evidence](evidence/research-reliability/README.md) ·
+[Offline example and optional Linux prerequisites](docs/protected-research.md)
+
+### Optional: snapshot gate and experimental access check
 
 The [snapshot gate](docs/migration.md) is an opt-in workflow aid; edits require
 operator re-admission. A same-user hook or signing key is not a sandbox.

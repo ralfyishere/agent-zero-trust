@@ -17,8 +17,8 @@ MAX_OUTPUT = MAX_REPORT
 MAX_ITEMS = 10000
 SEVERITY = {"HIGH": 0, "MEDIUM": 1, "INFO": 2}
 SENSITIVE_RULE = 'request.sensitive_disclosure'
-SENSITIVE_ANALYSIS = 'sensitive-request-v1.2'
-SENSITIVE_ANALYSES = {SENSITIVE_ANALYSIS, 'sensitive-request-v1.1', 'sensitive-request-v1'}
+SENSITIVE_ANALYSIS = 'sensitive-request-v1.3'
+SENSITIVE_ANALYSES = {SENSITIVE_ANALYSIS, 'sensitive-request-v1.2', 'sensitive-request-v1.1', 'sensitive-request-v1'}
 SENSITIVE_LIMITS = ['bounded-english-context', 'wording-not-intent',
                     'no-secret-content-inspected', 'destination-not-verified']
 EXCEPTION_REFUSAL = 'primary-file exception cannot authorize referenced context'
@@ -41,7 +41,8 @@ def require(ok, message):
         raise ReviewError(message)
 
 
-def bounded(value):
+def bounded(value, *, string_limit=8192):
+    require(type(string_limit) is int and 8192 <= string_limit <= 65536, "invalid string bound")
     stack, count = [(value, 0)], 0
     while stack:
         item, depth = stack.pop()
@@ -54,14 +55,14 @@ def bounded(value):
             require(len(item) <= MAX_ITEMS, "report array limit exceeded")
             stack.extend((v, depth + 1) for v in item)
         elif isinstance(item, str):
-            require(len(item) <= 8192 and not any(0xD800 <= ord(c) <= 0xDFFF for c in item), "invalid or oversized string")
+            require(len(item) <= string_limit and not any(0xD800 <= ord(c) <= 0xDFFF for c in item), "invalid or oversized string")
         else:
             require(item is None or type(item) in (bool, int), "unsupported JSON scalar")
             if type(item) is int:
                 require(abs(item) <= 10**19, "integer limit exceeded")
 
 
-def parse(raw):
+def parse(raw, *, string_limit=8192):
     require(len(raw) <= MAX_REPORT, "report byte limit exceeded")
     text = raw.decode("utf-8")
     depth, quoted, escaped = 0, False, False
@@ -97,7 +98,7 @@ def parse(raw):
 
     value = json.loads(text, object_pairs_hook=pairs, parse_int=integer,
                        parse_float=unsupported, parse_constant=unsupported)
-    bounded(value)
+    bounded(value, string_limit=string_limit)
     return value
 
 

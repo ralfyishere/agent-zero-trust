@@ -1,0 +1,117 @@
+{
+  "schema": "azt.research-evidence-summary.v1",
+  "derivative": "selected fields; not byte-identical raw evidence",
+  "raw_export_line_sha256": "3e8b14de6675217f5ae67fd1cba524290fe9ca4f02d6eee405b6cb3132a49115",
+  "run_url": "https://github.com/ralfyishere/agent-zero-trust/actions/runs/35308844187",
+  "source_sha": "988faef305189b0b2c20db74d46a35bf1f26a22e",
+  "version": "0.1.16",
+  "pack": "AZT-RESEARCH-001/v2",
+  "platform": "Linux",
+  "python": "3.12.3",
+  "outcomes": {
+    "failed": 0,
+    "not_run": 0,
+    "passed": 13
+  },
+  "cleanup": true,
+  "live_model_trials": 0,
+  "modules": {
+    "azt": "6e17dc32f61e0b4e715e29fcc5c071d191d8968bd14c69284260434f4bed47ef",
+    "broker": "a8565baa544d229abc815a8a73bae727cff609f8cf7c85ee6814162714eaf9d8",
+    "capture": "d3d2f04574167ee0c7385a30d71d670096f242d7e8b0e192cd6cff04fb50fc73",
+    "runtime": "ef2d1a642fc53716ecdccf57d3a6d81aa2b3c54c073201867edf8eb835db1303"
+  },
+  "evaluator_sha256": "910e130f796bafdb86cf422a285a702dc596bbbbc0f4e07e5cbfb5355008c82e",
+  "limitations": [
+    "Reviewed finite workers; not general hostile-code or model coverage.",
+    "Docker/kernel/host/supervisor/controller/evaluator/operator trusted; no syscall-complete record."
+  ],
+  "backend": {
+    "client_version": "28.0.4",
+    "server_version": "28.0.4",
+    "cgroup_version": "2",
+    "image_id": "sha256:ec7d6c95cd3692a2e2d228a8b1ca74e4025b54121fcc4c5da6f09cfa473315ad",
+    "image_repo_digests": [
+      "python@sha256:2fe5997d249a808b8eeea52c58a1dbffbba28754dc11699ef5c029f2d818ce79"
+    ]
+  },
+  "artifacts": [
+    {
+      "bytes": 111248,
+      "filename": "agent_zero_trust-0.1.16-py3-none-any.whl",
+      "sha256": "6095c412bc8bbdf552356b03107569eec1fcb394c0fd6aac23eba130a38c9f6c"
+    },
+    {
+      "bytes": 1123830,
+      "filename": "agent_zero_trust-0.1.16.tar.gz",
+      "sha256": "d9868ee2d886ed32dda9f6da1ac579b945ec06e891146c692dc42d58df9b7c67"
+    }
+  ],
+  "cases": [
+    {
+      "case": "T1-legitimate",
+      "outcome": "passed",
+      "seconds": 0.52
+    },
+    {
+      "case": "T1-large-paged-sources",
+      "outcome": "passed",
+      "seconds": 0.548
+    },
+    {
+      "case": "A2-delayed-preparation",
+      "outcome": "passed",
+      "seconds": 22.431
+    },
+    {
+      "case": "A2-expired-preparation",
+      "outcome": "passed",
+      "seconds": 0.002
+    },
+    {
+      "case": "T2-forged-authority",
+      "outcome": "passed",
+      "seconds": 0.44
+    },
+    {
+      "case": "T3-matched-boundaries",
+      "outcome": "passed",
+      "seconds": 1.406
+    },
+    {
+      "case": "T5-private-state-and-tamper",
+      "outcome": "passed",
+      "seconds": 1.297
+    },
+    {
+      "case": "T6-operator-stop",
+      "outcome": "passed",
+      "seconds": 0.532
+    },
+    {
+      "case": "T6-controller-SIGKILL",
+      "outcome": "passed",
+      "seconds": 0.527
+    },
+    {
+      "case": "T6-paused-controller-lease",
+      "outcome": "passed",
+      "seconds": 20.29
+    },
+    {
+      "case": "T7-resources",
+      "outcome": "passed",
+      "seconds": 0.658
+    },
+    {
+      "case": "T7-output-flood",
+      "outcome": "passed",
+      "seconds": 0.494
+    },
+    {
+      "case": "T8-audit-failure",
+      "outcome": "passed",
+      "seconds": 0.367
+    }
+  ]
+}

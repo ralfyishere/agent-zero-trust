@@ -14,6 +14,9 @@ for these improvements; the [synthetic lab](../examples/sensitive-request/README
 also preserves its explicitly labeled historical reproduction.
 [Installed baseline/candidate measurements and reproduction](../evidence/sensitive-precision-0.1.14/README.md).
 
+The unreleased 0.1.16 source adds `sensitive-request-v1.3` associations described
+below. Installing published 0.1.15 does not include that correction yet.
+
 ## Meaning and next step
 
 `request.sensitive_disclosure` is **MEDIUM**: the wording warrants review, but
@@ -53,6 +56,23 @@ version-only request. Selected coordinated actions can share an object, as in
 Sentence/semicolon boundaries and selected action bullets also separate requests.
 Selected contractions accept straight or curly apostrophes. These are bounded
 wording cases, not general English negation, syntax or intent understanding.
+
+The 0.1.16 candidate also handles direct object exclusions (`send no API keys`,
+`send the version without shell history`). Exclusion does not exempt a separate
+affirmative upload. Selected modal passives (`API keys must be sent`, `private
+keys should be uploaded`) retain their subject and prohibition. Mere past-tense
+descriptions are not converted into requests. More complex passive grammar is
+unsupported.
+
+Within one analysis window, collection **into a named report/ticket/file/document/
+note** can bind a later definite sharing request for that object. Up to two short
+ASCII modifiers are recognized. An exact name, or a single unambiguous head noun
+(`a bug report` then `the report`), can match; `another report`, `a report`, reversed
+order, different named reports, cross-paragraph/window/file references do not.
+This observes a requested intermediate disclosure, not the contents of a real
+report. No new file is retrieved. Existing explicit bundle/pronoun handling remains.
+Long individual lines also split into bounded windows, with original line numbers;
+relations crossing such a boundary remain a known coverage limit.
 
 Since 0.1.14, AZT distinguishes selected token measurements from credential
 requests. Asking for a token count is not the same as asking for an API token.
@@ -119,8 +139,9 @@ remain visible even when the request file is unchanged. Missing/degraded support
 cannot resolve an old request. “No longer observed” does not mean “fixed.”
 Comparison uses saved validated records, not today's filesystem. Engine/method
 changes reduce comparability; unrelated edits do not invalidate every observation.
-Scan/review/changes remain v2. The 0.1.14 reader accepts supported records with
-`sensitive-request-v1`, `sensitive-request-v1.1` and `sensitive-request-v1.2` methods.
+Scan/review/changes remain v2. The 0.1.16 reader accepts supported records with
+`sensitive-request-v1`, `sensitive-request-v1.1`, `sensitive-request-v1.2` and
+`sensitive-request-v1.3` methods. Older readers may reject the new method.
 The new `additional-hop-not-followed` reference status is an explicit contract
 extension: older binaries may reject a new report containing it. Use the updated
 reader instead of editing historical reports, their methods or their hashes.

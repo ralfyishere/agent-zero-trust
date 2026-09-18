@@ -155,7 +155,8 @@ def main():
         run([python, "-I", "-m", "unittest", "discover", "-s", root / "tests", "-p", "test_action_review.py", "-q"])
         for test in ('test_sensitive.py', 'test_sensitive_review.py', 'test_sensitive_associations.py',
                      'test_sensitive_precision.py', 'test_review_summary.py', 'test_review_bounds.py',
-                     'test_research.py', 'test_research_runtime.py'):
+                     'test_sensitive_reliability.py', 'test_research.py', 'test_research_runtime.py',
+                     'test_research_reliability.py'):
             run([python, "-I", "-m", "unittest", "discover", "-s", root / "tests", "-p", test, "-q"])
         for resource in ("review-v1", "changes-v1", "guidance-v1", "scan-v2", "review-v2", "changes-v2", "research-sources-v1"):
             run([python, "-I", "-c", "from importlib.resources import files; import json; json.loads(files('azt_resources').joinpath('"+resource+".schema.json').read_text())"])
