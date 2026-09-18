@@ -1,12 +1,18 @@
 # Coverage and known limitations
 
-## Captured-source research (0.1.15 source candidate)
+## Captured-source research (since 0.1.15)
 
 [Protected Research v1](docs/protected-research.md) reuses existing detectors;
 it does not add general source authentication or language understanding. Local
 capture/broker tests and the separately gated [AZT-RESEARCH-001](packs/AZT-RESEARCH-001/v1/README.md)
 backend suite have distinct evidence levels. No live model or protected live-web
 mode is included. Historical FS-001 records retain their original scope.
+
+The unreleased 0.1.16 [investigator](docs/controlled-investigator.md) adds a separate
+optional local-model adapter. Offline contract tests, scripted HTTP tests, actual
+Linux planner/lifecycle trials and live-model utility are separate categories.
+Live-model utility is currently **blocked**, not inferred from scripted responses.
+Novel hypotheses validate source linkage only and do not become static findings.
 
 ## GitHub review integration (since 0.1.13)
 

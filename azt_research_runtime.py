@@ -75,7 +75,7 @@ def decode_frame(raw):
 
 
 def create_args(name, image_id, runtime_dir, worker='reference'):
-    if worker != 'reference' and worker not in TEST_WORKERS:
+    if worker not in ('reference', 'investigator') and worker not in TEST_WORKERS:
         raise ResearchRuntimeError('unknown_bundled_worker')
     if not re.fullmatch(r'azt-research-[0-9a-f]{32}', name):
         raise ResearchRuntimeError('invalid_container_name')
@@ -84,7 +84,7 @@ def create_args(name, image_id, runtime_dir, worker='reference'):
     source = str(Path(runtime_dir).resolve(strict=True))
     if any(c in source for c in ',\n\r\x00'):
         raise ResearchRuntimeError('unsupported_mount_path')
-    return ['create', '--name', name, '--label', 'org.azt.profile=research-v1',
+    return ['create', '--name', name, '--label', 'org.azt.profile='+('investigator-v1' if worker == 'investigator' else 'research-v1'),
         '--pull', 'never', '--interactive', '--network', 'none', '--read-only',
         '--cap-drop', 'ALL', '--security-opt', 'no-new-privileges=true',
         '--cgroupns', 'private', '--ipc', 'private', '--init', '--user', '65532:65532',
@@ -347,6 +347,13 @@ def run_worker(broker, image, endpoint, worker='reference', lease_seconds=20, co
     return _run(broker, image, endpoint, worker, lease_seconds, control_dir, None)
 
 
+def run_investigator(broker, image, endpoint, control_dir=None):
+    from azt_investigator import LEASE_SECONDS
+    if broker.investigator is None:
+        raise ResearchRuntimeError('investigator_profile_required')
+    return _run(broker, image, endpoint, 'investigator', LEASE_SECONDS, control_dir, None)
+
+
 def _run_test_worker(broker, image, endpoint, worker, test_context=None, lease_seconds=20, control_dir=None):
     if worker not in TEST_WORKERS:
         raise ResearchRuntimeError('unknown_bundled_test_worker')
@@ -372,8 +379,9 @@ def _run(broker, image, endpoint, worker, lease_seconds, control_dir, test_conte
             if self.preparing:
                 broker.preparation_remaining()
             return result
-    if type(lease_seconds) is not int or not 2 <= lease_seconds <= 30:
-        raise ResearchRuntimeError('lease_must_be_2_to_30_seconds')
+    maximum = 120 if worker == 'investigator' and broker.investigator is not None else 30
+    if type(lease_seconds) is not int or not 2 <= lease_seconds <= maximum:
+        raise ResearchRuntimeError('lease_outside_selected_profile')
     if not isinstance(image, str) or not re.fullmatch(
             r'(?:sha256:[0-9a-f]{64}|(?:docker.io/library/)?python@sha256:[0-9a-f]{64})', image):
         raise ResearchRuntimeError('preloaded_immutable_official_python_image_required')
@@ -400,6 +408,9 @@ def _run(broker, image, endpoint, worker, lease_seconds, control_dir, test_conte
             'Controller SIGKILL is distinct from supervisor, daemon or host failure.',
             'Readback is not exercised denial evidence; worker claims require external verification.',
             'No general agent, live model, or arbitrary repository program runs.']}
+    if worker == 'investigator':
+        report['profile'] = 'azt.investigator-local.v1'
+        report['limitations'][-1] = 'Fixed optional planner; inference-service behavior trusted separately, cancellation unverified.'
     docker, container, supervisor, life, attached, name = None, None, None, None, None, None
     stage = 'preflight'
     try:

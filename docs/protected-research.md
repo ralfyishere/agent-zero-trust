@@ -8,6 +8,10 @@ The unreleased **0.1.16 source candidate** adds the paging/preparation changes
 identified below. Neither profile fetches websites or runs
 a model, repository program, plugin, or live coding agent.
 
+The separately selected, unreleased [controlled investigator](controlled-investigator.md)
+adds a local-only inference adapter and fixed planner. Its service prerequisite
+and live-model validation are explicitly separate from the reference evidence below.
+
 ## Start without Docker
 
 Install into an environment **outside** the selected inputs. Installation downloads

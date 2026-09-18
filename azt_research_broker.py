@@ -31,7 +31,15 @@ POLICY = {'schema': 'azt.research-policy.v2', 'operations': ['read', 'check', 'o
 
 
 class Broker:
-    def __init__(self, capture, audit_path, clock=time.monotonic):
+    def __init__(self, capture, audit_path, clock=time.monotonic, investigator=None):
+        self.investigator = investigator
+        self.policy = copy.deepcopy(POLICY)
+        self.maximum_lease = 30
+        if investigator is not None:
+            from azt_investigator import Investigator, LEASE_SECONDS as MODEL_LEASE
+            require(type(investigator) is Investigator, 'fixed_investigator_required')
+            self.policy = investigator.policy(self.policy)
+            self.maximum_lease = MODEL_LEASE
         self._documents = copy.deepcopy(capture.documents)
         self._pages = {key: pages(d['text'], d['sha256']) for key, d in self._documents.items()}
         self._read_pages = {key: set() for key in self._documents}
@@ -49,7 +57,7 @@ class Broker:
         self.events, self.observations = [], []
         self._seen, self._checked, self._read = {}, set(), set()
         self._audit = None
-        self.policy_sha256 = intake.digest(POLICY)
+        self.policy_sha256 = intake.digest(self.policy)
         self.controller_sha256 = hashlib.sha256(Path(__file__).read_bytes()).hexdigest()
         p = Path(audit_path)
         require('..' not in p.parts, 'unsafe audit path')
@@ -86,7 +94,7 @@ class Broker:
         Unit callers without a backend exercise policy only.
         """
         self.preparation_remaining()
-        require(type(lease_seconds) is int and 2 <= lease_seconds <= 30, 'invalid_active_lease')
+        require(type(lease_seconds) is int and 2 <= lease_seconds <= self.maximum_lease, 'invalid_active_lease')
         now = self.clock()
         limit = now + lease_seconds if deadline is None else deadline
         require(type(limit) in (int, float) and now < limit <= now + lease_seconds,
@@ -134,11 +142,17 @@ class Broker:
                 'review_completed_before_revocation': self.review_completed,
                 'checked_sources': len(self._checked), 'read_sources': len(self._read),
                 'documents': [{k:d[k] for k in ('id','registration','path','sha256')} for d in self._documents.values()],
-                'observations': copy.deepcopy(self.observations), 'limits': dict(POLICY),
+                'observations': copy.deepcopy(self.observations), 'limits': copy.deepcopy(self.policy),
                 'worker_identity': 'single controller-created channel; no asserted roles accepted',
                 'record_authentication': 'none; protected placement in this run, not a signed or complete syscall log'}
 
     def handle(self, request):
+        response = self._handle(request)
+        if self.investigator is not None and isinstance(request, dict):
+            self.investigator.recorded(request, response)
+        return response
+
+    def _handle(self, request):
         self.calls += 1
         # Floods cannot grow the ledger forever. Runtime terminates on this error.
         if self.calls > MAX_CALLS:
@@ -158,12 +172,13 @@ class Broker:
             require(request.get('mission') == self.mission_id and request.get('run') == self.run_id,
                     'mission_or_run_mismatch')
             op = request.get('operation')
-            require(op in POLICY['operations'], 'operation_not_permitted')
+            require(op in self.policy['operations'], 'operation_not_permitted')
             operation = op
             fields = {'id', 'mission', 'run', 'operation'}
             if op in ('read', 'check'): fields |= {'source', 'sha256'}
             if op == 'read' and 'page' in request: fields.add('page')
             if op == 'observe': fields.add('observation')
+            if op == 'hypothesis': fields.add('hypothesis')
             require(set(request) == fields, 'unexpected_authority_or_argument_fields')
             fingerprint = intake.digest(request)
             if req_id in self._seen:
@@ -171,6 +186,8 @@ class Broker:
                 require(old_fingerprint == fingerprint, 'conflicting_request_id')
                 self._record(operation, 'replayed', 'identical_request_not_reexecuted', request_sha256=fingerprint)
                 return self._response_budget(copy.deepcopy(response))
+            if self.investigator is not None:
+                self.investigator.before(request)
             result = {}
             if op in ('read', 'check'):
                 source = request['source']
@@ -202,9 +219,14 @@ class Broker:
                         'observation_not_supported_by_checked_evidence')
                 require(len(self.observations) < MAX_OBSERVATIONS, 'observation_budget_exhausted')
                 result = {'accepted_as': 'source-linked observation proposal, not truth or authority'}
+            elif op == 'infer':
+                result = self.investigator.infer(self)
+            elif op == 'hypothesis':
+                result = self.investigator.validate_hypothesis(request['hypothesis'], self)
             else:
                 require(self._read == set(self._documents) and self._checked == set(self._documents), 'review_sources_not_completed')
                 require(self._report['complete'], 'inspection_incomplete')
+                require(self.investigator is None or bool(self.investigator.hypotheses), 'cited_interpretation_required')
                 result = {'completed': True, 'source_count': len(self._documents), 'observation_count': len(self.observations)}
             response = {'id': req_id, 'decision': 'allowed', 'reason': 'within_frozen_mission', 'result': result}
             self._response_budget(response)
@@ -216,7 +238,8 @@ class Broker:
                     self._read.add(source)
             elif op == 'check': self._checked.add(source)
             elif op == 'observe': self.observations.append(copy.deepcopy(request['observation']))
-            else:
+            elif op == 'hypothesis': self.investigator.hypotheses.append(copy.deepcopy(request['hypothesis']))
+            elif op == 'review':
                 self.completed = True
                 self.review_completed = True
             self._seen[req_id] = (fingerprint, copy.deepcopy(response))
@@ -227,13 +250,17 @@ class Broker:
             # Reasons contain maintained labels only; never rejected paths, URLs,
             # recipients, text, roles or arbitrary caller-supplied operation names.
             reason = str(exc)
+            investigator_reason = False
+            if self.investigator is not None:
+                from azt_investigator import ERRORS
+                investigator_reason = reason in ERRORS
             if reason not in {'invalid_request', 'request_too_large', 'mission_not_active', 'lease_expired',
                               'mission_or_run_mismatch', 'operation_not_permitted', 'unexpected_authority_or_argument_fields',
                               'conflicting_request_id', 'unknown_source', 'source_identity_mismatch', 'frozen_source_identity_mismatch',
                               'paged_read_required', 'invalid_page',
                               'inspection_not_available', 'observation_requires_checked_source',
                               'observation_not_supported_by_checked_evidence', 'observation_budget_exhausted',
-                              'review_sources_not_completed', 'inspection_incomplete'}:
+                              'review_sources_not_completed', 'inspection_incomplete'} and not investigator_reason:
                 reason = 'invalid_request_structure'
             self._record(operation, 'broker-rejected', reason, request_sha256=fingerprint)
             response = {'id': req_id, 'decision': 'denied', 'reason': reason, 'result': {}}

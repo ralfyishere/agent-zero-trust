@@ -403,17 +403,21 @@ def protected_run(capture, output, image, endpoint):
 def add_parser(sub):
     group = sub.add_parser('research', help='review registered local captures; optional protected reference-worker profile')
     commands = group.add_subparsers(dest='research_cmd', required=True)
-    for name in ('review', 'run'):
-        p = commands.add_parser(name, help='inspect frozen local captures' if name == 'review' else 'experimental native-Linux Docker reference worker')
+    for name in ('review', 'run', 'investigate'):
+        p = commands.add_parser(name, help={'review':'inspect frozen local captures', 'run':'experimental native-Linux Docker reference worker',
+                                          'investigate':'experimental isolated planner with explicitly registered local-only Ollama'}[name])
         p.add_argument('--manifest', required=True)
         p.add_argument('--root', action='append', required=True, help='explicit ID=/absolute/input/root (repeatable)')
         p.add_argument('--fail-on', choices=['high', 'medium', 'any'], default='high')
-        p.add_argument('--output', required=True, help='new private '+('directory' if name == 'run' else 'file')+' outside all input roots')
+        p.add_argument('--output', required=True, help='new private '+('file' if name == 'review' else 'directory')+' outside all input roots')
         if name == 'review':
             p.add_argument('--format', choices=['json', 'text', 'html'], default='json')
-        if name == 'run':
+        if name in ('run', 'investigate'):
             p.add_argument('--image', required=True, help='approved preloaded immutable Docker Official Python identity; never pulled')
             p.add_argument('--endpoint', default='unix:///var/run/docker.sock')
+        if name == 'investigate':
+            p.add_argument('--inference-config', required=True,
+                           help='operator-owned local-only service registration outside input roots; experimental, no implicit service startup')
     export = commands.add_parser('export', help='render a saved captured-source review; never reread source files')
     export.add_argument('--input', required=True); export.add_argument('--output', required=True)
     export.add_argument('--format', choices=['json', 'text', 'html'], default='html')
@@ -448,6 +452,13 @@ def command(args):
             capture = inspect_sources(args.manifest, roots, args.fail_on)
             value = capture.report
             code = 0 if value['complete'] else 2
+            if args.research_cmd == 'investigate':
+                from azt_investigator import run
+                config = absolute(args.inference_config)
+                require(not any(contains(r, config) for r in roots.values()), 'inference configuration must be outside input roots')
+                code = run(capture, output, args.image, args.endpoint, config)
+                print('AZT experimental investigator: '+('completed; interpretation remains unverified' if code == 0 else 'blocked or failed')+'; private output retained.')
+                return code
             if args.research_cmd == 'run':
                 code = protected_run(capture, output, args.image, args.endpoint)
                 print('AZT research runtime: ' + ('completed' if code == 0 else 'blocked or failed') + '; private evidence directory retained.')

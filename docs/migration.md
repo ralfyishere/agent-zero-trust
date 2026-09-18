@@ -19,6 +19,15 @@ or activate authority. Local unit calls to `activate` are not an OS boundary.
 The 60-second setup budget is separate from the unchanged maximum active lease.
 No historical runtime result establishes this changed profile's behavior.
 
+The separate `research investigate` opt-in adds an experimental local-only model
+transport, a 120-second planner profile and source-linked **unverified** hypotheses.
+The reference worker's 20-second normal / 30-second maximum is not increased.
+Its generated `azt.investigator-run.v1` / pending-case records are new envelopes,
+not scan reports: existing `research export` still accepts captured-source reviews
+only. Use the generated private HTML/text; do not hand-edit legacy exports.
+No old binary is expected to understand the optional model registration/profile.
+Live-model validation remains blocked pending its distinct service prerequisite.
+
 ## 0.1.15 source candidate
 
 Publication note: [v0.1.15 is now published](https://github.com/ralfyishere/agent-zero-trust/releases/tag/v0.1.15).

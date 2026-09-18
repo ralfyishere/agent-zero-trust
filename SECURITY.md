@@ -7,6 +7,13 @@ Docker daemon, approved image, external supervisor, controller and operator;
 it does not claim kernel escape resistance or protection after supervisor/host
 compromise. A pending case/export never promotes a rule or permission.
 
+The optional unreleased [investigator](docs/controlled-investigator.md) additionally
+trusts an explicitly registered local inference service and its operator-verified
+cloud-disabled configuration. Worker networking remains disabled; only the
+controller's fixed chat transport can contact that selected loopback service.
+Connection closure does not prove inference-server cancellation. Model hypotheses
+are unverified interpretations, not permissions, maintained advice or static rules.
+
 ## Experimental safety pack
 
 AZT-FS-001's static adapter and repair logic are offline-tested. Its Docker
