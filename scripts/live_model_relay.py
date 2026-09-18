@@ -16,6 +16,16 @@ import time
 MODEL = 'qwen3:0.6b'
 MODEL_DIGEST = '7df6b6e09427a769808717c0a93cadc4ae99ed4eb8bf5ca557c90846becea435'
 LIMIT = 65536
+ERROR_SCHEMA = 'azt.test-relay-error.v1'
+ERROR_REASONS = frozenset(('timeout', 'http_status', 'encoding', 'reply_bound',
+                           'invalid_json', 'transport', 'unknown'))
+
+
+class RelayError(ValueError):
+    """Only maintained categories cross the test relay's error channel."""
+    def __init__(self, reason):
+        self.reason = reason if reason in ERROR_REASONS else 'unknown'
+        super().__init__(self.reason)
 
 
 def require(ok, message):
@@ -49,15 +59,25 @@ def request(method, path, payload, timeout=9):
     try:
         connection.request(method, path, raw, {'Content-Type': 'application/json'})
         response = connection.getresponse()
-        require(response.status == 200 and not response.getheader('Location'), 'service_status')
-        require(response.getheader('Content-Encoding', 'identity') == 'identity', 'encoding')
+        if response.status != 200 or response.getheader('Location'):
+            raise RelayError('http_status')
+        if response.getheader('Content-Encoding', 'identity') != 'identity':
+            raise RelayError('encoding')
         raw = response.read(LIMIT + 1)
-        require(len(raw) <= LIMIT, 'reply_bound')
-        value = parse(raw)
+        if len(raw) > LIMIT: raise RelayError('reply_bound')
+        try:
+            value = parse(raw)
+            require(isinstance(value, dict), 'object_required')
+        except (ValueError, RecursionError):
+            raise RelayError('invalid_json') from None
         # Hidden reasoning is not part of test evidence or returned to AZT.
         if isinstance(value.get('message'), dict):
             value['message'].pop('thinking', None)
         return value
+    except TimeoutError:
+        raise RelayError('timeout') from None
+    except (OSError, http.client.HTTPException):
+        raise RelayError('transport') from None
     finally:
         connection.close()
 
@@ -143,5 +163,18 @@ def main():
     sys.stdout.buffer.write(raw + b'\n')
 
 
+def entrypoint():
+    try:
+        main()
+        return 0
+    except Exception as exc:
+        # No traceback, service body, exception message, headers or arguments.
+        # A nonzero process exit AND this bounded stderr envelope are required
+        # by the host. Service JSON on successful stdout cannot forge a failure.
+        reason = exc.reason if type(exc) is RelayError else 'unknown'
+        sys.stderr.write(json.dumps({'schema': ERROR_SCHEMA, 'reason': reason})+'\n')
+        return 2
+
+
 if __name__ == '__main__':
-    main()
+    raise SystemExit(entrypoint())

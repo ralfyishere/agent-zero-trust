@@ -20,6 +20,7 @@ from azt_research import ResearchError, require, read_local
 PROFILE = 'azt.investigator-local.v1'
 LEASE_SECONDS = 120
 MAX_TURNS = 24
+MAX_EMPTY_TOOL_TURNS = 3
 MAX_TOOLS = 96
 MAX_CONTEXT = 16384
 MAX_REPLY = 65536
@@ -33,14 +34,14 @@ NEXT_STEPS = {
 SETTINGS = {'profile': PROFILE, 'lease_seconds': LEASE_SECONDS, 'turns': MAX_TURNS,
             'tool_calls': MAX_TOOLS, 'parallel_calls': 4, 'context_bytes': MAX_CONTEXT,
             'reply_bytes': MAX_REPLY, 'request_seconds': REQUEST_SECONDS,
-            'hypotheses': 16, 'retries': 0,
+            'hypotheses': 16, 'retries': 0, 'consecutive_empty_tool_turns': MAX_EMPTY_TOOL_TURNS,
             'options': {'temperature': 0, 'num_predict': 1024, 'num_ctx': 32768}}
 ERRORS = frozenset(('inference_response_limit','inference_object_required','inference_route_not_permitted',
     'inference_deadline','inference_context_limit','inference_http_status','inference_encoding_unsupported',
     'inference_media_type','inference_transport_failed','inference_incomplete_or_wrong_model',
     'inference_context_accounting_invalid','inference_message_invalid','inference_tool_batch_limit',
     'pending_model_tools','model_proposal_mismatch','inference_turn_limit','late_inference_response',
-    'inference_tool_limit','invalid_hypothesis_category','hypothesis_text_limit','hypothesis_reference_limit',
+    'inference_tool_limit','inference_no_progress','invalid_hypothesis_category','hypothesis_text_limit','hypothesis_reference_limit',
     'hypothesis_requires_checked_source','invalid_hypothesis_location','hypothesis_quote_mismatch',
     'hypothesis_unread_location','hypothesis_unread_quote','hypothesis_budget','cited_interpretation_required'))
 PROMPT = ('Review the registered project/support instructions. Explain what they ask a person to run or share; '
@@ -195,6 +196,7 @@ class Investigator:
         self.pending = []
         self.hypotheses = []
         self.turns = self.tools = self.denied = 0
+        self.empty_tool_turns = self.consecutive_empty_tool_turns = 0
         self.source_pages_sent = {}
         self._pages_in_tool_results = {}
         self.inference_error = None
@@ -215,6 +217,8 @@ class Investigator:
             require(op != 'review' or len(self.pending) == 1, 'pending_model_tools')
 
     def infer(self, broker):
+        # A fresh request ID cannot restart an exhausted empty-response budget.
+        require(self.consecutive_empty_tool_turns < MAX_EMPTY_TOOL_TURNS, 'inference_no_progress')
         require(self.turns < MAX_TURNS, 'inference_turn_limit')
         if not self.messages:
             self.messages = [{'role':'system','content':PROMPT},
@@ -227,6 +231,14 @@ class Investigator:
             require(broker.state == 'active' and broker.clock() < broker.deadline, 'late_inference_response')
             require(self.tools + len(proposals) <= MAX_TOOLS, 'inference_tool_limit')
             self.source_pages_sent = copy.deepcopy(self._pages_in_tool_results)
+            if not proposals:
+                self.empty_tool_turns += 1
+                self.consecutive_empty_tool_turns += 1
+                require(self.consecutive_empty_tool_turns < MAX_EMPTY_TOOL_TURNS, 'inference_no_progress')
+            else:
+                # Nonempty proposals are not necessarily useful or authorized.
+                # Their existing tool/denial/turn/lease checks remain in force.
+                self.consecutive_empty_tool_turns = 0
         except (ResearchError, review.ReviewError) as exc:
             self.inference_error = str(exc) if str(exc) in ERRORS else 'inference_failed_or_incomplete'
             raise
@@ -287,6 +299,8 @@ class Investigator:
                 'prompt_sha256':hashlib.sha256(PROMPT.encode()).hexdigest(), 'tools_sha256':intake.digest(TOOLS),
                 'adapter_sha256':hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
                 'turns':self.turns, 'tool_proposals':self.tools, 'denied_proposals':self.denied,
+                'empty_tool_turns':self.empty_tool_turns,
+                'consecutive_empty_tool_turns':self.consecutive_empty_tool_turns,
                 'pages_returned_to_model_context':{k:sorted(v) for k,v in self.source_pages_sent.items()},
                 'hypotheses':copy.deepcopy(self.hypotheses), 'inference_error':self.inference_error,
                 'reasoning_retained':False, 'server_cancellation_verified':False,
@@ -298,6 +312,8 @@ def render(summary, execution, fmt):
     lines = ['AZT experimental investigator', 'Runtime outcome: '+execution['status'],
              'Cleanup: '+execution['cleanup'], 'Model interpretations below are UNVERIFIED, not recommendations or approval.',
              'Static findings are in the separate source-review.html. Quotes/recipients are omitted here; paths and prose may still be sensitive.']
+    if summary.get('inference_error') == 'inference_no_progress':
+        lines.append('Inference stopped: three consecutive replies contained no structured tool proposals. Review is incomplete.')
     for item in summary['hypotheses']:
         lines += ['', 'Interpretation ('+item['kind']+'): '+intake.safe_label(item['claim']),
                   'Uncertainty: '+intake.safe_label(item['uncertainty'])]

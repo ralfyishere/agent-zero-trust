@@ -24,6 +24,45 @@ MODEL = 'qwen3:0.6b'
 MODEL_DIGEST = '7df6b6e09427a769808717c0a93cadc4ae99ed4eb8bf5ca557c90846becea435'
 LABEL = 'org.azt.test=isolated-local-model-v1'
 DIAGNOSTIC_BYTES = 8192
+RELAY_REASONS = frozenset(('timeout', 'http_status', 'encoding', 'reply_bound',
+                           'invalid_json', 'transport', 'unknown'))
+
+
+class RelayFailure(ValueError):
+    def __init__(self, reason):
+        self.reason = reason if reason in RELAY_REASONS else 'unknown'
+        super().__init__('relay_'+self.reason)
+
+
+def relay_failure(code, out, err):
+    """Decode only the trusted helper's bounded non-success stderr protocol."""
+    if code != 2 or out or len(err) > 512: return 'unknown'
+    def unique(items):
+        value = {}
+        for key, item in items:
+            require(key not in value, 'duplicate_relay_diagnostic')
+            value[key] = item
+        return value
+    try:
+        value = json.loads(err, object_pairs_hook=unique)
+        if (type(value) is dict and set(value) == {'schema','reason'} and
+                value['schema'] == 'azt.test-relay-error.v1' and
+                type(value['reason']) is str and value['reason'] in RELAY_REASONS):
+            return value['reason']
+    except (ValueError, RecursionError):
+        pass
+    return 'unknown'
+
+
+def response_shape(value):
+    """Structural observation only, never prose, thinking or tool arguments."""
+    message = value.get('message')
+    calls = message.get('tool_calls') if type(message) is dict else None
+    state = ('missing' if type(message) is not dict or 'tool_calls' not in message else
+             'invalid' if type(calls) is not list or len(calls) > 4 else
+             'empty' if not calls else 'present')
+    return {'tool_calls_state': state,
+            'tool_calls_count': len(calls) if state in ('empty','present') else None}
 STATE_FORMAT = ('{"status":{{json .State.Status}},"running":{{json .State.Running}},'
                 '"oom_killed":{{json .State.OOMKilled}},"exit_code":{{json .State.ExitCode}},'
                 '"error":{{json .State.Error}}}')
@@ -260,8 +299,16 @@ class Lab:
             env={'PATH':'/usr/bin:/bin','LC_ALL':'C'}, start_new_session=True)
         try:
             out, err = proc.communicate(raw, timeout=timeout)
-            require(proc.returncode == 0 and len(out)+len(err) <= 131072, 'relay_failed')
-            return json.loads(out)
+            if len(out)+len(err) > 131072: raise RelayFailure('reply_bound')
+            if proc.returncode != 0: raise RelayFailure(relay_failure(proc.returncode, out, err))
+            try:
+                value = json.loads(out)
+                require(type(value) is dict, 'relay_object_required')
+            except (ValueError, RecursionError):
+                raise RelayFailure('invalid_json') from None
+            return value
+        except subprocess.TimeoutExpired:
+            raise RelayFailure('timeout') from None
         finally:
             if proc.poll() is None:
                 proc.kill(); proc.wait(timeout=3)
@@ -441,8 +488,11 @@ class Bridge:
             def route(self,method):
                 owner.calls+=1
                 start=time.monotonic()
+                observation={'request_id':owner.calls, 'method':method,'path':'fixed_local_route',
+                             'response_received':False,'response_write_completed':False}
                 try:
                     require(owner.calls<=60 and (method,self.path) in (('GET','/api/version'),('GET','/api/tags'),('POST','/api/chat')), 'bridge_route_budget')
+                    observation['path']=self.path
                     require(not self.headers.get('Transfer-Encoding') and not self.headers.get('Authorization'), 'bridge_headers')
                     size=int(self.headers.get('Content-Length','0'));require(0<=size<=16384,'bridge_size')
                     payload=json.loads(self.rfile.read(size)) if size else None
@@ -451,15 +501,20 @@ class Bridge:
                         require(owner.chat_calls<=48 and payload.get('model')==MODEL,'bridge_model_budget')
                     value=lab.relay_call(relay,{'mode':'request','method':method,'path':self.path,'payload':payload},timeout=11)
                     raw=json.dumps(value,ensure_ascii=True).encode();require(len(raw)<=65536,'bridge_reply')
-                    owner.observations.append({'method':method,'path':self.path,'seconds':round(time.monotonic()-start,3),
-                        'response_bytes':len(raw),'prompt_eval_count':value.get('prompt_eval_count'),
-                        'eval_count':value.get('eval_count'),'response_sha256':hashlib.sha256(raw).hexdigest()})
+                    observation.update(response_received=True,response_bytes=len(raw),
+                                       response_sha256=hashlib.sha256(raw).hexdigest())
+                    if method=='POST':observation.update(response_shape(value))
                     self.send_response(200);self.send_header('Content-Type','application/json');self.send_header('Content-Length',str(len(raw)));self.end_headers();self.wfile.write(raw)
+                    observation['response_write_completed']=True
                 except Exception as exc:
-                    owner.observations.append({'method':method,'path':'fixed_local_route','failed':True,
-                        'seconds':round(time.monotonic()-start,3),'error_type':type(exc).__name__})
-                    try:self.send_error(502,'bounded_local_inference_failed')
-                    except OSError:pass
+                    observation.update(failed=True,error_reason=(exc.reason if type(exc) is RelayFailure else
+                                       'response_write_failed' if observation['response_received'] else 'bridge_failed'))
+                    if not observation['response_received']:
+                        try:self.send_error(502,'bounded_local_inference_failed')
+                        except OSError:pass
+                finally:
+                    observation['seconds']=round(time.monotonic()-start,3)
+                    owner.observations.append(observation)
         self.server=HTTPServer(('127.0.0.1',0),Handler);self.server.timeout=12
         self.thread=threading.Thread(target=self.server.serve_forever,kwargs={'poll_interval':.1},daemon=True)
     def __enter__(self):self.thread.start();return self

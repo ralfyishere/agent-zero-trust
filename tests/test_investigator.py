@@ -152,13 +152,72 @@ class InvestigatorTests(ResearchFixture):
 
     def test_context_and_turn_bounds_no_silent_truncation(self):
         self.setup_broker()
-        with mock.patch.object(self.state.transport,'chat',return_value=[]):
-            for _ in range(inv.MAX_TURNS): self.assertEqual(self.call('infer')['decision'],'allowed')
-            self.assertEqual(self.call('infer')['decision'],'denied')
+        for _ in range(inv.MAX_TURNS):
+            self.assertEqual(self.turn([proposal('check',**self.identity)])[0]['decision'],'allowed')
+        with mock.patch.object(self.state.transport,'chat') as chat:
+            self.assertEqual(self.call('infer')['reason'],'inference_turn_limit')
+        chat.assert_not_called()
         with mock.patch.object(inv.http.client,'HTTPConnection') as http:
             with self.assertRaisesRegex(research.ResearchError,'context_limit'):
                 self.state.transport.request('POST','/api/chat',{'x':'s'*inv.MAX_CONTEXT},time.monotonic()+5)
         http.assert_not_called()
+
+    def test_empty_tool_limit_latches_without_replay_or_new_id_restart(self):
+        self.setup_broker()
+        with mock.patch.object(self.state.transport,'chat',return_value=[]) as chat:
+            self.assertEqual(self.call('infer')['decision'],'allowed')
+            self.assertEqual(self.call('infer')['decision'],'allowed')
+            request=dict(id='terminal',mission=self.broker.mission_id,run=self.broker.run_id,operation='infer')
+            failed=self.broker.handle(request)
+            self.assertEqual(failed['reason'],'inference_no_progress')
+            self.assertEqual(self.broker.handle(request),failed)
+            self.assertEqual(self.call('infer')['reason'],'inference_no_progress')
+            with self.assertRaisesRegex(research.ResearchError,'inference_no_progress'):
+                self.state.infer(self.broker)
+            self.assertEqual(chat.call_count,3)
+        self.assertEqual(self.state.turns,3)
+        self.assertEqual(self.state.empty_tool_turns,3)
+        self.assertEqual(self.state.consecutive_empty_tool_turns,3)
+        self.assertEqual(self.state.inference_error,'inference_no_progress')
+        self.assertEqual(self.state.hypotheses,[])
+        self.assertFalse(self.broker.completed)
+        self.assertEqual(len([m for m in self.state.messages if m.get('content','').startswith('No tool proposal')]),2)
+        summary=self.state.summary()
+        self.assertEqual(summary['settings']['consecutive_empty_tool_turns'],3)
+        self.assertEqual(self.state.policy(policy.POLICY)['inference'],summary['settings'])
+        for fmt in ('text','html'):
+            self.assertIn('Review is incomplete',inv.render(summary,{'status':'failed','cleanup':'removed'},fmt))
+
+    def test_short_empty_recovery_preserves_legitimate_completion(self):
+        self.setup_broker()
+        for _ in range(2):self.turn([])
+        self.turn([proposal('read',**self.identity,page=0),proposal('check',**self.identity)])
+        self.assertEqual(self.state.consecutive_empty_tool_turns,0)
+        for _ in range(2):self.turn([])
+        self.turn([proposal('hypothesis',hypothesis=self.hypothesis()),proposal('review')])
+        self.assertTrue(self.broker.completed)
+        self.assertEqual(self.state.empty_tool_turns,4)
+        self.assertIsNone(self.state.inference_error)
+
+    def test_invalid_nonempty_proposal_still_denied_and_http_failure_not_empty(self):
+        self.setup_broker()
+        self.turn([])
+        self.assertEqual(self.turn([proposal('invalid_tool')])[0]['decision'],'denied')
+        self.assertEqual(self.state.consecutive_empty_tool_turns,0)
+        with mock.patch.object(self.state.transport,'chat',side_effect=research.ResearchError('inference_http_status')):
+            self.assertEqual(self.call('infer')['reason'],'inference_http_status')
+        self.assertEqual(self.state.empty_tool_turns,1)
+        self.assertEqual(self.state.inference_error,'inference_http_status')
+        self.assertFalse(self.broker.completed)
+
+    def test_planner_stops_after_empty_tool_budget(self):
+        self.setup_broker();channel=MemoryChannel(self.broker)
+        with mock.patch.object(self.state.transport,'chat',return_value=[]) as chat, \
+             mock.patch.object(worker.sys,'stdin',SimpleNamespace(buffer=channel)), \
+             mock.patch.object(worker.sys,'stdout',SimpleNamespace(buffer=channel)):
+            with self.assertRaises(ValueError):worker.main('investigator')
+            self.assertEqual(chat.call_count,3)
+        self.assertFalse(self.broker.completed)
 
     def test_early_review_cannot_skip_later_forbidden_parallel_proposal(self):
         self.setup_broker()

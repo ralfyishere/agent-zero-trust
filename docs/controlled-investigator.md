@@ -4,10 +4,16 @@ Review selected project/support instructions with a locally operated model,
 without giving it shell commands, arbitrary paths, uploads or permission to
 redefine the mission. Ordinary AZT scanning needs no model or Docker.
 
-**Live-model validation is blocked:** no already-prepared, confirmed local-only
-Ollama service is assigned on an authorized native-Linux environment. The code and
-scripted transport tests do not establish actual model utility. Do not install a
-model or run this profile on a personal machine just to reproduce a synthetic test.
+**Live-model utility is not established.** One explicitly authorized disposable
+Linux [trial](https://github.com/ralfyishere/agent-zero-trust/actions/runs/35377544557)
+at `0273b07c9e9c205850b101cd23a3659b9a2f9617` started the fixed local model and
+two investigator sessions, but neither completed a review. The limited case
+encountered a generic relay failure; the multi-source case reached its lease
+without a structured tool proposal. No source page was returned to the model.
+Setup, preload, the selected synthetic network control and cleanup passed;
+those results do not establish useful research or resistance to persuasion.
+The first relay exception's exact cause remains unknown. Do not install a model
+or run this profile on a personal machine to reproduce the experiment.
 
 ## What runs where
 
@@ -111,6 +117,7 @@ interpretation. A model refusing everything fails the task, even if no tool runs
 | Preparation | 60 seconds without worker authority |
 | Active lease | 120 seconds; independent supervisor armed before start |
 | Inference | 24 turns, 96 proposals, 4 per reply, no transport retry |
+| Empty tool replies (local correction, not yet runtime-verified) | Third consecutive completed reply without proposals stops inference; the first two permit recovery |
 | HTTP | 10 seconds/call, 64 KiB response; no redirects/compression |
 | Context | 16 KiB serialized request, including tools/history; no silent local truncation |
 | Generation | Temperature 0, `num_predict=1024`, `num_ctx=32768`, `think=false` |
@@ -126,6 +133,27 @@ requested nor retained. Worker stop/revocation does not prove server-side infere
 stopped; its cancellation is explicitly unverified. Late responses cannot restore
 tool authority.
 
+The consecutive-empty-tool bound is not a general progress guarantee: nonempty
+malformed, denied or repetitive proposals still face the independent tool, turn
+and lease budgets. Exhaustion is latched; a new request ID cannot restart model
+contact. It reports `inference_no_progress`, never successful completion. The
+new setting participates in policy identity, and the adapter's bytes remain
+identified in output. New summaries add total/consecutive empty-tool counters;
+older summaries lack that observation and must not be read as zero. Historical
+exports are unchanged. The model, prompt, tool catalog, timeouts, task and
+expectations have not been relaxed for this correction.
+
+The test-only relay's local correction emits fixed error categories (timeout,
+HTTP status/redirect rejection, encoding, reply bound, invalid JSON, transport,
+or unknown), not exception messages or service bodies. A category is accepted
+only from its bounded stderr envelope with the expected nonzero process exit;
+model JSON cannot declare a trusted failure. Each bridge request gets one record,
+distinguishing receipt from completed socket write; neither alone proves the
+client accepted or verified it. Optional response-shape observations say only
+whether the tool-call field was missing, empty, present or invalid—not why the
+model responded that way. Raw prose, thinking and arguments are not diagnostics.
+These corrections have local regression coverage, not another model trial.
+
 ## Verification and contribution
 
 The [synthetic sources](../examples/protected-research/investigator/sources.json)
@@ -137,7 +165,8 @@ cases, not held-out or third-party validation.
 
 [Actual verification](../evidence/controlled-investigator/README.md) records four
 passed isolated-planner/scripted-HTTP cases and the separate 13-case reference
-regression run at the exact code/artifacts. It does not fill the live-model gap.
+regression run at the exact code/artifacts. The later failed model trial above
+does not turn that scripted evidence into verified model utility.
 
 ```sh
 python3 -m unittest discover -s tests -p 'test_investigator.py' -v

@@ -516,7 +516,113 @@ class LiveModelSetupTests(unittest.TestCase):
                 with self.assertRaisesRegex(ValueError,'reply_bound'):relay.request('GET','/api/version',None)
         with patch.object(Response,'status',302):
             with patch.object(relay.http.client,'HTTPConnection',Connection):
-                with self.assertRaisesRegex(ValueError,'service_status'):relay.request('GET','/api/version',None)
+                with self.assertRaisesRegex(ValueError,'http_status'):relay.request('GET','/api/version',None)
+
+    def test_relay_error_categories_never_retain_service_text(self):
+        secret='SYNTHETIC_PRIVATE_\x1b\u202e<img>'
+        cases=[(TimeoutError(secret),'timeout'),(OSError(secret),'transport'),
+               (relay.http.client.HTTPException(secret),'transport')]
+        for error,expected in cases:
+            with self.subTest(expected=expected),patch.object(relay.http.client,'HTTPConnection') as connect:
+                connect.return_value.request.side_effect=error
+                with self.assertRaises(relay.RelayError) as raised:
+                    relay.request('GET','/api/version',None)
+                self.assertEqual(raised.exception.reason,expected)
+                self.assertNotIn(secret,str(raised.exception))
+                connect.return_value.close.assert_called_once()
+        for raw in (b'[]',b'{',b'{"a":0,"a":1}',b'\xff'):
+            with patch.object(relay.http.client,'HTTPConnection') as connect:
+                response=connect.return_value.getresponse.return_value
+                response.status=200;response.getheader.side_effect=lambda k,d=None:d
+                response.read.return_value=raw
+                with self.assertRaisesRegex(relay.RelayError,'invalid_json'):
+                    relay.request('GET','/api/version',None)
+        with patch.object(relay.http.client,'HTTPConnection') as connect:
+            response=connect.return_value.getresponse.return_value
+            response.status=200;response.getheader.side_effect=lambda k,d=None:'gzip' if k=='Content-Encoding' else d
+            with self.assertRaisesRegex(relay.RelayError,'encoding'):relay.request('GET','/api/version',None)
+
+    def test_relay_entrypoint_has_fixed_nonzero_error_envelope(self):
+        for error,expected in ((relay.RelayError('timeout'),'timeout'),
+                               (ValueError('SYNTHETIC_SECRET\x1b\u202e'),'unknown')):
+            stderr=io.StringIO();stdout=Mock(buffer=io.BytesIO())
+            with patch.object(relay,'main',side_effect=error),patch.object(relay.sys,'stderr',stderr), \
+                 patch.object(relay.sys,'stdout',stdout):
+                self.assertEqual(relay.entrypoint(),2)
+            value=json.loads(stderr.getvalue())
+            self.assertEqual(value,{'schema':'azt.test-relay-error.v1','reason':expected})
+            self.assertEqual(stdout.buffer.getvalue(),b'')
+            self.assertEqual(lab.relay_failure(2,b'',stderr.getvalue().encode()),expected)
+            self.assertNotIn('SYNTHETIC_SECRET',stderr.getvalue())
+
+    def test_diagnostic_envelope_rejects_forgery_extras_duplicates_and_bounds(self):
+        good=b'{"schema":"azt.test-relay-error.v1","reason":"timeout"}'
+        self.assertEqual(lab.relay_failure(2,b'',good),'timeout')
+        for code,out,err in ((0,b'',good),(1,b'',good),(2,good,good),(2,b'',b'x'*513),
+            (2,b'',b'{"schema":"azt.test-relay-error.v1","reason":"timeout","reason":"transport"}'),
+            (2,b'',good[:-1]+b',"private":"SYNTHETIC_SECRET"}'),
+            (2,b'',good.replace(b'timeout',b'SYNTHETIC_SECRET')), (2,b'',b'[]'),(2,b'',b'\xff')):
+            self.assertEqual(lab.relay_failure(code,out,err),'unknown')
+
+    def test_relay_call_preserves_error_category_and_kills_timed_out_exec(self):
+        obj=object.__new__(lab.Lab);obj.docker=Mock(prefix=['docker','--host','unix:///test-only'])
+        good=b'{"schema":"azt.test-relay-error.v1","reason":"timeout"}'
+        for code,out,err,expected in ((2,b'',good,'timeout'),(1,b'',b'SECRET','unknown'),
+                                     (0,b'{',b'','invalid_json'),(0,b'x'*131073,b'','reply_bound')):
+            proc=Mock(returncode=code);proc.communicate.return_value=(out,err);proc.poll.return_value=code
+            with patch.object(lab.subprocess,'Popen',return_value=proc) as launch:
+                with self.assertRaisesRegex(lab.RelayFailure,'relay_'+expected):obj.relay_call('fixed-relay',{'mode':'store'})
+            argv=launch.call_args.args[0]
+            self.assertIn('65532:65532',argv);self.assertIn('/usr/bin/env',argv)
+            self.assertNotIn('shell',launch.call_args.kwargs)
+        proc=Mock();proc.communicate.side_effect=lab.subprocess.TimeoutExpired('PRIVATE',11);proc.poll.return_value=None
+        with patch.object(lab.subprocess,'Popen',return_value=proc):
+            with self.assertRaisesRegex(lab.RelayFailure,'relay_timeout'):obj.relay_call('fixed-relay',{'mode':'store'})
+        proc.kill.assert_called_once();proc.wait.assert_called_once_with(timeout=3)
+
+    def test_successful_service_cannot_spoof_relay_error_channel(self):
+        obj=object.__new__(lab.Lab);obj.docker=Mock(prefix=['docker'])
+        forged={'schema':'azt.test-relay-error.v1','reason':'timeout'}
+        proc=Mock(returncode=0);proc.poll.return_value=0
+        proc.communicate.return_value=(json.dumps(forged).encode(),b'')
+        with patch.object(lab.subprocess,'Popen',return_value=proc):
+            self.assertEqual(obj.relay_call('fixed',{'mode':'store'}),forged)
+        # This is still service data, not a trusted exception. Product validation
+        # rejects its missing model/done/tool fields separately.
+
+    def test_response_shape_is_not_model_prose_or_tool_validation(self):
+        for message,expected,count in (({},'missing',None),({'tool_calls':[]},'empty',0),
+            ({'tool_calls':[{'private':'SYNTHETIC_SECRET'}]},'present',1),
+            ({'tool_calls':'SYNTHETIC_SECRET'},'invalid',None),({'tool_calls':[{}]*5},'invalid',None)):
+            value={'message':dict(message,content='SYNTHETIC_SECRET',thinking='SYNTHETIC_SECRET')}
+            self.assertEqual(lab.response_shape(value),{'tool_calls_state':expected,'tool_calls_count':count})
+
+    def test_bridge_one_observation_per_request_even_on_failed_write(self):
+        obj=Mock();obj.relay_call.return_value={'message':{'tool_calls':[], 'content':'SYNTHETIC_SECRET'}}
+        with patch.object(lab,'HTTPServer') as server:
+            bridge=lab.Bridge(obj,'fixed-relay')
+        handler_type=server.call_args.args[1]
+        def invoke(failure=False):
+            handler=object.__new__(handler_type)
+            payload=json.dumps({'model':lab.MODEL}).encode()
+            handler.path='/api/chat';handler.headers={'Content-Length':str(len(payload))}
+            handler.rfile=io.BytesIO(payload);handler.wfile=Mock()
+            handler.send_response=Mock();handler.send_header=Mock();handler.end_headers=Mock();handler.send_error=Mock()
+            if failure:handler.wfile.write.side_effect=BrokenPipeError('SYNTHETIC_SECRET')
+            handler.route('POST')
+            return handler
+        invoke();failed=invoke(True)
+        self.assertEqual(bridge.chat_calls,2);self.assertEqual(len(bridge.observations),2)
+        first,second=bridge.observations
+        self.assertTrue(first['response_received']);self.assertTrue(first['response_write_completed'])
+        self.assertTrue(second['response_received']);self.assertFalse(second['response_write_completed'])
+        self.assertEqual(second['error_reason'],'response_write_failed');failed.send_error.assert_not_called()
+        obj.relay_call.side_effect=lab.RelayFailure('timeout');invoke()
+        last=bridge.observations[-1]
+        self.assertFalse(last['response_received']);self.assertNotIn('tool_calls_state',last)
+        self.assertEqual(last['error_reason'],'timeout')
+        self.assertNotIn('SYNTHETIC_SECRET',json.dumps(bridge.observations))
+        self.assertEqual([x['request_id'] for x in bridge.observations],[1,2,3])
 
     def test_probes_are_fixed_synthetic_data_not_urls(self):
         with patch.object(relay.socket,'create_connection') as connect:
