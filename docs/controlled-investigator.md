@@ -135,6 +135,10 @@ Contract tests add novel hypotheses, fabricated citations, malicious next steps,
 unread pages, expiry/replay, limits and safe output. All are disclosed development
 cases, not held-out or third-party validation.
 
+[Actual verification](../evidence/controlled-investigator/README.md) records four
+passed isolated-planner/scripted-HTTP cases and the separate 13-case reference
+regression run at the exact code/artifacts. It does not fill the live-model gap.
+
 ```sh
 python3 -m unittest discover -s tests -p 'test_investigator.py' -v
 ```

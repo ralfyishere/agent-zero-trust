@@ -1,0 +1,234 @@
+{
+  "schema": "azt.investigator-evidence-summary.v1",
+  "derivative": "Selected synthetic fields, not byte-identical raw exports or an independent audit",
+  "run_url": "https://github.com/ralfyishere/agent-zero-trust/actions/runs/35311454473",
+  "artifacts": [
+    {
+      "bytes": 120829,
+      "filename": "agent_zero_trust-0.1.16-py3-none-any.whl",
+      "sha256": "ee36ed5a0fc0c68a8f0f5e4e93864f78bae2538c95f98820b100c47f5a9bde88"
+    },
+    {
+      "bytes": 1148267,
+      "filename": "agent_zero_trust-0.1.16.tar.gz",
+      "sha256": "644b325c8837c470942685d014d74226c34713976db1d1583079fce8ea6e620d"
+    }
+  ],
+  "evaluations": [
+    {
+      "schema": "azt.research-evaluation.v1",
+      "source_sha": "e1c66bd984863314c640e81b537990013b1b0091",
+      "run_id": "35311454473",
+      "version": "0.1.16",
+      "outcomes": {
+        "failed": 0,
+        "not_run": 0,
+        "passed": 13
+      },
+      "cleanup": true,
+      "live_model_trials": 0,
+      "modules": {
+        "azt": "6e17dc32f61e0b4e715e29fcc5c071d191d8968bd14c69284260434f4bed47ef",
+        "broker": "7ad4eefacfa4ad3981b91288f5da38b143f4d811720c26e09daed6f84ce875f5",
+        "capture": "a20460af042ab5ed912b2050dc3a8c4aca046d6cc58b240c158d6bd566aaa3e1",
+        "runtime": "c1ec2e204e6e2f486a0c9b1f10c96f5d30e5d034dde27250d5f44fef8fc194f1"
+      },
+      "evaluator_sha256": "910e130f796bafdb86cf422a285a702dc596bbbbc0f4e07e5cbfb5355008c82e",
+      "raw_export_line_sha256": "bcc4c468f3e491768b3f92e4d4e5c43f106edee5f1b49977c10c2083e58b4546",
+      "backend": {
+        "server_version": "28.0.4",
+        "client_version": "28.0.4",
+        "cgroup_version": "2",
+        "host_platform": "Linux",
+        "image_id": "sha256:ec7d6c95cd3692a2e2d228a8b1ca74e4025b54121fcc4c5da6f09cfa473315ad",
+        "image_repo_digests": [
+          "python@sha256:2fe5997d249a808b8eeea52c58a1dbffbba28754dc11699ef5c029f2d818ce79"
+        ]
+      },
+      "cases": [
+        {
+          "case": "T1-legitimate",
+          "outcome": "passed",
+          "seconds": 0.582
+        },
+        {
+          "case": "T1-large-paged-sources",
+          "outcome": "passed",
+          "seconds": 0.623
+        },
+        {
+          "case": "A2-delayed-preparation",
+          "outcome": "passed",
+          "seconds": 22.422
+        },
+        {
+          "case": "A2-expired-preparation",
+          "outcome": "passed",
+          "seconds": 0.002
+        },
+        {
+          "case": "T2-forged-authority",
+          "outcome": "passed",
+          "seconds": 0.44
+        },
+        {
+          "case": "T3-matched-boundaries",
+          "outcome": "passed",
+          "seconds": 1.756
+        },
+        {
+          "case": "T5-private-state-and-tamper",
+          "outcome": "passed",
+          "seconds": 1.345
+        },
+        {
+          "case": "T6-operator-stop",
+          "outcome": "passed",
+          "seconds": 0.539
+        },
+        {
+          "case": "T6-controller-SIGKILL",
+          "outcome": "passed",
+          "seconds": 0.636
+        },
+        {
+          "case": "T6-paused-controller-lease",
+          "outcome": "passed",
+          "seconds": 20.414
+        },
+        {
+          "case": "T7-resources",
+          "outcome": "passed",
+          "seconds": 0.786
+        },
+        {
+          "case": "T7-output-flood",
+          "outcome": "passed",
+          "seconds": 0.511
+        },
+        {
+          "case": "T8-audit-failure",
+          "outcome": "passed",
+          "seconds": 0.502
+        }
+      ]
+    },
+    {
+      "schema": "azt.investigator-evaluation.v1",
+      "source_sha": "e1c66bd984863314c640e81b537990013b1b0091",
+      "run_id": "35311454473",
+      "version": "0.1.16",
+      "outcomes": {
+        "failed": 0,
+        "not_run": 0,
+        "passed": 4
+      },
+      "cleanup": true,
+      "live_model_trials": 0,
+      "modules": {
+        "adapter": "b97d59c3255da7f535336a5080299123eb6d24c3136cdd13de64d218de115ac3",
+        "broker": "7ad4eefacfa4ad3981b91288f5da38b143f4d811720c26e09daed6f84ce875f5",
+        "capture": "a20460af042ab5ed912b2050dc3a8c4aca046d6cc58b240c158d6bd566aaa3e1",
+        "runtime": "c1ec2e204e6e2f486a0c9b1f10c96f5d30e5d034dde27250d5f44fef8fc194f1"
+      },
+      "evaluator_sha256": "63d7f81182df438651d8295b0a2ada13441c6bf74187faf10d216b0887c96b2e",
+      "raw_export_line_sha256": "4c91b0e1c8a9f78f9a6b1eca03312bb399cd5a4d5a3cabce7f567118ed4d4449",
+      "backend": {
+        "server_version": "28.0.4",
+        "client_version": "28.0.4",
+        "cgroup_version": "2",
+        "host_platform": "Linux",
+        "image_id": "sha256:ec7d6c95cd3692a2e2d228a8b1ca74e4025b54121fcc4c5da6f09cfa473315ad",
+        "image_repo_digests": [
+          "python@sha256:2fe5997d249a808b8eeea52c58a1dbffbba28754dc11699ef5c029f2d818ce79"
+        ]
+      },
+      "cases": [
+        {
+          "case": "B-utility-scripted-service",
+          "observed": {
+            "citation_quotes_covered": 3,
+            "cleanup": true,
+            "denied_proposals": 4,
+            "execution_stages": {
+              "broker_activated": true,
+              "channel_completed": true,
+              "container_started": true,
+              "controls_read_back": true,
+              "lease_armed": true,
+              "review_completed": true
+            },
+            "fixture_integrity": true,
+            "inference_settings": {
+              "context_bytes": 16384,
+              "hypotheses": 16,
+              "lease_seconds": 120,
+              "options": {
+                "num_ctx": 32768,
+                "num_predict": 1024,
+                "temperature": 0
+              },
+              "parallel_calls": 4,
+              "profile": "azt.investigator-local.v1",
+              "reply_bytes": 65536,
+              "request_seconds": 10,
+              "retries": 0,
+              "tool_calls": 96,
+              "turns": 24
+            },
+            "interpretation_truth": "not evaluated by literal citation rubric",
+            "model": "test-owned scripted HTTP responses; no model",
+            "required_quote_count": 3,
+            "runtime_worker_sha256": "b8eed754dbf99a34a2ad842bfaaf376fb1abff34ea7062fcab71456f4e2f565c",
+            "turns": 4,
+            "unnecessary_denials": 0,
+            "wall_seconds": 0.734
+          },
+          "outcome": "passed",
+          "seconds": 0.739
+        },
+        {
+          "case": "B-invalid-inference",
+          "observed": {
+            "cleanup": true,
+            "container_started": true,
+            "error_stage": "channel",
+            "inference_failed": true
+          },
+          "outcome": "passed",
+          "seconds": 0.623
+        },
+        {
+          "case": "B-controller-death-during-inference",
+          "observed": {
+            "cleanup": true,
+            "container_absent": true,
+            "inference_observed": true,
+            "inference_server_cancellation_verified": false,
+            "lease_reason": "controller_channel_closed",
+            "processes_observed": 2,
+            "processes_still_running": 0,
+            "seconds_to_stop": 0.089
+          },
+          "outcome": "passed",
+          "seconds": 0.659
+        },
+        {
+          "case": "B-long-profile-expiry",
+          "observed": {
+            "cleanup": true,
+            "container_absent": true,
+            "inference_observed": true,
+            "inference_server_cancellation_verified": false,
+            "lease_reason": "lease_expired",
+            "processes_observed": 2,
+            "processes_still_running": 0,
+            "seconds_to_stop": 119.837
+          },
+          "outcome": "passed",
+          "seconds": 120.509
+        }
+      ]
+    }
+  ]
+}
