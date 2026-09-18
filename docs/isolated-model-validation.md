@@ -196,3 +196,29 @@ Offline mocked regressions verify orchestration, no fallthrough into model work,
 failure stages, safe output and cleanup failure semantics. They do not establish
 that Docker started or the selected image became ready. No further run is
 authorized by these documentation or workflow edits.
+
+## Startup diagnostic result and logging correction (not yet retested)
+
+[Run 35374300274](https://github.com/ralfyishere/agent-zero-trust/actions/runs/35374300274)
+tested source `dfddf864564542320b6d5fc92bb8bf5e5cf7f718`. The build, 46 scanner
+checks, 364 unit tests (no skips), and installed wheel/source-distribution tests
+passed. Startup again failed before acknowledgement, relay or readiness. No model
+weights, preload or inference were requested. Both cleanup passes verified the
+recorded container, volume and two downloaded images absent. This is a failed
+startup diagnostic, not live-model or isolation evidence.
+
+The new State readback enabled a precise diagnosis: the harness requested the
+Docker **local** logger with `max-file=1`, while leaving compression enabled by
+default. Docker28.0.4 [rejects that combination](https://github.com/moby/moby/blob/v28.0.4/daemon/logger/local/config.go#L28)
+during logger initialization. The 128-byte error reconstructed from the upstream
+logger and task-creation wrappers matches the recorded State.Error SHA-256
+`0a42d7da1594e76b554d61efc00051df13e55733b0d0205efb057703e485b3ac` exactly.
+This identifies this failure without claiming the earlier discarded errors were
+independently recovered or that subsequent startup stages will succeed.
+
+The local correction explicitly sets `compress=false`, retaining `max-file=1`
+and `max-size=1m`. This changes neither user/capabilities, filesystem/network
+access, model selection, nor resource/lease limits. Log size is a rotation
+threshold, **not a hard disk quota**. Offline argument regressions cover all fixed
+container roles. A new Linux startup result is still required; none is implied
+by the local fix or the successful offline tests. No automatic retry follows.

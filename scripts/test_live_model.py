@@ -148,7 +148,8 @@ def common(name, network, memory, cpus, pids):
         '--no-healthcheck', '--cpus', str(cpus), '--memory', memory,
         '--memory-swap', memory, '--pids-limit', str(pids), '--shm-size', '1m',
         '--ulimit', 'nofile=128:128', '--log-driver', 'local',
-        '--log-opt', 'max-size=1m', '--log-opt', 'max-file=1', '--stop-timeout', '1',
+        '--log-opt', 'max-size=1m', '--log-opt', 'max-file=1',
+        '--log-opt', 'compress=false', '--stop-timeout', '1',
         '--tmpfs', '/tmp:rw,nosuid,nodev,noexec,size=64m,mode=1777']
 
 

@@ -461,6 +461,19 @@ class LiveModelSetupTests(unittest.TestCase):
         self.assertIn('--read-only',args);self.assertNotIn('--privileged',args)
         self.assertNotIn('--publish',args);self.assertNotIn('--pid',args)
 
+    def test_single_file_local_logger_explicitly_disables_compression(self):
+        # Docker28.0.4 defaults local compression on, then rejects max-file=1
+        # during logger initialization (after create, before acknowledged start).
+        # Check emitted arguments for every fixed role, not Docker execution.
+        for role in ('download','downloadrelay','inference','relay','sink','positive'):
+            with self.subTest(role=role):
+                args=lab.common('azt-live-'+'a'*12+'-'+role,'none','6g',3.5,128)
+                self.assertEqual(args[args.index('--log-driver')+1],'local')
+                options=[args[i+1] for i,arg in enumerate(args) if arg=='--log-opt']
+                self.assertEqual(options,['max-size=1m','max-file=1','compress=false'])
+                self.assertEqual(args[args.index('--user')+1],'65532:65532')
+                self.assertIn('--read-only',args)
+
     def test_unsafe_names_rejected(self):
         for name in ('main','--privileged','azt-live-'+'a'*12+'-x;echo bad','azt-live-'+'a'*12+'-../'):
             with self.assertRaises(ValueError):lab.common(name,'none','6g',3.5,128)
